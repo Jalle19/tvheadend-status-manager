@@ -15,4 +15,6 @@ Vagrant.configure(2) do |config|
   # provisioning
   config.vm.provision "shell", path: "provisioning/01-install-system-packages.sh",
   	name: "01 - Install and update system packages"
+  config.vm.provision "shell", path: "provisioning/02-install-dependencies.sh",
+   	name: "02 - Install dependencies"
 end

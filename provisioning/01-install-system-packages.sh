@@ -7,4 +7,4 @@
 	cd /vagrant
 	curl -sS https://getcomposer.org/installer | php
 
-} #> /dev/null 2>&1
+} > /dev/null 2>&1
