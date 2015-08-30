@@ -34,7 +34,7 @@ class TvheadendStatusManagerCommand extends Command
 
 		// Add options
 		$this->addOption('updateInterval', 'i', InputOption::VALUE_REQUIRED, 'The status update interval (in seconds)',
-			Configuration::DEFAULT_UPDATER_INTERVAL);
+			Configuration::DEFAULT_UPDATE_INTERVAL);
 	}
 
 

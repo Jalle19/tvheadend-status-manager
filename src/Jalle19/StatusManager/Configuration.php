@@ -11,7 +11,7 @@ namespace Jalle19\StatusManager;
 class Configuration
 {
 
-	const DEFAULT_UPDATER_INTERVAL = 1;
+	const DEFAULT_UPDATE_INTERVAL = 1;
 
 	/**
 	 * @var Instance[] the instances
@@ -21,7 +21,7 @@ class Configuration
 	/**
 	 * @var float the status update interval (in seconds)
 	 */
-	private $_updateInterval = self::DEFAULT_UPDATER_INTERVAL;
+	private $_updateInterval = self::DEFAULT_UPDATE_INTERVAL;
 
 
 	/**
