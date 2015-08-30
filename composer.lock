@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Jalle19/php-tvheadend.git",
-                "reference": "64b393259dd95a161822f7388545b67bf6fe0bf0"
+                "reference": "cd98269a8b8422eb53e390b05ef9d0839b4c98a0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/64b393259dd95a161822f7388545b67bf6fe0bf0",
-                "reference": "64b393259dd95a161822f7388545b67bf6fe0bf0",
+                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/cd98269a8b8422eb53e390b05ef9d0839b4c98a0",
+                "reference": "cd98269a8b8422eb53e390b05ef9d0839b4c98a0",
                 "shasum": ""
             },
             "require": {
@@ -45,7 +45,7 @@
                 "source": "https://github.com/Jalle19/php-tvheadend/tree/master",
                 "issues": "https://github.com/Jalle19/php-tvheadend/issues"
             },
-            "time": "2015-03-26 09:30:33"
+            "time": "2015-08-30 08:56:48"
         },
         {
             "name": "kevinlebrun/colors.php",
