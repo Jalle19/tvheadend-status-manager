@@ -13,26 +13,6 @@ class Instance
 	private $_name;
 
 	/**
-	 * @var string the hostname
-	 */
-	private $_address;
-
-	/**
-	 * @var int the port
-	 */
-	private $_port;
-
-	/**
-	 * @var string
-	 */
-	private $_username;
-
-	/**
-	 * @var string
-	 */
-	private $_password;
-
-	/**
 	 * @var Tvheadend the actual tvheadend instance
 	 */
 	private $_instance;
@@ -48,8 +28,6 @@ class Instance
 	public function __construct($name, $address, $port)
 	{
 		$this->_name    = $name;
-		$this->_address = $address;
-		$this->_port    = $port;
 
 		// Create the actual instance
 		$this->_instance = new Tvheadend($address, $port);
@@ -62,42 +40,6 @@ class Instance
 	public function getName()
 	{
 		return $this->_name;
-	}
-
-
-	/**
-	 * @return string
-	 */
-	public function getAddress()
-	{
-		return $this->_address;
-	}
-
-
-	/**
-	 * @return int
-	 */
-	public function getPort()
-	{
-		return $this->_port;
-	}
-
-
-	/**
-	 * @return string
-	 */
-	public function getUsername()
-	{
-		return $this->_username;
-	}
-
-
-	/**
-	 * @return string
-	 */
-	public function getPassword()
-	{
-		return $this->_password;
 	}
 
 

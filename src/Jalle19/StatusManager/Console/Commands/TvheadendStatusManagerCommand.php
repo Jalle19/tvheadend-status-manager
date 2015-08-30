@@ -4,10 +4,13 @@ namespace Jalle19\StatusManager\Console\Commands;
 
 use Jalle19\StatusManager\Configuration;
 use Jalle19\StatusManager\Instance;
-use jalle19\tvheadend\Tvheadend;
+use Jalle19\StatusManager\StatusManager;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Logger;
+use Monolog\Processor\PsrLogMessageProcessor;
+use Symfony\Bridge\Monolog\Handler\ConsoleHandler;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -16,16 +19,6 @@ class TvheadendStatusManagerCommand extends Command
 {
 
 	const COMMAND_NAME = 'tvheadend-status-manager';
-
-	/**
-	 * @var Configuration the configuration
-	 */
-	private $_configuration;
-
-	/**
-	 * @var Instance[] the tvheadend instances we're listening to
-	 */
-	private $_instances = [];
 
 
 	/**
@@ -45,23 +38,21 @@ class TvheadendStatusManagerCommand extends Command
 	}
 
 
+	/**
+	 * @inheritdoc
+	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		// Parse the configuration
-		$this->_configuration = $this->parseConfiguration($input);
+		// Configure the logger
+		$handler = new ConsoleHandler($output);
+		$handler->setFormatter(new LineFormatter("[%datetime%] %level_name%: %message%\n"));
 
-		// Start the main loop
-		while (true)
-		{
-			foreach($this->_configuration->getInstances() as $instance)
-			{
-				$tvheadend = $instance->getInstance();
-				$channels = $tvheadend->getNetworks();
-				var_dump(count($channels));
-			}
+		$logger = new Logger(self::COMMAND_NAME);
+		$logger->pushHandler($handler);
+		$logger->pushProcessor(new PsrLogMessageProcessor());
 
-			usleep($this->_configuration->getUpdateInterval() * 1000000);
-		}
+		$statusManager = new StatusManager($this->parseConfiguration($input), $logger);
+		$statusManager->run();
 	}
 
 
@@ -69,6 +60,8 @@ class TvheadendStatusManagerCommand extends Command
 	 * Parses the application configuration
 	 *
 	 * @param InputInterface $input
+	 *
+	 * @return Configuration the parsed configuration
 	 */
 	private function parseConfiguration(InputInterface $input)
 	{
