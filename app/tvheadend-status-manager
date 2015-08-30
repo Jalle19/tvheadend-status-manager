@@ -1,0 +1,11 @@
+#!/usr/bin/env php
+<?php
+
+set_time_limit(0);
+
+require_once __DIR__ . '/../vendor/autoload.php';
+use Jalle19\StatusManager\Console\SingleCommandApplication;
+use Jalle19\StatusManager\Console\Commands\TvheadendStatusManagerCommand;
+
+$app = new SingleCommandApplication(TvheadendStatusManagerCommand::COMMAND_NAME, TvheadendStatusManagerCommand::class);
+$app->run();

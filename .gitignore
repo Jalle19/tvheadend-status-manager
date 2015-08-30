@@ -1,0 +1,7 @@
+.vagrant
+/vendor/
+composer.phar
+**/.idea/workspace.xml 
+**/.idea/tasks.xml
+
+app/config.ini

@@ -1,0 +1,11 @@
+[instance:first]
+address = example.com
+port = 9981
+username = admin
+password = admin
+
+[instance:another]
+address = another.example.com
+port = 9981
+username = admin
+password = "???"

@@ -1,0 +1,27 @@
+{
+    "name": "jalle19/tvheadend-status-manager",
+    "description": "Aggregating streaming status manager for tvheadend instances",
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "Sam Stenvall",
+            "email": "neggelandia@gmail.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/Jalle19/php-tvheadend.git"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.0",
+        "symfony/console": "^2.7",
+        "jalle19/php-tvheadend": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "": "src/"
+        }
+    }
+}
