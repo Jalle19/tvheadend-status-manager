@@ -122,20 +122,12 @@ class TvheadendStatusManagerCommand extends Command
 
 		// Parse options
 		$updateInterval = floatval($input->getOption(Configuration::OPTION_UPDATE_INTERVAL));
-
-		if ($updateInterval <= 0)
-			throw new \RuntimeException('Invalid update interval specified');
-
 		$config->setUpdateInterval($updateInterval);
 
 		$listenAddress = $input->getOption(Configuration::OPTION_LISTEN_ADDRESS);
 		$config->setListenAddress($listenAddress);
 
 		$listenPort = $input->getOption(Configuration::OPTION_LISTEN_PORT);
-
-		if ($listenPort < 1 || $listenPort > 65535)
-			throw new \RuntimeException('Invalid port specified');
-
 		$config->setListenPort($listenPort);
 
 		return $config;

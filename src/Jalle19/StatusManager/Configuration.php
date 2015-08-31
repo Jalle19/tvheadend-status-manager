@@ -70,10 +70,15 @@ class Configuration
 
 
 	/**
-	 * @param int $updateInterval
+	 * @param $updateInterval
+	 *
+	 * @throws \RuntimeException
 	 */
 	public function setUpdateInterval($updateInterval)
 	{
+		if ($updateInterval <= 0)
+			throw new \RuntimeException('Invalid update interval specified');
+
 		$this->_updateInterval = $updateInterval;
 	}
 
@@ -107,9 +112,14 @@ class Configuration
 
 	/**
 	 * @param int $listenPort
+	 *
+	 * @throws \RuntimeException
 	 */
 	public function setListenPort($listenPort)
 	{
+		if ($listenPort < 1 || $listenPort > 65535)
+			throw new \RuntimeException('Invalid port specified');
+
 		$this->_listenPort = $listenPort;
 	}
 
