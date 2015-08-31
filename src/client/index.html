@@ -1,23 +1,139 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="statusManagerApp">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <title>Tvheadend Status Manager</title>
 
-  <script type="text/javascript">
-    var socket = new WebSocket("ws://192.168.47.47:9333");
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+  <link rel="stylesheet" href="css/styles.css">
 
-    socket.onopen = function() {
-      console.log("open");
-    };
+  <script type="text/javascript" src="bower_components/angular/angular.js"></script>
+  <script type="text/javascript" src="bower_components/reconnectingWebsocket/reconnecting-websocket.js"></script>
 
-    socket.onmessage = function(message) {
-      console.log("got message");
-      console.log(message.data);
-    };
-  </script>
 </head>
-<body>
-tvheadend status manager
+<body ng-controller="StatusController">
+
+<div class="container-fluid">
+  <h1>Tvheadend Status Manager</h1>
+
+  <p>
+    Aggregating streaming status manager for tvheadend instances
+  </p>
+
+  <p class="bg-success" ng-show="connected">
+    Connected
+    <span ng-show="instances.length > 0">, managing {{instances.length}} instance(s)</span>
+  </p>
+
+  <p class="bg-danger" ng-show="!connected">
+    Disconnected
+  </p>
+
+  <h4>Subscriptions</h4>
+
+  <div ng-show="!instances.length">
+    Waiting for status from server
+  </div>
+
+  <div ng-repeat="instance in instances">
+    <table class="table table-striped">
+      <caption>{{instance.name}}</caption>
+      <tr>
+        <th>Started:</th>
+        <th>Errors:</th>
+        <th>State:</th>
+        <th>Hostname:</th>
+        <th>Username:</th>
+        <th>Title:</th>
+        <th>Channel:</th>
+        <th>Service:</th>
+      </tr>
+      <tr ng-repeat="subscription in instance.subscriptions">
+        <td>{{formatDate(subscription.start) | date:dateFormat}}</td>
+        <td>{{subscription.errors}}</td>
+        <td>{{subscription.state}}</td>
+        <td>{{subscription.hostname}}</td>
+        <td>{{subscription.username}}</td>
+        <td>{{subscription.title}}</td>
+        <td>{{subscription.channel}}</td>
+        <td>{{subscription.service}}</td>
+      </tr>
+      <tr ng-show="!instance.subscriptions.length">
+        <td colspan="8">No subscriptions</td>
+      </tr>
+    </table>
+  </div>
+
+  <h4>Connections</h4>
+
+  <div ng-show="!instances.length">
+    Waiting for status from server
+  </div>
+
+  <div ng-repeat="instance in instances">
+    <table class="table table-striped">
+      <caption>{{instance.name}}</caption>
+      <tr>
+        <th>Peer:</th>
+        <th>Started:</th>
+        <th>Type:</th>
+        <th>User:</th>
+      </tr>
+      <tr ng-repeat="connection in instance.connections">
+        <td>{{connection.peer}}</td>
+        <td>{{formatDate(connection.started) | date:dateFormat}}</td>
+        <td>{{connection.type}}</td>
+        <td>{{connection.user}}</td>
+      </tr>
+      <tr ng-show="!instance.connections.length">
+        <td colspan="4">No connections</td>
+      </tr>
+    </table>
+  </div>
+
+  <h4>Inputs</h4>
+
+  <div ng-show="!instances.length">
+    Waiting for status from server
+  </div>
+
+  <div ng-repeat="instance in instances">
+    <table class="table table-striped">
+      <caption>{{instance.name}}</caption>
+      <tr>
+        <th>Input:</th>
+        <th>Stream:</th>
+        <th>Subscriptions:</th>
+        <th>Weight:</th>
+        <th>Signal:</th>
+        <th>BER:</th>
+        <th>UNC:</th>
+        <th>Bitrate (kbps):</th>
+        <th>Continuity errors:</th>
+      </tr>
+      <tr ng-repeat="input in instance.inputs">
+        <td>{{input.input}}</td>
+        <td>{{input.stream}}</td>
+        <td>{{input.subs}}</td>
+        <td>{{input.weight}}</td>
+        <td>{{input.signal}}</td>
+        <td>{{input.ber}}</td>
+        <td>{{input.unc}}</td>
+        <td>{{formatBitrate(input.bps)}}</td>
+        <td>{{input.cc}}</td>
+      </tr>
+      <tr ng-show="!instance.inputs.length">
+        <td colspan="9">No inputs</td>
+      </tr>
+    </table>
+  </div>
+
+</div>
+
+<script type="text/javascript" src="js/tvheadend-status-manager.js"></script>
+
 </body>
 </html>

@@ -1,0 +1,8 @@
+.bg-success, .bg-danger {
+    padding: 10px;
+}
+
+h4 {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #DDD;
+}

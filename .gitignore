@@ -6,3 +6,4 @@ composer.phar
 .idea/dictionaries/*
 
 app/config.ini
+src/client/bower_components
