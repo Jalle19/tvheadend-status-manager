@@ -1,13 +1,13 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: negge
- * Date: 2015-08-30
- * Time: 10:44
- */
 
 namespace Jalle19\StatusManager;
 
+/**
+ * Class Configuration
+ * @package Jalle19\StatusManager
+ * @copyright Copyright &copy; Sam Stenvall 2015-
+ * @license https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
+ */
 class Configuration
 {
 

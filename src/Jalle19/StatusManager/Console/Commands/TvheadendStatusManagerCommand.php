@@ -15,6 +15,12 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Class TvheadendStatusManagerCommand
+ * @package Jalle19\StatusManager\Console\Command
+ * @copyright Copyright &copy; Sam Stenvall 2015-
+ * @license https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
+ */
 class TvheadendStatusManagerCommand extends Command
 {
 

@@ -5,10 +5,10 @@ namespace Jalle19\StatusManager\Console;
 use Symfony\Component\Console\Input\InputInterface;
 
 /**
- * Created by PhpStorm.
- * User: negge
- * Date: 2015-08-30
- * Time: 09:39
+ * Class SingleCommandApplication
+ * @package Jalle19\StatusManager\Console
+ * @copyright Copyright &copy; Sam Stenvall 2015-
+ * @license https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
 class SingleCommandApplication extends \Symfony\Component\Console\Application
 {

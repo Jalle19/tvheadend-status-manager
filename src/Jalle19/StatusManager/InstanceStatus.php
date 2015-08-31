@@ -6,6 +6,12 @@ use jalle19\tvheadend\model\ConnectionStatus;
 use jalle19\tvheadend\model\InputStatus;
 use jalle19\tvheadend\model\SubscriptionStatus;
 
+/**
+ * Class InstanceStatus
+ * @package Jalle19\StatusManager
+ * @copyright Copyright &copy; Sam Stenvall 2015-
+ * @license https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
+ */
 class InstanceStatus implements \JsonSerializable
 {
 

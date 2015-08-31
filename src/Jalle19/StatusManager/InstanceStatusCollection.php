@@ -2,6 +2,12 @@
 
 namespace Jalle19\StatusManager;
 
+/**
+ * Class InstanceStatusCollection
+ * @package Jalle19\StatusManager
+ * @copyright Copyright &copy; Sam Stenvall 2015-
+ * @license https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
+ */
 class InstanceStatusCollection implements \JsonSerializable
 {
 
