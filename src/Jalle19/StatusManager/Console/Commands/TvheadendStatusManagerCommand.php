@@ -17,9 +17,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Class TvheadendStatusManagerCommand
- * @package Jalle19\StatusManager\Console\Command
+ * @package   Jalle19\StatusManager\Console\Command
  * @copyright Copyright &copy; Sam Stenvall 2015-
- * @license https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
+ * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
 class TvheadendStatusManagerCommand extends Command
 {
@@ -41,6 +41,13 @@ class TvheadendStatusManagerCommand extends Command
 		// Add options
 		$this->addOption('updateInterval', 'i', InputOption::VALUE_REQUIRED, 'The status update interval (in seconds)',
 			Configuration::DEFAULT_UPDATE_INTERVAL);
+
+		$this->addOption('listenAddress', 'l', InputOption::VALUE_REQUIRED,
+			'The address the Websocket server should be listening on',
+			Configuration::DEFAULT_LISTEN_ADDRESS);
+
+		$this->addOption('listenPort', 'p', InputOption::VALUE_REQUIRED,
+			'The port the Websocket server should be listening on', Configuration::DEFAULT_LISTEN_PORT);
 	}
 
 
@@ -114,12 +121,22 @@ class TvheadendStatusManagerCommand extends Command
 		$config = new Configuration($instances);
 
 		// Parse options
-		$updateInterval = floatval($input->getOption('updateInterval'));
+		$updateInterval = floatval($input->getOption(Configuration::OPTION_UPDATE_INTERVAL));
 
 		if ($updateInterval <= 0)
 			throw new \RuntimeException('Invalid update interval specified');
 
 		$config->setUpdateInterval($updateInterval);
+
+		$listenAddress = $input->getOption(Configuration::OPTION_LISTEN_ADDRESS);
+		$config->setListenAddress($listenAddress);
+
+		$listenPort = $input->getOption(Configuration::OPTION_LISTEN_PORT);
+
+		if ($listenPort < 1 || $listenPort > 65535)
+			throw new \RuntimeException('Invalid port specified');
+
+		$config->setListenPort($listenPort);
 
 		return $config;
 	}

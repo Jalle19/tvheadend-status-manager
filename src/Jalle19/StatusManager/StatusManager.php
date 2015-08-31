@@ -11,9 +11,9 @@ use Ratchet\WebSocket\WsServer;
 
 /**
  * Class StatusManager
- * @package Jalle19\StatusManager
+ * @package   Jalle19\StatusManager
  * @copyright Copyright &copy; Sam Stenvall 2015-
- * @license https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
+ * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
 class StatusManager implements MessageComponentInterface
 {
@@ -59,10 +59,13 @@ class StatusManager implements MessageComponentInterface
 	public function run()
 	{
 		// Configure the WebSocket server
+		$address = $this->_configuration->getListenAddress();
+		$port    = $this->_configuration->getListenPort();
+
 		$this->_websocket = IoServer::factory(
 			new HttpServer(new WsServer($this)),
-			8080,
-			'0.0.0.0'
+			$port,
+			$address
 		);
 
 		// Add the status polling mechanism to the event loop
@@ -70,7 +73,11 @@ class StatusManager implements MessageComponentInterface
 			[$this, 'broadcastTimer']);
 
 		// Start the main loop
-		$this->_logger->info('Starting the main loop');
+		$this->_logger->info('Starting the Websocket server on {address}:{port}', [
+			'address' => $address,
+			'port'    => $port,
+		]);
+
 		$this->_websocket->run();
 	}
 
