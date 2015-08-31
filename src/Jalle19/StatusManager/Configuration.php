@@ -45,7 +45,7 @@ class Configuration
 
 
 	/**
-	 * @return int
+	 * @return float
 	 */
 	public function getUpdateInterval()
 	{
