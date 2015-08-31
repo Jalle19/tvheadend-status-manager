@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tvheadend Status Manager</title>
+
+  <script type="text/javascript">
+    var socket = new WebSocket("ws://192.168.47.47:9333");
+
+    socket.onopen = function() {
+      console.log("open");
+    };
+
+    socket.onmessage = function(message) {
+      console.log("got message");
+      console.log(message.data);
+    };
+  </script>
+</head>
+<body>
+tvheadend status manager
+</body>
+</html>

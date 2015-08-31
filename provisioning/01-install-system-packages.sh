@@ -2,7 +2,7 @@
 
 {
 	apt-get update
-	apt-get -y install php5-cli curl
+	apt-get -y install php5-cli curl nginx
 
 	cd /vagrant
 	curl -sS https://getcomposer.org/installer | php
