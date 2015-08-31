@@ -1,7 +1,7 @@
 {
     "name": "jalle19/tvheadend-status-manager",
     "description": "Aggregating streaming status manager for tvheadend instances",
-    "license": "GPL",
+    "license": "GPL-2.0",
     "authors": [
         {
             "name": "Sam Stenvall",
