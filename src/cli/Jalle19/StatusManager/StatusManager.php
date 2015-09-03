@@ -150,6 +150,17 @@ class StatusManager implements MessageComponentInterface
 						$tvheadend->getSubscriptionStatus(),
 						$tvheadend->getConnectionStatus()));
 
+					// Update reachability state now that we know the instance is reachable
+					if ($instanceState->getReachability() === InstanceState::MAYBE_REACHABLE)
+					{
+						$this->_logger->info('Instance {instanceName} is now reachable, will start polling for updates',
+							[
+								'instanceName' => $instanceName,
+							]);
+
+						$instanceState->setReachability(InstanceState::REACHABLE);
+					}
+
 					$this->_logger->debug('Got status updates from {instanceName}', [
 						'instanceName' => $instanceName,
 					]);
