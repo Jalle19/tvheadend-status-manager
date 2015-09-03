@@ -16,7 +16,7 @@ statusManagerApp.controller('StatusController', function($scope) {
 
   // Bitrate formatting
   $scope.formatBitrate = function(bps) {
-    return Math.round(bps / 1024);
+    return Math.round(bps * 8 / 1024);
   };
 
   // Connect to the server
