@@ -2,10 +2,10 @@
 
 namespace Jalle19\StatusManager\Console\Commands;
 
+use Bramus\Monolog\Formatter\ColoredLineFormatter;
 use Jalle19\StatusManager\Configuration;
 use Jalle19\StatusManager\Instance;
 use Jalle19\StatusManager\StatusManager;
-use Monolog\Formatter\LineFormatter;
 use Monolog\Logger;
 use Monolog\Processor\PsrLogMessageProcessor;
 use Symfony\Bridge\Monolog\Handler\ConsoleHandler;
@@ -58,7 +58,7 @@ class TvheadendStatusManagerCommand extends Command
 	{
 		// Configure the logger
 		$handler = new ConsoleHandler($output);
-		$handler->setFormatter(new LineFormatter("[%datetime%] %level_name%: %message%\n"));
+		$handler->setFormatter(new ColoredLineFormatter(null, "[%datetime%] %level_name%: %message%\n"));
 
 		$logger = new Logger(self::COMMAND_NAME);
 		$logger->pushHandler($handler);

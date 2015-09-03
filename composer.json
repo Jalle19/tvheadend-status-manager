@@ -20,7 +20,8 @@
         "jalle19/php-tvheadend": "dev-master",
         "symfony/monolog-bridge": "^2.7",
         "symfony/event-dispatcher": "^2.7",
-        "cboden/ratchet": "^0.3.3"
+        "cboden/ratchet": "^0.3.3",
+        "bramus/monolog-colored-line-formatter": "^2.0"
     },
     "autoload": {
         "psr-0": {
