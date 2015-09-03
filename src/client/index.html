@@ -49,6 +49,8 @@
         <th>Title:</th>
         <th>Channel:</th>
         <th>Service:</th>
+        <th>Input (kbps):</th>
+        <th>Output (kbps):</th>
       </tr>
       <tr ng-repeat="subscription in instance.subscriptions">
         <td>{{formatDate(subscription.start) | date:dateFormat}}</td>
@@ -59,6 +61,8 @@
         <td>{{subscription.title}}</td>
         <td>{{subscription.channel}}</td>
         <td>{{subscription.service}}</td>
+        <td>{{formatBitrate(subscription.in)}}</td>
+        <td>{{formatBitrate(subscription.out)}}</td>
       </tr>
       <tr ng-show="!instance.subscriptions.length">
         <td colspan="8">No subscriptions</td>

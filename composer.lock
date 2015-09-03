@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "5513b3abe952415a8496c2170b1c0a50",
+    "hash": "900dc4f8f37121f0d5bc6ecb70d0ae71",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -308,12 +308,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Jalle19/php-tvheadend.git",
-                "reference": "e4724c4e4c6b79225805645ea863cb95bba6f4ce"
+                "reference": "85d4bc3bd43cdbe6acfc54bf079b9cf5d1a2e4a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/e4724c4e4c6b79225805645ea863cb95bba6f4ce",
-                "reference": "e4724c4e4c6b79225805645ea863cb95bba6f4ce",
+                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/85d4bc3bd43cdbe6acfc54bf079b9cf5d1a2e4a4",
+                "reference": "85d4bc3bd43cdbe6acfc54bf079b9cf5d1a2e4a4",
                 "shasum": ""
             },
             "require": {
@@ -341,7 +341,7 @@
                 "source": "https://github.com/Jalle19/php-tvheadend/tree/master",
                 "issues": "https://github.com/Jalle19/php-tvheadend/issues"
             },
-            "time": "2015-08-30 19:17:51"
+            "time": "2015-09-03 16:12:25"
         },
         {
             "name": "kevinlebrun/colors.php",
