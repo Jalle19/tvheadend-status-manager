@@ -12,15 +12,19 @@ namespace Jalle19\StatusManager;
 class InstanceState
 {
 
+	const REACHABLE       = 0;
+	const MAYBE_REACHABLE = 1;
+	const UNREACHABLE     = 2;
+
 	/**
 	 * @var int the number of retries since marked as unreachable
 	 */
 	private $_retryCount = 0;
 
 	/**
-	 * @var bool whether the instance is reachable
+	 * @var int the instance reachability state
 	 */
-	private $_reachable = true;
+	private $_reachability = self::MAYBE_REACHABLE;
 
 
 	/**
@@ -55,18 +59,27 @@ class InstanceState
 	 */
 	public function isReachable()
 	{
-		return $this->_reachable;
+		return $this->_reachability === self::REACHABLE || $this->_reachability === self::MAYBE_REACHABLE;
+	}
+
+
+	/**
+	 * @return int the instance reachability state
+	 */
+	public function getReachability()
+	{
+		return $this->_reachability;
 	}
 
 
 	/**
 	 * Sets the reachability state of the instance
 	 *
-	 * @param boolean $reachable
+	 * @param int $reachable one of the reachability states
 	 */
-	public function setReachable($reachable)
+	public function setReachability($reachable)
 	{
-		$this->_reachable = $reachable;
+		$this->_reachability = $reachable;
 	}
 
 }

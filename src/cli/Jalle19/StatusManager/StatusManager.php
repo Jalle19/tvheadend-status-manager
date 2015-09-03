@@ -162,7 +162,7 @@ class StatusManager implements MessageComponentInterface
 						'exception'    => $e->getMessage(),
 					]);
 
-					$instanceState->setReachable(false);
+					$instanceState->setReachability(InstanceState::UNREACHABLE);
 				}
 
 				$this->_logger->debug('Got status updates from {instanceName}', [
@@ -171,11 +171,10 @@ class StatusManager implements MessageComponentInterface
 			}
 			else
 			{
-				// Increment the retry counter for the instance, and
-				// mark as reachable once
+				// Wait for some cycles and then mark unreachable instances as maybe reachable
 				if ($instanceState->getRetryCount() === self::UNREACHABLE_CYCLES_UNTIL_RETRY - 1)
 				{
-					$instanceState->setReachable(true);
+					$instanceState->setReachability(InstanceState::MAYBE_REACHABLE);
 					$instanceState->resetRetryCount();
 
 					$this->_logger->info('Retrying instance {instanceName} during next cycle', [
