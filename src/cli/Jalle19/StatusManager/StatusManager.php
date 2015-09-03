@@ -87,6 +87,21 @@ class StatusManager implements MessageComponentInterface
 		$this->_websocket->loop->addPeriodicTimer($this->_configuration->getUpdateInterval(),
 			[$this, 'broadcastTimer']);
 
+		// Log information about the configured instances
+		$instances = $this->_configuration->getInstances();
+
+		$this->_logger->info('Managing {instances} instances:', array(
+			'instances' => count($instances),
+		));
+
+		foreach ($instances as $instance)
+		{
+			$this->_logger->info('  {address}:{port}', array(
+				'address' => $instance->getInstance()->getHostname(),
+				'port'    => $instance->getInstance()->getPort(),
+			));
+		}
+
 		// Start the main loop
 		$this->_logger->info('Starting the Websocket server on {address}:{port}', [
 			'address' => $address,
