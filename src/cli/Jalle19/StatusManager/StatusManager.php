@@ -149,6 +149,10 @@ class StatusManager implements MessageComponentInterface
 						$tvheadend->getInputStatus(),
 						$tvheadend->getSubscriptionStatus(),
 						$tvheadend->getConnectionStatus()));
+
+					$this->_logger->debug('Got status updates from {instanceName}', [
+						'instanceName' => $instanceName,
+					]);
 				}
 				catch (\Exception $e)
 				{
@@ -164,10 +168,6 @@ class StatusManager implements MessageComponentInterface
 
 					$instanceState->setReachability(InstanceState::UNREACHABLE);
 				}
-
-				$this->_logger->debug('Got status updates from {instanceName}', [
-					'instanceName' => $instanceName,
-				]);
 			}
 			else
 			{
