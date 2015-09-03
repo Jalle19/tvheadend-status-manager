@@ -19,9 +19,19 @@ class StatusManager implements MessageComponentInterface
 {
 
 	/**
+	 * The number of cycles to wait until retrying an unreachable instance
+	 */
+	const UNREACHABLE_CYCLES_UNTIL_RETRY = 10;
+
+	/**
 	 * @var Configuration the configuration
 	 */
 	private $_configuration;
+
+	/**
+	 * @var \SplObjectStorage the instances to connect to and their individual state
+	 */
+	private $_instances;
 
 	/**
 	 * @var LoggerInterface the logger
@@ -50,6 +60,11 @@ class StatusManager implements MessageComponentInterface
 		$this->_configuration    = $configuration;
 		$this->_logger           = $logger;
 		$this->_connectedClients = new \SplObjectStorage();
+		$this->_instances        = new \SplObjectStorage();
+
+		// Attach a state to each instance
+		foreach ($this->_configuration->getInstances() as $instance)
+			$this->_instances->attach($instance, new InstanceState());
 	}
 
 
@@ -92,7 +107,7 @@ class StatusManager implements MessageComponentInterface
 
 
 	/**
-	 * Retrives and returns all status messages for the configured
+	 * Retrieves and returns all status messages for the configured
 	 * instances
 	 * @return InstanceStatusCollection
 	 */
@@ -100,21 +115,61 @@ class StatusManager implements MessageComponentInterface
 	{
 		$collection = new InstanceStatusCollection();
 
-		foreach ($this->_configuration->getInstances() as $instance)
+		foreach ($this->_instances as $instance)
 		{
+			/* @var Instance $instance */
 			$tvheadend    = $instance->getInstance();
 			$instanceName = $instance->getName();
 
-			// Collect statuses
-			$collection->add(new InstanceStatus(
-				$instanceName,
-				$tvheadend->getInputStatus(),
-				$tvheadend->getSubscriptionStatus(),
-				$tvheadend->getConnectionStatus()));
+			/* @var InstanceState $instanceState */
+			$instanceState = $this->_instances[$instance];
 
-			$this->_logger->debug('Got status updates from {instanceName}', [
-				'instanceName' => $instanceName,
-			]);
+			// Collect statuses from currently reachable instances
+			if ($instanceState->isReachable())
+			{
+				try
+				{
+					$collection->add(new InstanceStatus(
+						$instanceName,
+						$tvheadend->getInputStatus(),
+						$tvheadend->getSubscriptionStatus(),
+						$tvheadend->getConnectionStatus()));
+				}
+				catch (\Exception $e)
+				{
+					// Mark the instance as unreachable
+					$message = 'Instance {instanceName} not reachable, will wait for {cycles} cycles before retrying.
+								The exception was: {exception}';
+
+					$this->_logger->alert($message, [
+						'instanceName' => $instanceName,
+						'cycles'       => self::UNREACHABLE_CYCLES_UNTIL_RETRY,
+						'exception'    => $e->getMessage(),
+					]);
+
+					$instanceState->setReachable(false);
+				}
+
+				$this->_logger->debug('Got status updates from {instanceName}', [
+					'instanceName' => $instanceName,
+				]);
+			}
+			else
+			{
+				// Increment the retry counter for the instance, and
+				// mark as reachable once
+				if ($instanceState->getRetryCount() === self::UNREACHABLE_CYCLES_UNTIL_RETRY - 1)
+				{
+					$instanceState->setReachable(true);
+					$instanceState->resetRetryCount();
+
+					$this->_logger->info('Retrying instance {instanceName} during next cycle', [
+						'instanceName' => $instanceName,
+					]);
+				}
+				else
+					$instanceState->incrementRetryCount();
+			}
 		}
 
 		return $collection;
