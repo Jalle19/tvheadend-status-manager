@@ -10,8 +10,7 @@ statusManagerApp.controller('StatusController', function($scope) {
   // Date formatting
   $scope.dateFormat = 'yyyy-MM-dd HH:mm:ss';
   $scope.formatDate = function(date) {
-    var dateOut = new Date(date * 1000);
-    return dateOut;
+    return new Date(date * 1000);
   };
 
   // Bitrate formatting
@@ -38,9 +37,7 @@ statusManagerApp.controller('StatusController', function($scope) {
     var instances = JSON.parse(event.data).instances;
     var scopeInstances = [];
 
-    for (var i = 0; i < instances.length; i++) {
-      var instance = instances[i];
-
+    instances.forEach(function(instance) {
       var name = instance.instanceName;
       var inputs = instance.inputs;
       var subscriptions = instance.subscriptions;
