@@ -90,16 +90,16 @@ class StatusManager implements MessageComponentInterface
 		// Log information about the configured instances
 		$instances = $this->_configuration->getInstances();
 
-		$this->_logger->info('Managing {instances} instances:', array(
+		$this->_logger->info('Managing {instances} instances:', [
 			'instances' => count($instances),
-		));
+		]);
 
 		foreach ($instances as $instance)
 		{
-			$this->_logger->info('  {address}:{port}', array(
+			$this->_logger->info('  {address}:{port}', [
 				'address' => $instance->getInstance()->getHostname(),
 				'port'    => $instance->getInstance()->getPort(),
-			));
+			]);
 		}
 
 		// Start the main loop

@@ -6,9 +6,9 @@ use jalle19\tvheadend\Tvheadend;
 
 /**
  * Class Instance
- * @package Jalle19\StatusManager
+ * @package   Jalle19\StatusManager
  * @copyright Copyright &copy; Sam Stenvall 2015-
- * @license https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
+ * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
 class Instance
 {
@@ -33,7 +33,7 @@ class Instance
 	 */
 	public function __construct($name, $address, $port)
 	{
-		$this->_name    = $name;
+		$this->_name = $name;
 
 		// Create the actual instance
 		$this->_instance = new Tvheadend($address, $port);
