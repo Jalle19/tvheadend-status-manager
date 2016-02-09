@@ -29,6 +29,15 @@ class InstanceStatusCollection implements \JsonSerializable
 
 
 	/**
+	 * @return InstanceStatus[]
+	 */
+	public function getInstanceStatuses()
+	{
+		return $this->_messages;
+	}
+
+
+	/**
 	 * @inheritdoc
 	 */
 	public function jsonSerialize()

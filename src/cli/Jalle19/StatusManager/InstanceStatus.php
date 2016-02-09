@@ -52,6 +52,14 @@ class InstanceStatus implements \JsonSerializable
 		$this->_connections   = $connections;
 	}
 
+	/**
+	 * @return string
+	 */
+	public function getInstanceName()
+	{
+		return $this->_instanceName;
+	}
+
 
 	/**
 	 * @inheritdoc

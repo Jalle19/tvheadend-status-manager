@@ -119,6 +119,16 @@ class StatusManager implements MessageComponentInterface
 	{
 		$statusCollection = $this->getStatusMessages();
 
+		// Log subscription state changes
+		foreach ($statusCollection->getInstanceStatuses() as $instanceStatus)
+		{
+			$instanceName = $instanceStatus->getInstanceName();
+
+			$this->_logger->debug('Got status updates from {instanceName}', [
+				'instanceName' => $instanceName,
+			]);
+		}
+
 		// Broadcast the status messages to all connected clients
 		$this->broadcastMessages($statusCollection);
 	}
@@ -163,10 +173,6 @@ class StatusManager implements MessageComponentInterface
 
 						$instanceState->setReachability(InstanceState::REACHABLE);
 					}
-
-					$this->_logger->debug('Got status updates from {instanceName}', [
-						'instanceName' => $instanceName,
-					]);
 				}
 				catch (\Exception $e)
 				{
