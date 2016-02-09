@@ -2,6 +2,7 @@
 
 namespace Jalle19\StatusManager;
 
+use Jalle19\StatusManager\Subscription\StateChange;
 use jalle19\tvheadend\model\ConnectionStatus;
 use jalle19\tvheadend\model\InputStatus;
 use jalle19\tvheadend\model\SubscriptionStatus;
@@ -35,22 +36,36 @@ class InstanceStatus implements \JsonSerializable
 	 */
 	private $_connections;
 
+	/**
+	 * @var StateChange[]
+	 */
+	private $_subscriptionStateChanges;
+
 
 	/**
 	 * BroadcastMessage constructor.
 	 *
-	 * @param string                                        $instanceName
-	 * @param \jalle19\tvheadend\model\InputStatus[]        $inputs
-	 * @param \jalle19\tvheadend\model\SubscriptionStatus[] $subscriptions
-	 * @param \jalle19\tvheadend\model\ConnectionStatus[]   $connections
+	 * @param string               $instanceName
+	 * @param InputStatus[]        $inputs
+	 * @param SubscriptionStatus[] $subscriptions
+	 * @param ConnectionStatus[]   $connections
+	 * @param StateChange[]        $subscriptionStateChanges
+	 *
 	 */
-	public function __construct($instanceName, array $inputs, array $subscriptions, array $connections)
-	{
-		$this->_instanceName  = $instanceName;
-		$this->_inputs        = $inputs;
-		$this->_subscriptions = $subscriptions;
-		$this->_connections   = $connections;
+	public function __construct(
+		$instanceName,
+		array $inputs,
+		array $subscriptions,
+		array $connections,
+		array $subscriptionStateChanges
+	) {
+		$this->_instanceName             = $instanceName;
+		$this->_inputs                   = $inputs;
+		$this->_subscriptions            = $subscriptions;
+		$this->_connections              = $connections;
+		$this->_subscriptionStateChanges = $subscriptionStateChanges;
 	}
+
 
 	/**
 	 * @return string
@@ -67,10 +82,10 @@ class InstanceStatus implements \JsonSerializable
 	public function jsonSerialize()
 	{
 		return [
-			'instanceName'             => $this->_instanceName,
-			'inputs'                   => $this->_inputs,
-			'subscriptions'            => $this->_subscriptions,
-			'connections'              => $this->_connections,
+			'instanceName'  => $this->_instanceName,
+			'inputs'        => $this->_inputs,
+			'subscriptions' => $this->_subscriptions,
+			'connections'   => $this->_connections,
 		];
 	}
 

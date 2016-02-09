@@ -2,6 +2,7 @@
 
 namespace Jalle19\StatusManager;
 
+use Jalle19\StatusManager\Subscription\StateChangeParser;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
 use Ratchet\Http\HttpServer;
@@ -161,7 +162,8 @@ class StatusManager implements MessageComponentInterface
 						$instanceName,
 						$tvheadend->getInputStatus(),
 						$tvheadend->getSubscriptionStatus(),
-						$tvheadend->getConnectionStatus()));
+						$tvheadend->getConnectionStatus(),
+						StateChangeParser::parseStateChanges($tvheadend->getLogMessages())));
 
 					// Update reachability state now that we know the instance is reachable
 					if ($instanceState->getReachability() === InstanceState::MAYBE_REACHABLE)
