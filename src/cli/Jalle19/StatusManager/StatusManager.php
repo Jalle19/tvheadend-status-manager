@@ -83,9 +83,9 @@ class StatusManager implements MessageComponentInterface
 			$address
 		);
 
-		// Add the status polling mechanism to the event loop
+		// Add the instance polling mechanism to the event loop
 		$this->_websocket->loop->addPeriodicTimer($this->_configuration->getUpdateInterval(),
-			[$this, 'broadcastTimer']);
+			[$this, 'handleInstanceUpdates']);
 
 		// Log information about the configured instances
 		$instances = $this->_configuration->getInstances();
@@ -113,11 +113,14 @@ class StatusManager implements MessageComponentInterface
 
 
 	/**
-	 * Broadcasts all status messages to all clients
+	 * Handles the updates polled from the instances
 	 */
-	public function broadcastTimer()
+	public function handleInstanceUpdates()
 	{
-		$this->broadcastMessages($this->getStatusMessages());
+		$statusCollection = $this->getStatusMessages();
+
+		// Broadcast the status messages to all connected clients
+		$this->broadcastMessages($statusCollection);
 	}
 
 
