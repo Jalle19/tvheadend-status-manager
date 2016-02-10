@@ -57,7 +57,7 @@ class PersistenceManager
 		$instanceModel->setPrimaryKey($instance->getHostname());
 		$instanceModel->save();
 
-		$this->_logger->info('Stored new instance {instanceName} to database', [
+		$this->_logger->info('Stored new instance {instanceName}', [
 			'instanceName' => $instance->getHostname(),
 		]);
 
@@ -67,7 +67,7 @@ class PersistenceManager
 		$user->setName(User::NAME_DVR);
 		$user->save();
 
-		$this->_logger->info('Stored new special user (instance: {instanceName}, user: {userName}) to database', [
+		$this->_logger->info('Stored new special user (instance: {instanceName}, user: {userName})', [
 			'instanceName' => $instance->getHostname(),
 			'userName'     => $user->getName(),
 		]);
@@ -99,7 +99,7 @@ class PersistenceManager
 		           ->setUser($user)
 		           ->setStarted($connectionStatus->started)->setType($connectionStatus->type)->save();
 
-		$this->_logger->info('Stored new connection (instance: {instanceName}, peer: {peer}', [
+		$this->_logger->info('Stored new connection (instance: {instanceName}, peer: {peer})', [
 			'instanceName' => $instanceName,
 			'peer'         => $connectionStatus->peer,
 		]);
@@ -121,7 +121,7 @@ class PersistenceManager
 		$user->setInstanceName($instanceName)->setName($userName);
 		$user->save();
 
-		$this->_logger->info('Stored new user (instance: {instanceName}, username: {userName}', [
+		$this->_logger->info('Stored new user (instance: {instanceName}, username: {userName})', [
 			'instanceName' => $instanceName,
 			'userName'     => $userName,
 		]);
@@ -143,7 +143,7 @@ class PersistenceManager
 		$channel->setInstanceName($instanceName)->setName($channelName);
 		$channel->save();
 
-		$this->_logger->info('Stored new channel (instance: {instanceName}, name: {channelName}', [
+		$this->_logger->info('Stored new channel (instance: {instanceName}, name: {channelName})', [
 			'instanceName' => $instanceName,
 			'channelName'  => $channelName,
 		]);
@@ -189,7 +189,7 @@ class PersistenceManager
 		             ->setService($status->service);
 		$subscription->save();
 
-		$this->_logger->info('Stored new subscription (instance: {instanceName}, user: {userName}, channel: {channelName}',
+		$this->_logger->info('Stored new subscription (instance: {instanceName}, user: {userName}, channel: {channelName})',
 			[
 				'instanceName' => $instanceName,
 				'userName'     => $user !== null ? $user->getName() : 'N/A',
@@ -215,7 +215,7 @@ class PersistenceManager
 
 		if ($subscription === null)
 		{
-			$this->_logger->warning('Got subscription stop without a matching start (instance: {instanceName}, subscription: {subscriptionId}',
+			$this->_logger->warning('Got subscription stop without a matching start (instance: {instanceName}, subscription: {subscriptionId})',
 				[
 					'instanceName'   => $instanceName,
 					'subscriptionId' => $stateChange->getSubscriptionId(),
@@ -230,7 +230,7 @@ class PersistenceManager
 		$user    = $subscription->getUser();
 		$channel = $subscription->getChannel();
 
-		$this->_logger->info('Stored subscription stop (instance: {instanceName}, user: {userName}, channel: {channel}',
+		$this->_logger->info('Stored subscription stop (instance: {instanceName}, user: {userName}, channel: {channelName})',
 			[
 				'instanceName' => $instanceName,
 				'userName'     => $user !== null ? $user->getName() : 'N/A',
