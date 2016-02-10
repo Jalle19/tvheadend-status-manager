@@ -109,10 +109,11 @@ class InstanceStatus implements \JsonSerializable
 	public function jsonSerialize()
 	{
 		return [
-			'instanceName'  => $this->_instanceName,
-			'inputs'        => $this->_inputs,
-			'subscriptions' => $this->_subscriptions,
-			'connections'   => $this->_connections,
+			'instanceName'             => $this->_instanceName,
+			'inputs'                   => $this->_inputs,
+			'subscriptions'            => $this->_subscriptions,
+			'connections'              => $this->_connections,
+			'subscriptionStateChanges' => $this->_subscriptionStateChanges,
 		];
 	}
 
