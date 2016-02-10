@@ -13,12 +13,14 @@ Vagrant.configure(2) do |config|
   end
 
   # provisioning
-  config.vm.provision "shell", path: "provisioning/01-configure-system.sh",
-    name: "01 - Configure system"
   config.vm.provision "shell", path: "provisioning/02-install-system-packages.sh",
     name: "02 - Install and update system packages"
   config.vm.provision "shell", path: "provisioning/03-install-dependencies.sh",
     name: "03 - Install dependencies", privileged: false
   config.vm.provision "shell", path: "provisioning/04-configure-nginx.sh",
     name: "04 - Configure nginx"
+
+  config.vm.provision "shell", path: "provisioning/99-enable-swap.sh",
+    name: "99 - Enable swap",
+    run: "always"
 end
