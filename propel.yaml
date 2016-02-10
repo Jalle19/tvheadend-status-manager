@@ -1,0 +1,24 @@
+propel:
+  database:
+    connections:
+      tvheadend_status_manager:
+        adapter: sqlite
+        classname: Propel\Runtime\Connection\ConnectionWrapper
+        dsn: "sqlite:/vagrant/app/database.sqlite.example"
+        user:
+        password:
+        attributes:
+        settings:
+          charset: utf8
+  runtime:
+    defaultConnection: tvheadend_status_manager
+    connections:
+      - tvheadend_status_manager
+  generator:
+    defaultConnection: tvheadend_status_manager
+    connections:
+      - tvheadend_status_manager
+    schema:
+      autoPackage: true
+  paths:
+    phpDir: src/cli

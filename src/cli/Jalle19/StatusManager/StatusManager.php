@@ -2,6 +2,8 @@
 
 namespace Jalle19\StatusManager;
 
+use Jalle19\StatusManager\Database;
+use Jalle19\StatusManager\Database\InstanceQuery;
 use Jalle19\StatusManager\Subscription\StateChangeParser;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
@@ -49,6 +51,11 @@ class StatusManager implements MessageComponentInterface
 	 */
 	private $_connectedClients;
 
+	/**
+	 * @var PersistenceManager the persistence manager
+	 */
+	private $_persistenceManager;
+
 
 	/**
 	 * StatusManager constructor.
@@ -66,6 +73,9 @@ class StatusManager implements MessageComponentInterface
 		// Attach a state to each instance
 		foreach ($this->_configuration->getInstances() as $instance)
 			$this->_instances->attach($instance, new InstanceState());
+
+		// Start the persistence manager
+		$this->_persistenceManager = new PersistenceManager($logger);
 	}
 
 
@@ -88,6 +98,11 @@ class StatusManager implements MessageComponentInterface
 		$this->_websocket->loop->addPeriodicTimer($this->_configuration->getUpdateInterval(),
 			[$this, 'handleInstanceUpdates']);
 
+		// Log information about the database
+		$this->_logger->debug('Using database at {databasePath}', [
+			'databasePath' => $this->_configuration->getDatabasePath(),
+		]);
+
 		// Log information about the configured instances
 		$instances = $this->_configuration->getInstances();
 
@@ -95,12 +110,16 @@ class StatusManager implements MessageComponentInterface
 			'instances' => count($instances),
 		]);
 
-		foreach ($instances as $instance)
+		foreach ($instances as $configuredInstance)
 		{
+			$instance = $configuredInstance->getInstance();
+
 			$this->_logger->info('  {address}:{port}', [
-				'address' => $instance->getInstance()->getHostname(),
-				'port'    => $instance->getInstance()->getPort(),
+				'address' => $instance->getHostname(),
+				'port'    => $instance->getPort(),
 			]);
+
+			$this->_persistenceManager->onInstanceSeen($instance);
 		}
 
 		// Start the main loop
@@ -120,7 +139,6 @@ class StatusManager implements MessageComponentInterface
 	{
 		$statusCollection = $this->getStatusMessages();
 
-		// Log subscription state changes
 		foreach ($statusCollection->getInstanceStatuses() as $instanceStatus)
 		{
 			$instanceName = $instanceStatus->getInstanceName();
@@ -128,6 +146,18 @@ class StatusManager implements MessageComponentInterface
 			$this->_logger->debug('Got status updates from {instanceName}', [
 				'instanceName' => $instanceName,
 			]);
+
+			// Persist connections
+			foreach ($instanceStatus->getConnections() as $connection)
+				$this->_persistenceManager->onConnectionSeen($instanceName, $connection);
+
+			// Persist running subscriptions
+			foreach ($instanceStatus->getSubscriptions() as $subscription)
+				$this->_persistenceManager->onSubscriptionSeen($instanceName, $subscription);
+
+			// Handle subscription state changes
+			foreach ($instanceStatus->getSubscriptionStateChanges() as $subscriptionStateChange)
+				$this->_persistenceManager->onSubscriptionStateChange($instanceName, $subscriptionStateChange);
 		}
 
 		// Broadcast the status messages to all connected clients

@@ -22,6 +22,11 @@ class Configuration
 	const DEFAULT_LISTEN_PORT     = 9333;
 
 	/**
+	 * @var string the database path
+	 */
+	private $_databasePath;
+
+	/**
 	 * @var Instance[] the instances
 	 */
 	private $_instances;
@@ -43,13 +48,22 @@ class Configuration
 
 
 	/**
-	 * Configuration constructor.
-	 *
+	 * @param string     $databasePath
 	 * @param Instance[] $_instances
 	 */
-	public function __construct(array $_instances)
+	public function __construct($databasePath, array $_instances)
 	{
-		$this->_instances = $_instances;
+		$this->_databasePath = $databasePath;
+		$this->_instances    = $_instances;
+	}
+
+
+	/**
+	 * @return string
+	 */
+	public function getDatabasePath()
+	{
+		return $this->_databasePath;
 	}
 
 

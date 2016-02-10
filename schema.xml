@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database name="tvheadend_status_manager" defaultIdMethod="native" namespace="Jalle19\StatusManager\Database">
+
+    <table name="instance" phpName="Instance">
+        <column name="name" type="varchar" size="255" required="true" primaryKey="true"/>
+    </table>
+
+    <table name="user" phpName="User">
+        <column name="id" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="instance_name" type="varchar" size="255" required="true"/>
+        <column name="name" type="varchar" size="255" required="true"/>
+
+        <foreign-key foreignTable="instance" phpName="Instance" refPhpName="User">
+            <reference local="instance_name" foreign="name"/>
+        </foreign-key>
+    </table>
+
+    <table name="connection" phpName="Connection">
+        <column name="id" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="instance_name" type="varchar" size="255" required="true"/>
+        <!-- ticket subscriptions produce connections without a user -->
+        <column name="user_id" type="integer" defaultValue="NULL"/>
+        <column name="peer" type="varchar" size="255" required="true"/>
+        <column name="started" type="timestamp" required="true"/>
+        <column name="type" type="varchar" size="255" required="true"/>
+
+        <foreign-key foreignTable="instance" phpName="Instance" refPhpName="Connection">
+            <reference local="instance_name" foreign="name"/>
+        </foreign-key>
+
+        <foreign-key foreignTable="user" phpName="User" refPhpName="Connection">
+            <reference local="user_id" foreign="id"/>
+        </foreign-key>
+    </table>
+
+    <table name="channel" phpName="Channel">
+        <column name="id" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="instance_name" type="varchar" size="255" required="true"/>
+        <column name="name" type="varchar" size="255" required="true"/>
+
+        <foreign-key foreignTable="instance" phpName="Instance" refPhpName="Channel">
+            <reference local="instance_name" foreign="name"/>
+        </foreign-key>
+    </table>
+
+    <table name="subscription" phpName="Subscription">
+        <column name="id" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="instance_name" type="varchar" size="255" required="true"/>
+        <!-- ticket and DVR subscriptions don't have a user -->
+        <column name="user_id" type="integer" defaultValue="NULL"/>
+        <column name="channel_id" type="integer" required="true"/>
+        <column name="subscription_id" type="integer" required="true"/>
+        <column name="started" type="timestamp" required="true"/>
+        <column name="stopped" type="timestamp" defaultVaue="NULL"/>
+        <column name="title" type="varchar" size="255" required="true"/>
+        <column name="service" type="varchar" size="255" required="true"/>
+
+        <foreign-key foreignTable="instance" phpName="Instance" refPhpName="Subscription">
+            <reference local="instance_name" foreign="name"/>
+        </foreign-key>
+
+        <foreign-key foreignTable="user" phpName="User" refPhpName="Subscription">
+            <reference local="user_id" foreign="id"/>
+        </foreign-key>
+
+        <foreign-key foreignTable="channel" phpName="Channel" refPhpName="Subscription">
+            <reference local="channel_id" foreign="id"/>
+        </foreign-key>
+    </table>
+</database>

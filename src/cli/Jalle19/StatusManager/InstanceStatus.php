@@ -77,6 +77,33 @@ class InstanceStatus implements \JsonSerializable
 
 
 	/**
+	 * @return ConnectionStatus[]
+	 */
+	public function getConnections()
+	{
+		return $this->_connections;
+	}
+
+
+	/**
+	 * @return SubscriptionStatus[]
+	 */
+	public function getSubscriptions()
+	{
+		return $this->_subscriptions;
+	}
+
+
+	/**
+	 * @return Subscription\StateChange[]
+	 */
+	public function getSubscriptionStateChanges()
+	{
+		return $this->_subscriptionStateChanges;
+	}
+
+
+	/**
 	 * @inheritdoc
 	 */
 	public function jsonSerialize()
