@@ -50,15 +50,6 @@ class Instance
 
 
 	/**
-	 * @return bool
-	 */
-	public function requiresCredentials()
-	{
-		return $this->_username !== null && $this->_password !== null;
-	}
-
-
-	/**
 	 * Sets the credentials to use
 	 *
 	 * @param $username
@@ -66,9 +57,6 @@ class Instance
 	 */
 	public function setCredentials($username, $password)
 	{
-		$this->_username = $username;
-		$this->_password = $password;
-
 		$this->_instance->setCredentials($username, $password);
 	}
 
