@@ -1,5 +1,7 @@
 # tvheadend-status-manager
 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Jalle19/tvheadend-status-manager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Jalle19/tvheadend-status-manager/?branch=master)
+
 *This software is still highly experimental and comes entirely without support!*
 
 This project aims to provide a complete status and statistics manager for multiple tvheadend instances. It stores 
