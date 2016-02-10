@@ -1,5 +1,6 @@
 .vagrant
 /vendor/
+node_modules
 composer.phar
 .idea/workspace.xml
 .idea/tasks.xml

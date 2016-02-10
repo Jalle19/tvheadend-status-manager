@@ -7,6 +7,6 @@
 	cd /vagrant
 	curl -sS https://getcomposer.org/installer | php
 
-	npm install -g bower
+	npm install -g bower grunt-cli
 
 } > /dev/null 2>&1

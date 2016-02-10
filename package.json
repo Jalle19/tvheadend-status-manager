@@ -1,0 +1,22 @@
+{
+  "name": "tvheadend-status-manager",
+  "version": "0.0.0",
+  "description": "Aggregating streaming status manager for tvheadend instances",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Jalle19/tvheadend-status-manager.git"
+  },
+  "author": "Sam Stenvall <neggelandia@gmail.com>",
+  "license": "GPL-2",
+  "bugs": {
+    "url": "https://github.com/Jalle19/tvheadend-status-manager/issues"
+  },
+  "devDependencies": {
+    "grunt-contrib-less": "~1.2.0",
+    "grunt": "~0.4.5"
+  }
+}
