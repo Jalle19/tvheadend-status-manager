@@ -3,7 +3,6 @@
 namespace Jalle19\StatusManager;
 
 use Jalle19\StatusManager\Database;
-use Jalle19\StatusManager\Database\InstanceQuery;
 use Jalle19\StatusManager\Subscription\StateChangeParser;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
