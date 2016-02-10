@@ -36,7 +36,7 @@
 
   <div ng-repeat="instance in instances">
     <table class="table table-striped">
-      <caption>{{instance.name}}</caption>
+      <caption>{{instance.instanceName}}</caption>
       <tr>
         <th>Started:</th>
         <th>Errors:</th>
@@ -65,6 +65,10 @@
         <td colspan="8">No subscriptions</td>
       </tr>
     </table>
+
+    <flot dataset="subscriptionChartData[instance.instanceName]"
+          options="subscriptionChartOptions" class="subscription-chart"></flot>
+
   </div>
 
   <h4>Connections</h4>
@@ -75,7 +79,7 @@
 
   <div ng-repeat="instance in instances">
     <table class="table table-striped">
-      <caption>{{instance.name}}</caption>
+      <caption>{{instance.instanceName}}</caption>
       <tr>
         <th>Peer:</th>
         <th>Started:</th>
@@ -102,7 +106,7 @@
 
   <div ng-repeat="instance in instances">
     <table class="table table-striped">
-      <caption>{{instance.name}}</caption>
+      <caption>{{instance.instanceName}}</caption>
       <tr>
         <th>Input:</th>
         <th>Stream:</th>
@@ -134,7 +138,13 @@
 </div>
 
 <script type="text/javascript" src="bower_components/angular/angular.js"></script>
+<script type="text/javascript" src="bower_components/ng-lodash/build/ng-lodash.js"></script>
 <script type="text/javascript" src="bower_components/reconnectingWebsocket/reconnecting-websocket.js"></script>
+<script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
+<script type="text/javascript" src="bower_components/Flot/jquery.flot.js"></script>
+<script type="text/javascript" src="bower_components/Flot/jquery.flot.stack.js"></script>
+<script type="text/javascript" src="js/jquery.flot.axislabels.js"></script>
+<script type="text/javascript" src="bower_components/angular-flot/angular-flot.js"></script>
 <script type="text/javascript" src="js/tvheadend-status-manager.js"></script>
 
 </body>
