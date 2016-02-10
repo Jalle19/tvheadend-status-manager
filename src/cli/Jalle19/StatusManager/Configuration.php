@@ -11,6 +11,8 @@ namespace Jalle19\StatusManager;
 class Configuration
 {
 
+	const SECTION_TYPE_INSTANCE = 'instance';
+
 	const OPTION_UPDATE_INTERVAL = 'updateInterval';
 	const OPTION_LISTEN_ADDRESS  = 'listenAddress';
 	const OPTION_LISTEN_PORT     = 'listenPort';

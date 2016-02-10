@@ -4,6 +4,7 @@ namespace Jalle19\StatusManager\Console\Commands;
 
 use Bramus\Monolog\Formatter\ColoredLineFormatter;
 use Jalle19\StatusManager\Configuration;
+use Jalle19\StatusManager\Exception\InvalidConfigurationException;
 use Jalle19\StatusManager\Instance;
 use Jalle19\StatusManager\StatusManager;
 use Monolog\Logger;
@@ -80,42 +81,41 @@ class TvheadendStatusManagerCommand extends Command
 	{
 		// Check that the configuration file exists
 		if (!file_exists($input->getArgument('configFile')))
-			throw new \InvalidArgumentException('The specified configuration file does not exist');
+			throw new InvalidConfigurationException('The specified configuration file does not exist');
 
 		// Parse the configuration file
 		$configuration = parse_ini_file($input->getArgument('configFile'), true);
 
 		// Check that the file was parsed
 		if ($configuration === false)
-			throw new \RuntimeException('Failed to parse the specified configuration file');
+			throw new InvalidConfigurationException('Failed to parse the specified configuration file');
 
-		// Check that we have at least one instance
-		$hasInstances = false;
+		$instances    = [];
 
-		foreach (array_keys($configuration) as $section)
-			if (substr($section, 0, 8) === 'instance')
-				$hasInstances = true;
-
-		if (!$hasInstances)
-			throw new \RuntimeException('No instances defined, you need to specify at least one instance');
-
-		// Parse instances
-		$instances = [];
-
+		// Parse sections
 		foreach ($configuration as $section => $values)
 		{
-			$name    = substr($section, 9);
-			$address = $values['address'];
-			$port    = intval($values['port']);
+			switch (self::getSectionType($section))
+			{
+				case Configuration::SECTION_TYPE_INSTANCE:
+					$name    = substr($section, 9);
+					$address = $values['address'];
+					$port    = intval($values['port']);
 
-			$instance = new Instance($name, $address, $port);
+					$instance = new Instance($name, $address, $port);
 
-			// Optionally set credentials
-			if (isset($values['username']) && isset($values['password']))
-				$instance->setCredentials($values['username'], $values['password']);
+					// Optionally set credentials
+					if (isset($values['username']) && isset($values['password']))
+						$instance->setCredentials($values['username'], $values['password']);
 
-			$instances[] = $instance;
+					$instances[] = $instance;
+					break;
+			}
 		}
+
+		// Validate the configuration. We need at least one instance.
+		if (empty($instances))
+			throw new InvalidConfigurationException('No instances defined, you need to specify at least one instance');
 
 		// Create the configuration object
 		$config = new Configuration($instances);
@@ -131,6 +131,23 @@ class TvheadendStatusManagerCommand extends Command
 		$config->setListenPort($listenPort);
 
 		return $config;
+	}
+
+
+	/**
+	 * Returns the determined section type based on the specified section name
+	 *
+	 * @param string $section
+	 *
+	 * @return string
+	 * @throws InvalidConfigurationException if the section type could not be determined
+	 */
+	private static function getSectionType($section)
+	{
+		if (substr($section, 0, 8) === 'instance')
+			return Configuration::SECTION_TYPE_INSTANCE;
+
+		throw new InvalidConfigurationException('Unknown section "' . $section . '"');
 	}
 
 }
