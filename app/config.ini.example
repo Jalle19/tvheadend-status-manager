@@ -3,6 +3,7 @@ address = example.com
 port = 9981
 username = admin
 password = admin
+;ignoredUsers = someone
 
 [instance:another]
 address = another.example.com

@@ -19,6 +19,11 @@ class Instance
 	private $_name;
 
 	/**
+	 * @var array the names of users whose subscriptions should be ignored
+	 */
+	private $_ignoredUsers;
+
+	/**
 	 * @var Tvheadend the actual tvheadend instance
 	 */
 	private $_instance;
@@ -46,6 +51,24 @@ class Instance
 	public function getName()
 	{
 		return $this->_name;
+	}
+
+
+	/**
+	 * @return array
+	 */
+	public function getIgnoredUsers()
+	{
+		return $this->_ignoredUsers;
+	}
+
+
+	/**
+	 * @param array $ignoredUsers
+	 */
+	public function setIgnoredUsers($ignoredUsers)
+	{
+		$this->_ignoredUsers = $ignoredUsers;
 	}
 
 

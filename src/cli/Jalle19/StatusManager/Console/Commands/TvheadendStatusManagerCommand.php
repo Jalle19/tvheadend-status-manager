@@ -156,6 +156,10 @@ class TvheadendStatusManagerCommand extends Command
 
 					$instance = new Instance($name, $address, $port);
 
+					// Optionally set ignored users
+					if (isset($values['ignoredUsers']))
+						$instance->setIgnoredUsers($values['ignoredUsers']);
+
 					// Optionally set credentials
 					if (isset($values['username']) && isset($values['password']))
 						$instance->setCredentials($values['username'], $values['password']);
