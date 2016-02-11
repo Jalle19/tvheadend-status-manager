@@ -9,4 +9,8 @@ server {
 	location / {
 		try_files $uri $uri/ =404;
 	}
+	
+	gzip on;
+	gzip_comp_level 9;
+	gzip_types text/html text/css application/x-javascript;
 }
