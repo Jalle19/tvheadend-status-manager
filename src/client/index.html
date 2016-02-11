@@ -66,7 +66,8 @@
       </tr>
     </table>
 
-    <flot dataset="subscriptionChartData[instance.instanceName]"
+    <flot ng-show="instance.subscriptions.length > 0"
+          dataset="subscriptionChartData[instance.instanceName]"
           options="subscriptionChartOptions" class="subscription-chart"></flot>
 
   </div>
