@@ -25,7 +25,7 @@
         "propel/propel": "~2.0@dev"
     },
     "autoload": {
-        "psr-0": {
+        "psr-4": {
             "Jalle19\\StatusManager\\": "src/cli/"
         }
     }
