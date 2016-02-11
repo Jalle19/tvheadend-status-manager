@@ -3,9 +3,9 @@
 namespace Jalle19\StatusManager;
 
 use Jalle19\StatusManager\Subscription\StateChange;
-use jalle19\tvheadend\model\ConnectionStatus;
-use jalle19\tvheadend\model\InputStatus;
-use jalle19\tvheadend\model\SubscriptionStatus;
+use Jalle19\tvheadend\model\ConnectionStatus;
+use Jalle19\tvheadend\model\InputStatus;
+use Jalle19\tvheadend\model\SubscriptionStatus;
 
 /**
  * Class InstanceStatus

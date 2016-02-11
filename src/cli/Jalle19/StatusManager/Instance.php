@@ -2,7 +2,7 @@
 
 namespace Jalle19\StatusManager;
 
-use jalle19\tvheadend\Tvheadend;
+use Jalle19\tvheadend\Tvheadend;
 
 /**
  * Class Instance

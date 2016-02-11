@@ -2,7 +2,7 @@
 
 namespace Jalle19\StatusManager\Subscription;
 
-use jalle19\tvheadend\model\comet\LogMessageNotification;
+use Jalle19\tvheadend\model\comet\LogMessageNotification;
 
 /**
  * Helper for parsing subscription state changes from raw log messages

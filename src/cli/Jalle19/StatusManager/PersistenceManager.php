@@ -13,9 +13,9 @@ use Jalle19\StatusManager\Database\SubscriptionQuery;
 use Jalle19\StatusManager\Database\User;
 use Jalle19\StatusManager\Database\UserQuery;
 use Jalle19\StatusManager\Subscription\StateChange;
-use jalle19\tvheadend\model\ConnectionStatus;
-use jalle19\tvheadend\model\SubscriptionStatus;
-use jalle19\tvheadend\Tvheadend;
+use Jalle19\tvheadend\model\ConnectionStatus;
+use Jalle19\tvheadend\model\SubscriptionStatus;
+use Jalle19\tvheadend\Tvheadend;
 use Psr\Log\LoggerInterface;
 
 /**
