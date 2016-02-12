@@ -123,26 +123,19 @@ class TvheadendStatusManagerCommand extends Command
 	 */
 	private function parseConfiguration(InputInterface $input)
 	{
-		// Check that the configuration file exists
-		if (!file_exists($input->getArgument('configFile')))
-			throw new InvalidConfigurationException('The specified configuration file does not exist');
+		$this->validateArguments($input);
 
-		// Check that the database exists and is writable
-		$databasePath = $input->getArgument('databaseFile');
-
-		if (!file_exists($databasePath))
-			throw new InvalidConfigurationException('The specified database path does not exist');
-		else if (!is_writable($databasePath))
-			throw new InvalidConfigurationException('The specified database path is not writable');
+		$configFile   = $input->getArgument('configFile');
+		$databaseFile = $input->getArgument('databaseFile');
 
 		// Parse the configuration file
-		$configuration = parse_ini_file($input->getArgument('configFile'), true);
+		$configuration = parse_ini_file($configFile, true);
 
 		// Check that the file was parsed
 		if ($configuration === false)
 			throw new InvalidConfigurationException('Failed to parse the specified configuration file');
 
-		$instances    = [];
+		$instances = [];
 
 		// Parse sections
 		foreach ($configuration as $section => $values)
@@ -150,21 +143,7 @@ class TvheadendStatusManagerCommand extends Command
 			switch (self::getSectionType($section))
 			{
 				case Configuration::SECTION_TYPE_INSTANCE:
-					$name    = substr($section, 9);
-					$address = $values['address'];
-					$port    = intval($values['port']);
-
-					$instance = new Instance($name, $address, $port);
-
-					// Optionally set ignored users
-					if (isset($values['ignoredUsers']))
-						$instance->setIgnoredUsers($values['ignoredUsers']);
-
-					// Optionally set credentials
-					if (isset($values['username']) && isset($values['password']))
-						$instance->setCredentials($values['username'], $values['password']);
-
-					$instances[] = $instance;
+					$instances[] = $this->parseInstance($section, $values);
 					break;
 			}
 		}
@@ -174,7 +153,7 @@ class TvheadendStatusManagerCommand extends Command
 			throw new InvalidConfigurationException('No instances defined, you need to specify at least one instance');
 
 		// Create the configuration object
-		$config = new Configuration($databasePath, $instances);
+		$config = new Configuration($databaseFile, $instances);
 
 		// Parse options
 		$updateInterval = floatval($input->getOption(Configuration::OPTION_UPDATE_INTERVAL));
@@ -187,6 +166,54 @@ class TvheadendStatusManagerCommand extends Command
 		$config->setListenPort($listenPort);
 
 		return $config;
+	}
+
+
+	/**
+	 * @param InputInterface $input
+	 *
+	 * @throws InvalidConfigurationException if the arguments are invalid
+	 */
+	private function validateArguments(InputInterface $input)
+	{
+		$configFile   = $input->getArgument('configFile');
+		$databasePath = $input->getArgument('databaseFile');
+
+		// Check that the configuration file exists
+		if (!file_exists($configFile))
+			throw new InvalidConfigurationException('The specified configuration file does not exist');
+
+		// Check that the database exists and is writable
+		if (!file_exists($databasePath))
+			throw new InvalidConfigurationException('The specified database path does not exist');
+		else if (!is_writable($databasePath))
+			throw new InvalidConfigurationException('The specified database path is not writable');
+	}
+
+
+	/**
+	 * @param string $section
+	 * @param array  $values
+	 *
+	 * @return Instance
+	 */
+	private function parseInstance($section, $values)
+	{
+		$name    = substr($section, 9);
+		$address = $values['address'];
+		$port    = intval($values['port']);
+
+		$instance = new Instance($name, $address, $port);
+
+		// Optionally set ignored users
+		if (isset($values['ignoredUsers']))
+			$instance->setIgnoredUsers($values['ignoredUsers']);
+
+		// Optionally set credentials
+		if (isset($values['username']) && isset($values['password']))
+			$instance->setCredentials($values['username'], $values['password']);
+
+		return $instance;
 	}
 
 
