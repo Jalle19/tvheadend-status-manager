@@ -4,7 +4,7 @@ propel:
       tvheadend_status_manager:
         adapter: sqlite
         classname: Propel\Runtime\Connection\ConnectionWrapper
-        dsn: "sqlite:/vagrant/app/database.sqlite.example"
+        dsn: "sqlite:/vagrant/app/database.sqlite"
         user:
         password:
         attributes:
