@@ -213,9 +213,10 @@ class PersistenceManager
 		                                 ->filterBySubscriptionId($stateChange->getSubscriptionId())
 		                                 ->addDescendingOrderByColumn('started')->findOne();
 
+		// EPG grab subscriptions are not stored so we don't want to log these with a high level
 		if ($subscription === null)
 		{
-			$this->_logger->warning('Got subscription stop without a matching start (instance: {instanceName}, subscription: {subscriptionId})',
+			$this->_logger->debug('Got subscription stop without a matching start (instance: {instanceName}, subscription: {subscriptionId})',
 				[
 					'instanceName'   => $instanceName,
 					'subscriptionId' => $stateChange->getSubscriptionId(),
