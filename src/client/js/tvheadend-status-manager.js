@@ -1,3 +1,5 @@
+var WEBSOCKET_RECONNECT_INTERVAL_MS = 1000;
+
 var statusManagerApp = angular.module('statusManagerApp', [
   'angular-flot',
   'ngLodash'
@@ -93,7 +95,9 @@ statusManagerApp.controller('StatusController', function($scope, lodash) {
   };
 
   // Connect to the server
-  var websocket = new ReconnectingWebSocket('ws://192.168.47.47:9333');
+  var websocket = new ReconnectingWebSocket('ws://192.168.47.47:9333', null, {
+    reconnectInterval: WEBSOCKET_RECONNECT_INTERVAL_MS
+  });
 
   /**
    * Called when the connection is opened
