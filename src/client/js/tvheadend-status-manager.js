@@ -1,3 +1,4 @@
+var WEBSOCKET_HOSTNAME = '192.168.47.47';
 var WEBSOCKET_RECONNECT_INTERVAL_MS = 1000;
 
 var statusManagerApp = angular.module('statusManagerApp', [
@@ -95,7 +96,7 @@ statusManagerApp.controller('StatusController', function($scope, lodash) {
   };
 
   // Connect to the server
-  var websocket = new ReconnectingWebSocket('ws://192.168.47.47:9333', null, {
+  var websocket = new ReconnectingWebSocket('ws://' + WEBSOCKET_HOSTNAME + ':9333', null, {
     reconnectInterval: WEBSOCKET_RECONNECT_INTERVAL_MS
   });
 
