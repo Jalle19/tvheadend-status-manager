@@ -291,7 +291,7 @@ class PersistenceManager
 
 	/**
 	 * @param Database\Instance  $instance
-	 * @param                    $user
+	 * @param User|null          $user
 	 * @param Channel            $channel
 	 * @param SubscriptionStatus $subscription
 	 *
