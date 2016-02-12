@@ -150,6 +150,10 @@ class StatusManager implements MessageComponentInterface
 			foreach ($instanceStatus->getConnections() as $connection)
 				$this->_persistenceManager->onConnectionSeen($instanceName, $connection);
 
+			// Persist inputs
+			foreach($instanceStatus->getInputs() as $input)
+				$this->_persistenceManager->onInputSeen($instanceName, $input);
+
 			// Persist running subscriptions
 			foreach ($instanceStatus->getSubscriptions() as $subscription)
 				$this->_persistenceManager->onSubscriptionSeen($instanceName, $subscription);

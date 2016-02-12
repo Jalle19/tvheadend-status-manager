@@ -86,6 +86,15 @@ class InstanceStatus implements \JsonSerializable
 
 
 	/**
+	 * @return \Jalle19\tvheadend\model\InputStatus[]
+	 */
+	public function getInputs()
+	{
+		return $this->_inputs;
+	}
+
+
+	/**
 	 * @return SubscriptionStatus[]
 	 */
 	public function getSubscriptions()

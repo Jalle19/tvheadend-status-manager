@@ -7,6 +7,8 @@ use Jalle19\StatusManager\Database\Channel;
 use Jalle19\StatusManager\Database\ChannelQuery;
 use Jalle19\StatusManager\Database\Connection;
 use Jalle19\StatusManager\Database\ConnectionQuery;
+use Jalle19\StatusManager\Database\Input;
+use Jalle19\StatusManager\Database\InputQuery;
 use Jalle19\StatusManager\Database\InstanceQuery;
 use Jalle19\StatusManager\Database\Subscription;
 use Jalle19\StatusManager\Database\SubscriptionQuery;
@@ -14,6 +16,7 @@ use Jalle19\StatusManager\Database\User;
 use Jalle19\StatusManager\Database\UserQuery;
 use Jalle19\StatusManager\Subscription\StateChange;
 use Jalle19\tvheadend\model\ConnectionStatus;
+use Jalle19\tvheadend\model\InputStatus;
 use Jalle19\tvheadend\model\SubscriptionStatus;
 use Jalle19\tvheadend\Tvheadend;
 use Psr\Log\LoggerInterface;
@@ -103,6 +106,40 @@ class PersistenceManager
 			'instanceName' => $instanceName,
 			'peer'         => $connectionStatus->peer,
 		]);
+	}
+
+
+	/**
+	 * @param string      $instanceName
+	 * @param InputStatus $inputStatus
+	 */
+	public function onInputSeen($instanceName, InputStatus $inputStatus)
+	{
+		// Update the input and started fields for existing inputs
+		if ($this->hasInput($inputStatus->uuid))
+		{
+			$input = InputQuery::create()->findPk($inputStatus->uuid);
+			$input->setStarted(new \DateTime())->setWeight($inputStatus->weight);
+
+			return;
+		}
+
+		$input = new Input();
+		$input->setPrimaryKey($inputStatus->uuid);
+		$input->setInstanceName($instanceName)
+		      ->setStarted(new \DateTime())
+		      ->setInput($inputStatus->input)
+		      ->setWeight($inputStatus->weight)
+		      ->setNetwork(Input::parseNetwork($inputStatus))
+		      ->setMux(Input::parseMux($inputStatus))->save();
+
+		$this->_logger->info('Stored new input (instance: {instanceName}, network: {network}, mux: {mux}, weight: {weight})',
+			[
+				'instanceName' => $instanceName,
+				'network'      => $input->getNetwork(),
+				'mux'          => $input->getMux(),
+				'weight'       => $input->getWeight(),
+			]);
 	}
 
 
@@ -261,6 +298,17 @@ class PersistenceManager
 	{
 		return ConnectionQuery::create()->filterByInstanceName($instanceName)->filterByPeer($connectionStatus->peer)
 		                      ->filterByStarted($connectionStatus->started)->findOne() !== null;
+	}
+
+
+	/**
+	 * @param string $uuid
+	 *
+	 * @return bool
+	 */
+	private function hasInput($uuid)
+	{
+		return InputQuery::create()->findPk($uuid) !== null;
 	}
 
 

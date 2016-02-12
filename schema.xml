@@ -33,6 +33,20 @@
         </foreign-key>
     </table>
 
+    <table name="input" phpName="Input">
+        <column name="uuid" type="varchar" size="255" primaryKey="true"/>
+        <column name="instance_name" type="varchar" size="255" required="true"/>
+        <column name="started" type="timestamp" required="true"/>
+        <column name="input" type="varchar" size="255" required="true"/>
+        <column name="network" type="varchar" size="255" required="true"/>
+        <column name="mux" type="varchar" size="255" required="true"/>
+        <column name="weight" type="integer" required="true"/>
+
+        <foreign-key foreignTable="instance" phpName="Instance" refPhpName="Input">
+            <reference local="instance_name" foreign="name"/>
+        </foreign-key>
+    </table>
+
     <table name="channel" phpName="Channel">
         <column name="id" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
         <column name="instance_name" type="varchar" size="255" required="true"/>
