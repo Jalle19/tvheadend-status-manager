@@ -55,22 +55,15 @@ DROP TABLE IF EXISTS [input];
 CREATE TABLE [input]
 (
     [uuid] VARCHAR(255) NOT NULL,
-<<<<<<< HEAD
     [instance_name] VARCHAR(255) NOT NULL,
-=======
->>>>>>> 868ad65... add database schema file
     [started] TIMESTAMP NOT NULL,
     [input] VARCHAR(255) NOT NULL,
     [network] VARCHAR(255) NOT NULL,
     [mux] VARCHAR(255) NOT NULL,
     [weight] INTEGER NOT NULL,
     PRIMARY KEY ([uuid]),
-<<<<<<< HEAD
     UNIQUE ([uuid]),
     FOREIGN KEY ([instance_name]) REFERENCES [instance] ([name])
-=======
-    UNIQUE ([uuid])
->>>>>>> 868ad65... add database schema file
 );
 
 -----------------------------------------------------------------------
@@ -98,7 +91,7 @@ CREATE TABLE [subscription]
 (
     [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     [instance_name] VARCHAR(255) NOT NULL,
-    [input_uuid] VARCHAR(255),
+    [input_uuid] VARCHAR(255) NOT NULL,
     [user_id] INTEGER,
     [channel_id] INTEGER NOT NULL,
     [subscription_id] INTEGER NOT NULL,
