@@ -3,9 +3,7 @@
 node_modules
 composer.phar
 .idea/workspace.xml
-.idea/tasks.xml
 .idea/dictionaries/*
-sql/sqldb.map
 
 app/config.ini
 app/database.sqlite
