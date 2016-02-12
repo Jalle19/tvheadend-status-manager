@@ -5,15 +5,20 @@ namespace Jalle19\StatusManager\Database\Base;
 use \DateTime;
 use \Exception;
 use \PDO;
+use Jalle19\StatusManager\Database\Input as ChildInput;
 use Jalle19\StatusManager\Database\InputQuery as ChildInputQuery;
 use Jalle19\StatusManager\Database\Instance as ChildInstance;
 use Jalle19\StatusManager\Database\InstanceQuery as ChildInstanceQuery;
+use Jalle19\StatusManager\Database\Subscription as ChildSubscription;
+use Jalle19\StatusManager\Database\SubscriptionQuery as ChildSubscriptionQuery;
 use Jalle19\StatusManager\Database\Map\InputTableMap;
+use Jalle19\StatusManager\Database\Map\SubscriptionTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
 use Propel\Runtime\ActiveRecord\ActiveRecordInterface;
 use Propel\Runtime\Collection\Collection;
+use Propel\Runtime\Collection\ObjectCollection;
 use Propel\Runtime\Connection\ConnectionInterface;
 use Propel\Runtime\Exception\BadMethodCallException;
 use Propel\Runtime\Exception\LogicException;
@@ -118,12 +123,24 @@ abstract class Input implements ActiveRecordInterface
     protected $aInstance;
 
     /**
+     * @var        ObjectCollection|ChildSubscription[] Collection to store aggregation of ChildSubscription objects.
+     */
+    protected $collSubscriptions;
+    protected $collSubscriptionsPartial;
+
+    /**
      * Flag to prevent endless save loop, if this object is referenced
      * by another object which falls in this transaction.
      *
      * @var boolean
      */
     protected $alreadyInSave = false;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var ObjectCollection|ChildSubscription[]
+     */
+    protected $subscriptionsScheduledForDeletion = null;
 
     /**
      * Initializes internal state of Jalle19\StatusManager\Database\Base\Input object.
@@ -703,6 +720,8 @@ abstract class Input implements ActiveRecordInterface
         if ($deep) {  // also de-associate any related objects?
 
             $this->aInstance = null;
+            $this->collSubscriptions = null;
+
         } // if (deep)
     }
 
@@ -823,6 +842,24 @@ abstract class Input implements ActiveRecordInterface
                     $affectedRows += $this->doUpdate($con);
                 }
                 $this->resetModified();
+            }
+
+            if ($this->subscriptionsScheduledForDeletion !== null) {
+                if (!$this->subscriptionsScheduledForDeletion->isEmpty()) {
+                    foreach ($this->subscriptionsScheduledForDeletion as $subscription) {
+                        // need to save related object because we set the relation to null
+                        $subscription->save($con);
+                    }
+                    $this->subscriptionsScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collSubscriptions !== null) {
+                foreach ($this->collSubscriptions as $referrerFK) {
+                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                        $affectedRows += $referrerFK->save($con);
+                    }
+                }
             }
 
             $this->alreadyInSave = false;
@@ -1038,6 +1075,21 @@ abstract class Input implements ActiveRecordInterface
                 }
 
                 $result[$key] = $this->aInstance->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->collSubscriptions) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'subscriptions';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'subscriptions';
+                        break;
+                    default:
+                        $key = 'Subscriptions';
+                }
+
+                $result[$key] = $this->collSubscriptions->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
         }
 
@@ -1296,6 +1348,20 @@ abstract class Input implements ActiveRecordInterface
         $copyObj->setNetwork($this->getNetwork());
         $copyObj->setMux($this->getMux());
         $copyObj->setWeight($this->getWeight());
+
+        if ($deepCopy) {
+            // important: temporarily setNew(false) because this affects the behavior of
+            // the getter/setter methods for fkey referrer objects.
+            $copyObj->setNew(false);
+
+            foreach ($this->getSubscriptions() as $relObj) {
+                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+                    $copyObj->addSubscription($relObj->copy($deepCopy));
+                }
+            }
+
+        } // if ($deepCopy)
+
         if ($makeNew) {
             $copyObj->setNew(true);
         }
@@ -1374,6 +1440,322 @@ abstract class Input implements ActiveRecordInterface
         return $this->aInstance;
     }
 
+
+    /**
+     * Initializes a collection based on the name of a relation.
+     * Avoids crafting an 'init[$relationName]s' method name
+     * that wouldn't work when StandardEnglishPluralizer is used.
+     *
+     * @param      string $relationName The name of the relation to initialize
+     * @return void
+     */
+    public function initRelation($relationName)
+    {
+        if ('Subscription' == $relationName) {
+            return $this->initSubscriptions();
+        }
+    }
+
+    /**
+     * Clears out the collSubscriptions collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return void
+     * @see        addSubscriptions()
+     */
+    public function clearSubscriptions()
+    {
+        $this->collSubscriptions = null; // important to set this to NULL since that means it is uninitialized
+    }
+
+    /**
+     * Reset is the collSubscriptions collection loaded partially.
+     */
+    public function resetPartialSubscriptions($v = true)
+    {
+        $this->collSubscriptionsPartial = $v;
+    }
+
+    /**
+     * Initializes the collSubscriptions collection.
+     *
+     * By default this just sets the collSubscriptions collection to an empty array (like clearcollSubscriptions());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param      boolean $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initSubscriptions($overrideExisting = true)
+    {
+        if (null !== $this->collSubscriptions && !$overrideExisting) {
+            return;
+        }
+
+        $collectionClassName = SubscriptionTableMap::getTableMap()->getCollectionClassName();
+
+        $this->collSubscriptions = new $collectionClassName;
+        $this->collSubscriptions->setModel('\Jalle19\StatusManager\Database\Subscription');
+    }
+
+    /**
+     * Gets an array of ChildSubscription objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this ChildInput is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @return ObjectCollection|ChildSubscription[] List of ChildSubscription objects
+     * @throws PropelException
+     */
+    public function getSubscriptions(Criteria $criteria = null, ConnectionInterface $con = null)
+    {
+        $partial = $this->collSubscriptionsPartial && !$this->isNew();
+        if (null === $this->collSubscriptions || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collSubscriptions) {
+                // return empty collection
+                $this->initSubscriptions();
+            } else {
+                $collSubscriptions = ChildSubscriptionQuery::create(null, $criteria)
+                    ->filterByInput($this)
+                    ->find($con);
+
+                if (null !== $criteria) {
+                    if (false !== $this->collSubscriptionsPartial && count($collSubscriptions)) {
+                        $this->initSubscriptions(false);
+
+                        foreach ($collSubscriptions as $obj) {
+                            if (false == $this->collSubscriptions->contains($obj)) {
+                                $this->collSubscriptions->append($obj);
+                            }
+                        }
+
+                        $this->collSubscriptionsPartial = true;
+                    }
+
+                    return $collSubscriptions;
+                }
+
+                if ($partial && $this->collSubscriptions) {
+                    foreach ($this->collSubscriptions as $obj) {
+                        if ($obj->isNew()) {
+                            $collSubscriptions[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collSubscriptions = $collSubscriptions;
+                $this->collSubscriptionsPartial = false;
+            }
+        }
+
+        return $this->collSubscriptions;
+    }
+
+    /**
+     * Sets a collection of ChildSubscription objects related by a one-to-many relationship
+     * to the current object.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param      Collection $subscriptions A Propel collection.
+     * @param      ConnectionInterface $con Optional connection object
+     * @return $this|ChildInput The current object (for fluent API support)
+     */
+    public function setSubscriptions(Collection $subscriptions, ConnectionInterface $con = null)
+    {
+        /** @var ChildSubscription[] $subscriptionsToDelete */
+        $subscriptionsToDelete = $this->getSubscriptions(new Criteria(), $con)->diff($subscriptions);
+
+
+        $this->subscriptionsScheduledForDeletion = $subscriptionsToDelete;
+
+        foreach ($subscriptionsToDelete as $subscriptionRemoved) {
+            $subscriptionRemoved->setInput(null);
+        }
+
+        $this->collSubscriptions = null;
+        foreach ($subscriptions as $subscription) {
+            $this->addSubscription($subscription);
+        }
+
+        $this->collSubscriptions = $subscriptions;
+        $this->collSubscriptionsPartial = false;
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related Subscription objects.
+     *
+     * @param      Criteria $criteria
+     * @param      boolean $distinct
+     * @param      ConnectionInterface $con
+     * @return int             Count of related Subscription objects.
+     * @throws PropelException
+     */
+    public function countSubscriptions(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    {
+        $partial = $this->collSubscriptionsPartial && !$this->isNew();
+        if (null === $this->collSubscriptions || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collSubscriptions) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getSubscriptions());
+            }
+
+            $query = ChildSubscriptionQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByInput($this)
+                ->count($con);
+        }
+
+        return count($this->collSubscriptions);
+    }
+
+    /**
+     * Method called to associate a ChildSubscription object to this object
+     * through the ChildSubscription foreign key attribute.
+     *
+     * @param  ChildSubscription $l ChildSubscription
+     * @return $this|\Jalle19\StatusManager\Database\Input The current object (for fluent API support)
+     */
+    public function addSubscription(ChildSubscription $l)
+    {
+        if ($this->collSubscriptions === null) {
+            $this->initSubscriptions();
+            $this->collSubscriptionsPartial = true;
+        }
+
+        if (!$this->collSubscriptions->contains($l)) {
+            $this->doAddSubscription($l);
+
+            if ($this->subscriptionsScheduledForDeletion and $this->subscriptionsScheduledForDeletion->contains($l)) {
+                $this->subscriptionsScheduledForDeletion->remove($this->subscriptionsScheduledForDeletion->search($l));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param ChildSubscription $subscription The ChildSubscription object to add.
+     */
+    protected function doAddSubscription(ChildSubscription $subscription)
+    {
+        $this->collSubscriptions[]= $subscription;
+        $subscription->setInput($this);
+    }
+
+    /**
+     * @param  ChildSubscription $subscription The ChildSubscription object to remove.
+     * @return $this|ChildInput The current object (for fluent API support)
+     */
+    public function removeSubscription(ChildSubscription $subscription)
+    {
+        if ($this->getSubscriptions()->contains($subscription)) {
+            $pos = $this->collSubscriptions->search($subscription);
+            $this->collSubscriptions->remove($pos);
+            if (null === $this->subscriptionsScheduledForDeletion) {
+                $this->subscriptionsScheduledForDeletion = clone $this->collSubscriptions;
+                $this->subscriptionsScheduledForDeletion->clear();
+            }
+            $this->subscriptionsScheduledForDeletion[]= $subscription;
+            $subscription->setInput(null);
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this Input is new, it will return
+     * an empty collection; or if this Input has previously
+     * been saved, it will retrieve related Subscriptions from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in Input.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildSubscription[] List of ChildSubscription objects
+     */
+    public function getSubscriptionsJoinInstance(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildSubscriptionQuery::create(null, $criteria);
+        $query->joinWith('Instance', $joinBehavior);
+
+        return $this->getSubscriptions($query, $con);
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this Input is new, it will return
+     * an empty collection; or if this Input has previously
+     * been saved, it will retrieve related Subscriptions from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in Input.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildSubscription[] List of ChildSubscription objects
+     */
+    public function getSubscriptionsJoinUser(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildSubscriptionQuery::create(null, $criteria);
+        $query->joinWith('User', $joinBehavior);
+
+        return $this->getSubscriptions($query, $con);
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this Input is new, it will return
+     * an empty collection; or if this Input has previously
+     * been saved, it will retrieve related Subscriptions from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in Input.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildSubscription[] List of ChildSubscription objects
+     */
+    public function getSubscriptionsJoinChannel(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildSubscriptionQuery::create(null, $criteria);
+        $query->joinWith('Channel', $joinBehavior);
+
+        return $this->getSubscriptions($query, $con);
+    }
+
     /**
      * Clears the current object, sets all attributes to their default values and removes
      * outgoing references as well as back-references (from other objects to this one. Results probably in a database
@@ -1409,8 +1791,14 @@ abstract class Input implements ActiveRecordInterface
     public function clearAllReferences($deep = false)
     {
         if ($deep) {
+            if ($this->collSubscriptions) {
+                foreach ($this->collSubscriptions as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
         } // if ($deep)
 
+        $this->collSubscriptions = null;
         $this->aInstance = null;
     }
 

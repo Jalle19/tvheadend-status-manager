@@ -220,8 +220,23 @@ class PersistenceManager
 		if ($this->hasSubscription($instance, $user, $channel, $status))
 			return;
 
+		// Determine which input the subscription uses
+		$input = InputQuery::create()->filterBySubscriptionStatus($instanceName, $status)->findOne();
+
+		if ($input === null)
+		{
+			$this->_logger->warning('Got subscription that cannot be tied to an input ({instanceName}, user: {userName}, channel: {channelName})',
+				[
+					'instanceName' => $instanceName,
+					'userName'     => $user !== null ? $user->getName() : 'N/A',
+					'channelName'  => $channel->getName(),
+				]);
+
+			return;
+		}
+
 		$subscription = new Subscription();
-		$subscription->setInstance($instance)->setUser($user)->setChannel($channel)
+		$subscription->setInstance($instance)->setInput($input)->setUser($user)->setChannel($channel)
 		             ->setSubscriptionId($status->id)->setStarted($status->start)->setTitle($status->title)
 		             ->setService($status->service);
 		$subscription->save();

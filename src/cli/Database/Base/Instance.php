@@ -8,6 +8,8 @@ use Jalle19\StatusManager\Database\Channel as ChildChannel;
 use Jalle19\StatusManager\Database\ChannelQuery as ChildChannelQuery;
 use Jalle19\StatusManager\Database\Connection as ChildConnection;
 use Jalle19\StatusManager\Database\ConnectionQuery as ChildConnectionQuery;
+use Jalle19\StatusManager\Database\Input as ChildInput;
+use Jalle19\StatusManager\Database\InputQuery as ChildInputQuery;
 use Jalle19\StatusManager\Database\Instance as ChildInstance;
 use Jalle19\StatusManager\Database\InstanceQuery as ChildInstanceQuery;
 use Jalle19\StatusManager\Database\Subscription as ChildSubscription;
@@ -16,6 +18,7 @@ use Jalle19\StatusManager\Database\User as ChildUser;
 use Jalle19\StatusManager\Database\UserQuery as ChildUserQuery;
 use Jalle19\StatusManager\Database\Map\ChannelTableMap;
 use Jalle19\StatusManager\Database\Map\ConnectionTableMap;
+use Jalle19\StatusManager\Database\Map\InputTableMap;
 use Jalle19\StatusManager\Database\Map\InstanceTableMap;
 use Jalle19\StatusManager\Database\Map\SubscriptionTableMap;
 use Jalle19\StatusManager\Database\Map\UserTableMap;
@@ -93,6 +96,12 @@ abstract class Instance implements ActiveRecordInterface
     protected $collConnectionsPartial;
 
     /**
+     * @var        ObjectCollection|ChildInput[] Collection to store aggregation of ChildInput objects.
+     */
+    protected $collInputs;
+    protected $collInputsPartial;
+
+    /**
      * @var        ObjectCollection|ChildChannel[] Collection to store aggregation of ChildChannel objects.
      */
     protected $collChannels;
@@ -123,6 +132,12 @@ abstract class Instance implements ActiveRecordInterface
      * @var ObjectCollection|ChildConnection[]
      */
     protected $connectionsScheduledForDeletion = null;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var ObjectCollection|ChildInput[]
+     */
+    protected $inputsScheduledForDeletion = null;
 
     /**
      * An array of objects scheduled for deletion.
@@ -502,6 +517,8 @@ abstract class Instance implements ActiveRecordInterface
 
             $this->collConnections = null;
 
+            $this->collInputs = null;
+
             $this->collChannels = null;
 
             $this->collSubscriptions = null;
@@ -644,6 +661,23 @@ abstract class Instance implements ActiveRecordInterface
 
             if ($this->collConnections !== null) {
                 foreach ($this->collConnections as $referrerFK) {
+                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                        $affectedRows += $referrerFK->save($con);
+                    }
+                }
+            }
+
+            if ($this->inputsScheduledForDeletion !== null) {
+                if (!$this->inputsScheduledForDeletion->isEmpty()) {
+                    \Jalle19\StatusManager\Database\InputQuery::create()
+                        ->filterByPrimaryKeys($this->inputsScheduledForDeletion->getPrimaryKeys(false))
+                        ->delete($con);
+                    $this->inputsScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collInputs !== null) {
+                foreach ($this->collInputs as $referrerFK) {
                     if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
                         $affectedRows += $referrerFK->save($con);
                     }
@@ -848,6 +882,21 @@ abstract class Instance implements ActiveRecordInterface
                 }
 
                 $result[$key] = $this->collConnections->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
+            }
+            if (null !== $this->collInputs) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'inputs';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'inputs';
+                        break;
+                    default:
+                        $key = 'Inputs';
+                }
+
+                $result[$key] = $this->collInputs->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
             if (null !== $this->collChannels) {
 
@@ -1094,6 +1143,12 @@ abstract class Instance implements ActiveRecordInterface
                 }
             }
 
+            foreach ($this->getInputs() as $relObj) {
+                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+                    $copyObj->addInput($relObj->copy($deepCopy));
+                }
+            }
+
             foreach ($this->getChannels() as $relObj) {
                 if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
                     $copyObj->addChannel($relObj->copy($deepCopy));
@@ -1151,6 +1206,9 @@ abstract class Instance implements ActiveRecordInterface
         }
         if ('Connection' == $relationName) {
             return $this->initConnections();
+        }
+        if ('Input' == $relationName) {
+            return $this->initInputs();
         }
         if ('Channel' == $relationName) {
             return $this->initChannels();
@@ -1636,6 +1694,231 @@ abstract class Instance implements ActiveRecordInterface
     }
 
     /**
+     * Clears out the collInputs collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return void
+     * @see        addInputs()
+     */
+    public function clearInputs()
+    {
+        $this->collInputs = null; // important to set this to NULL since that means it is uninitialized
+    }
+
+    /**
+     * Reset is the collInputs collection loaded partially.
+     */
+    public function resetPartialInputs($v = true)
+    {
+        $this->collInputsPartial = $v;
+    }
+
+    /**
+     * Initializes the collInputs collection.
+     *
+     * By default this just sets the collInputs collection to an empty array (like clearcollInputs());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param      boolean $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initInputs($overrideExisting = true)
+    {
+        if (null !== $this->collInputs && !$overrideExisting) {
+            return;
+        }
+
+        $collectionClassName = InputTableMap::getTableMap()->getCollectionClassName();
+
+        $this->collInputs = new $collectionClassName;
+        $this->collInputs->setModel('\Jalle19\StatusManager\Database\Input');
+    }
+
+    /**
+     * Gets an array of ChildInput objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this ChildInstance is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @return ObjectCollection|ChildInput[] List of ChildInput objects
+     * @throws PropelException
+     */
+    public function getInputs(Criteria $criteria = null, ConnectionInterface $con = null)
+    {
+        $partial = $this->collInputsPartial && !$this->isNew();
+        if (null === $this->collInputs || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collInputs) {
+                // return empty collection
+                $this->initInputs();
+            } else {
+                $collInputs = ChildInputQuery::create(null, $criteria)
+                    ->filterByInstance($this)
+                    ->find($con);
+
+                if (null !== $criteria) {
+                    if (false !== $this->collInputsPartial && count($collInputs)) {
+                        $this->initInputs(false);
+
+                        foreach ($collInputs as $obj) {
+                            if (false == $this->collInputs->contains($obj)) {
+                                $this->collInputs->append($obj);
+                            }
+                        }
+
+                        $this->collInputsPartial = true;
+                    }
+
+                    return $collInputs;
+                }
+
+                if ($partial && $this->collInputs) {
+                    foreach ($this->collInputs as $obj) {
+                        if ($obj->isNew()) {
+                            $collInputs[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collInputs = $collInputs;
+                $this->collInputsPartial = false;
+            }
+        }
+
+        return $this->collInputs;
+    }
+
+    /**
+     * Sets a collection of ChildInput objects related by a one-to-many relationship
+     * to the current object.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param      Collection $inputs A Propel collection.
+     * @param      ConnectionInterface $con Optional connection object
+     * @return $this|ChildInstance The current object (for fluent API support)
+     */
+    public function setInputs(Collection $inputs, ConnectionInterface $con = null)
+    {
+        /** @var ChildInput[] $inputsToDelete */
+        $inputsToDelete = $this->getInputs(new Criteria(), $con)->diff($inputs);
+
+
+        $this->inputsScheduledForDeletion = $inputsToDelete;
+
+        foreach ($inputsToDelete as $inputRemoved) {
+            $inputRemoved->setInstance(null);
+        }
+
+        $this->collInputs = null;
+        foreach ($inputs as $input) {
+            $this->addInput($input);
+        }
+
+        $this->collInputs = $inputs;
+        $this->collInputsPartial = false;
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related Input objects.
+     *
+     * @param      Criteria $criteria
+     * @param      boolean $distinct
+     * @param      ConnectionInterface $con
+     * @return int             Count of related Input objects.
+     * @throws PropelException
+     */
+    public function countInputs(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    {
+        $partial = $this->collInputsPartial && !$this->isNew();
+        if (null === $this->collInputs || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collInputs) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getInputs());
+            }
+
+            $query = ChildInputQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByInstance($this)
+                ->count($con);
+        }
+
+        return count($this->collInputs);
+    }
+
+    /**
+     * Method called to associate a ChildInput object to this object
+     * through the ChildInput foreign key attribute.
+     *
+     * @param  ChildInput $l ChildInput
+     * @return $this|\Jalle19\StatusManager\Database\Instance The current object (for fluent API support)
+     */
+    public function addInput(ChildInput $l)
+    {
+        if ($this->collInputs === null) {
+            $this->initInputs();
+            $this->collInputsPartial = true;
+        }
+
+        if (!$this->collInputs->contains($l)) {
+            $this->doAddInput($l);
+
+            if ($this->inputsScheduledForDeletion and $this->inputsScheduledForDeletion->contains($l)) {
+                $this->inputsScheduledForDeletion->remove($this->inputsScheduledForDeletion->search($l));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param ChildInput $input The ChildInput object to add.
+     */
+    protected function doAddInput(ChildInput $input)
+    {
+        $this->collInputs[]= $input;
+        $input->setInstance($this);
+    }
+
+    /**
+     * @param  ChildInput $input The ChildInput object to remove.
+     * @return $this|ChildInstance The current object (for fluent API support)
+     */
+    public function removeInput(ChildInput $input)
+    {
+        if ($this->getInputs()->contains($input)) {
+            $pos = $this->collInputs->search($input);
+            $this->collInputs->remove($pos);
+            if (null === $this->inputsScheduledForDeletion) {
+                $this->inputsScheduledForDeletion = clone $this->collInputs;
+                $this->inputsScheduledForDeletion->clear();
+            }
+            $this->inputsScheduledForDeletion[]= clone $input;
+            $input->setInstance(null);
+        }
+
+        return $this;
+    }
+
+    /**
      * Clears out the collChannels collection
      *
      * This does not modify the database; however, it will remove any associated objects, causing
@@ -2102,6 +2385,31 @@ abstract class Instance implements ActiveRecordInterface
      * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
      * @return ObjectCollection|ChildSubscription[] List of ChildSubscription objects
      */
+    public function getSubscriptionsJoinInput(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
+    {
+        $query = ChildSubscriptionQuery::create(null, $criteria);
+        $query->joinWith('Input', $joinBehavior);
+
+        return $this->getSubscriptions($query, $con);
+    }
+
+
+    /**
+     * If this collection has already been initialized with
+     * an identical criteria, it returns the collection.
+     * Otherwise if this Instance is new, it will return
+     * an empty collection; or if this Instance has previously
+     * been saved, it will retrieve related Subscriptions from storage.
+     *
+     * This method is protected by default in order to keep the public
+     * api reasonable.  You can provide public methods for those you
+     * actually need in Instance.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @param      string $joinBehavior optional join type to use (defaults to Criteria::LEFT_JOIN)
+     * @return ObjectCollection|ChildSubscription[] List of ChildSubscription objects
+     */
     public function getSubscriptionsJoinUser(Criteria $criteria = null, ConnectionInterface $con = null, $joinBehavior = Criteria::LEFT_JOIN)
     {
         $query = ChildSubscriptionQuery::create(null, $criteria);
@@ -2171,6 +2479,11 @@ abstract class Instance implements ActiveRecordInterface
                     $o->clearAllReferences($deep);
                 }
             }
+            if ($this->collInputs) {
+                foreach ($this->collInputs as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
             if ($this->collChannels) {
                 foreach ($this->collChannels as $o) {
                     $o->clearAllReferences($deep);
@@ -2185,6 +2498,7 @@ abstract class Instance implements ActiveRecordInterface
 
         $this->collUsers = null;
         $this->collConnections = null;
+        $this->collInputs = null;
         $this->collChannels = null;
         $this->collSubscriptions = null;
     }

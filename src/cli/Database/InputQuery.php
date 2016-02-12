@@ -3,6 +3,7 @@
 namespace Jalle19\StatusManager\Database;
 
 use Jalle19\StatusManager\Database\Base\InputQuery as BaseInputQuery;
+use Jalle19\tvheadend\model\SubscriptionStatus;
 
 /**
  * Skeleton subclass for performing query and update operations on the 'input' table.
@@ -16,5 +17,19 @@ use Jalle19\StatusManager\Database\Base\InputQuery as BaseInputQuery;
  */
 class InputQuery extends BaseInputQuery
 {
+
+	/**
+	 * @param string             $instanceName
+	 * @param SubscriptionStatus $status
+	 *
+	 * @return $this|\Propel\Runtime\ActiveQuery\Criteria
+	 */
+	public function filterBySubscriptionStatus($instanceName, SubscriptionStatus $status)
+	{
+		return $this->filterByInstanceName($instanceName)
+		            ->filterByNetwork(Subscription::parseNetwork($status))
+		            ->filterByMux(Subscription::parseMux($status))
+		            ->addDescendingOrderByColumn('started');
+	}
 
 }

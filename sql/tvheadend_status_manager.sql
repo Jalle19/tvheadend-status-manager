@@ -98,6 +98,7 @@ CREATE TABLE [subscription]
 (
     [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     [instance_name] VARCHAR(255) NOT NULL,
+    [input_uuid] VARCHAR(255),
     [user_id] INTEGER,
     [channel_id] INTEGER NOT NULL,
     [subscription_id] INTEGER NOT NULL,
@@ -107,6 +108,7 @@ CREATE TABLE [subscription]
     [service] VARCHAR(255) NOT NULL,
     UNIQUE ([id]),
     FOREIGN KEY ([instance_name]) REFERENCES [instance] ([name]),
+    FOREIGN KEY ([input_uuid]) REFERENCES [input] ([uuid]),
     FOREIGN KEY ([user_id]) REFERENCES [user] ([id]),
     FOREIGN KEY ([channel_id]) REFERENCES [channel] ([id])
 );

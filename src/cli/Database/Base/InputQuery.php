@@ -54,7 +54,17 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildInputQuery rightJoinWithInstance() Adds a RIGHT JOIN clause and with to the query using the Instance relation
  * @method     ChildInputQuery innerJoinWithInstance() Adds a INNER JOIN clause and with to the query using the Instance relation
  *
- * @method     \Jalle19\StatusManager\Database\InstanceQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     ChildInputQuery leftJoinSubscription($relationAlias = null) Adds a LEFT JOIN clause to the query using the Subscription relation
+ * @method     ChildInputQuery rightJoinSubscription($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Subscription relation
+ * @method     ChildInputQuery innerJoinSubscription($relationAlias = null) Adds a INNER JOIN clause to the query using the Subscription relation
+ *
+ * @method     ChildInputQuery joinWithSubscription($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the Subscription relation
+ *
+ * @method     ChildInputQuery leftJoinWithSubscription() Adds a LEFT JOIN clause and with to the query using the Subscription relation
+ * @method     ChildInputQuery rightJoinWithSubscription() Adds a RIGHT JOIN clause and with to the query using the Subscription relation
+ * @method     ChildInputQuery innerJoinWithSubscription() Adds a INNER JOIN clause and with to the query using the Subscription relation
+ *
+ * @method     \Jalle19\StatusManager\Database\InstanceQuery|\Jalle19\StatusManager\Database\SubscriptionQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildInput findOne(ConnectionInterface $con = null) Return the first ChildInput matching the query
  * @method     ChildInput findOneOrCreate(ConnectionInterface $con = null) Return the first ChildInput matching the query, or a new ChildInput object populated from the query conditions when no match is found
@@ -572,6 +582,79 @@ abstract class InputQuery extends ModelCriteria
         return $this
             ->joinInstance($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'Instance', '\Jalle19\StatusManager\Database\InstanceQuery');
+    }
+
+    /**
+     * Filter the query by a related \Jalle19\StatusManager\Database\Subscription object
+     *
+     * @param \Jalle19\StatusManager\Database\Subscription|ObjectCollection $subscription the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildInputQuery The current query, for fluid interface
+     */
+    public function filterBySubscription($subscription, $comparison = null)
+    {
+        if ($subscription instanceof \Jalle19\StatusManager\Database\Subscription) {
+            return $this
+                ->addUsingAlias(InputTableMap::COL_UUID, $subscription->getInputUuid(), $comparison);
+        } elseif ($subscription instanceof ObjectCollection) {
+            return $this
+                ->useSubscriptionQuery()
+                ->filterByPrimaryKeys($subscription->getPrimaryKeys())
+                ->endUse();
+        } else {
+            throw new PropelException('filterBySubscription() only accepts arguments of type \Jalle19\StatusManager\Database\Subscription or Collection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the Subscription relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this|ChildInputQuery The current query, for fluid interface
+     */
+    public function joinSubscription($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('Subscription');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'Subscription');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the Subscription relation Subscription object
+     *
+     * @see useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return \Jalle19\StatusManager\Database\SubscriptionQuery A secondary query class using the current class as primary query
+     */
+    public function useSubscriptionQuery($relationAlias = null, $joinType = Criteria::LEFT_JOIN)
+    {
+        return $this
+            ->joinSubscription($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'Subscription', '\Jalle19\StatusManager\Database\SubscriptionQuery');
     }
 
     /**

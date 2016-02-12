@@ -177,6 +177,13 @@ class InputTableMap extends TableMap
     1 => ':name',
   ),
 ), null, null, null, false);
+        $this->addRelation('Subscription', '\\Jalle19\\StatusManager\\Database\\Subscription', RelationMap::ONE_TO_MANY, array (
+  0 =>
+  array (
+    0 => ':input_uuid',
+    1 => ':uuid',
+  ),
+), null, null, 'Subscriptions', false);
     } // buildRelations()
 
     /**

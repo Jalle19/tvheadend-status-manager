@@ -52,6 +52,16 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildInstanceQuery rightJoinWithConnection() Adds a RIGHT JOIN clause and with to the query using the Connection relation
  * @method     ChildInstanceQuery innerJoinWithConnection() Adds a INNER JOIN clause and with to the query using the Connection relation
  *
+ * @method     ChildInstanceQuery leftJoinInput($relationAlias = null) Adds a LEFT JOIN clause to the query using the Input relation
+ * @method     ChildInstanceQuery rightJoinInput($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Input relation
+ * @method     ChildInstanceQuery innerJoinInput($relationAlias = null) Adds a INNER JOIN clause to the query using the Input relation
+ *
+ * @method     ChildInstanceQuery joinWithInput($joinType = Criteria::INNER_JOIN) Adds a join clause and with to the query using the Input relation
+ *
+ * @method     ChildInstanceQuery leftJoinWithInput() Adds a LEFT JOIN clause and with to the query using the Input relation
+ * @method     ChildInstanceQuery rightJoinWithInput() Adds a RIGHT JOIN clause and with to the query using the Input relation
+ * @method     ChildInstanceQuery innerJoinWithInput() Adds a INNER JOIN clause and with to the query using the Input relation
+ *
  * @method     ChildInstanceQuery leftJoinChannel($relationAlias = null) Adds a LEFT JOIN clause to the query using the Channel relation
  * @method     ChildInstanceQuery rightJoinChannel($relationAlias = null) Adds a RIGHT JOIN clause to the query using the Channel relation
  * @method     ChildInstanceQuery innerJoinChannel($relationAlias = null) Adds a INNER JOIN clause to the query using the Channel relation
@@ -72,7 +82,7 @@ use Propel\Runtime\Exception\PropelException;
  * @method     ChildInstanceQuery rightJoinWithSubscription() Adds a RIGHT JOIN clause and with to the query using the Subscription relation
  * @method     ChildInstanceQuery innerJoinWithSubscription() Adds a INNER JOIN clause and with to the query using the Subscription relation
  *
- * @method     \Jalle19\StatusManager\Database\UserQuery|\Jalle19\StatusManager\Database\ConnectionQuery|\Jalle19\StatusManager\Database\ChannelQuery|\Jalle19\StatusManager\Database\SubscriptionQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
+ * @method     \Jalle19\StatusManager\Database\UserQuery|\Jalle19\StatusManager\Database\ConnectionQuery|\Jalle19\StatusManager\Database\InputQuery|\Jalle19\StatusManager\Database\ChannelQuery|\Jalle19\StatusManager\Database\SubscriptionQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
  * @method     ChildInstance findOne(ConnectionInterface $con = null) Return the first ChildInstance matching the query
  * @method     ChildInstance findOneOrCreate(ConnectionInterface $con = null) Return the first ChildInstance matching the query, or a new ChildInstance object populated from the query conditions when no match is found
@@ -441,6 +451,79 @@ abstract class InstanceQuery extends ModelCriteria
         return $this
             ->joinConnection($relationAlias, $joinType)
             ->useQuery($relationAlias ? $relationAlias : 'Connection', '\Jalle19\StatusManager\Database\ConnectionQuery');
+    }
+
+    /**
+     * Filter the query by a related \Jalle19\StatusManager\Database\Input object
+     *
+     * @param \Jalle19\StatusManager\Database\Input|ObjectCollection $input the related object to use as filter
+     * @param string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildInstanceQuery The current query, for fluid interface
+     */
+    public function filterByInput($input, $comparison = null)
+    {
+        if ($input instanceof \Jalle19\StatusManager\Database\Input) {
+            return $this
+                ->addUsingAlias(InstanceTableMap::COL_NAME, $input->getInstanceName(), $comparison);
+        } elseif ($input instanceof ObjectCollection) {
+            return $this
+                ->useInputQuery()
+                ->filterByPrimaryKeys($input->getPrimaryKeys())
+                ->endUse();
+        } else {
+            throw new PropelException('filterByInput() only accepts arguments of type \Jalle19\StatusManager\Database\Input or Collection');
+        }
+    }
+
+    /**
+     * Adds a JOIN clause to the query using the Input relation
+     *
+     * @param     string $relationAlias optional alias for the relation
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return $this|ChildInstanceQuery The current query, for fluid interface
+     */
+    public function joinInput($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        $tableMap = $this->getTableMap();
+        $relationMap = $tableMap->getRelation('Input');
+
+        // create a ModelJoin object for this join
+        $join = new ModelJoin();
+        $join->setJoinType($joinType);
+        $join->setRelationMap($relationMap, $this->useAliasInSQL ? $this->getModelAlias() : null, $relationAlias);
+        if ($previousJoin = $this->getPreviousJoin()) {
+            $join->setPreviousJoin($previousJoin);
+        }
+
+        // add the ModelJoin to the current object
+        if ($relationAlias) {
+            $this->addAlias($relationAlias, $relationMap->getRightTable()->getName());
+            $this->addJoinObject($join, $relationAlias);
+        } else {
+            $this->addJoinObject($join, 'Input');
+        }
+
+        return $this;
+    }
+
+    /**
+     * Use the Input relation Input object
+     *
+     * @see useQuery()
+     *
+     * @param     string $relationAlias optional alias for the relation,
+     *                                   to be used as main alias in the secondary query
+     * @param     string $joinType Accepted values are null, 'left join', 'right join', 'inner join'
+     *
+     * @return \Jalle19\StatusManager\Database\InputQuery A secondary query class using the current class as primary query
+     */
+    public function useInputQuery($relationAlias = null, $joinType = Criteria::INNER_JOIN)
+    {
+        return $this
+            ->joinInput($relationAlias, $joinType)
+            ->useQuery($relationAlias ? $relationAlias : 'Input', '\Jalle19\StatusManager\Database\InputQuery');
     }
 
     /**

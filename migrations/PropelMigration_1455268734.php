@@ -41,6 +41,8 @@ class PropelMigration_1455268734
   'tvheadend_status_manager' => '
 PRAGMA foreign_keys = OFF;
 
+DROP TABLE IF EXISTS [input];
+
 CREATE TABLE [input]
 (
     [uuid] VARCHAR(255) NOT NULL,

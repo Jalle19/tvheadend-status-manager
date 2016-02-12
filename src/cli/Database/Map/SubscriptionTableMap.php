@@ -59,7 +59,7 @@ class SubscriptionTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 9;
+    const NUM_COLUMNS = 10;
 
     /**
      * The number of lazy-loaded columns
@@ -69,7 +69,7 @@ class SubscriptionTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 9;
+    const NUM_HYDRATE_COLUMNS = 10;
 
     /**
      * the column name for the id field
@@ -80,6 +80,11 @@ class SubscriptionTableMap extends TableMap
      * the column name for the instance_name field
      */
     const COL_INSTANCE_NAME = 'subscription.instance_name';
+
+    /**
+     * the column name for the input_uuid field
+     */
+    const COL_INPUT_UUID = 'subscription.input_uuid';
 
     /**
      * the column name for the user_id field
@@ -128,11 +133,11 @@ class SubscriptionTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('Id', 'InstanceName', 'UserId', 'ChannelId', 'SubscriptionId', 'Started', 'Stopped', 'Title', 'Service', ),
-        self::TYPE_CAMELNAME     => array('id', 'instanceName', 'userId', 'channelId', 'subscriptionId', 'started', 'stopped', 'title', 'service', ),
-        self::TYPE_COLNAME       => array(SubscriptionTableMap::COL_ID, SubscriptionTableMap::COL_INSTANCE_NAME, SubscriptionTableMap::COL_USER_ID, SubscriptionTableMap::COL_CHANNEL_ID, SubscriptionTableMap::COL_SUBSCRIPTION_ID, SubscriptionTableMap::COL_STARTED, SubscriptionTableMap::COL_STOPPED, SubscriptionTableMap::COL_TITLE, SubscriptionTableMap::COL_SERVICE, ),
-        self::TYPE_FIELDNAME     => array('id', 'instance_name', 'user_id', 'channel_id', 'subscription_id', 'started', 'stopped', 'title', 'service', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, )
+        self::TYPE_PHPNAME       => array('Id', 'InstanceName', 'InputUuid', 'UserId', 'ChannelId', 'SubscriptionId', 'Started', 'Stopped', 'Title', 'Service', ),
+        self::TYPE_CAMELNAME     => array('id', 'instanceName', 'inputUuid', 'userId', 'channelId', 'subscriptionId', 'started', 'stopped', 'title', 'service', ),
+        self::TYPE_COLNAME       => array(SubscriptionTableMap::COL_ID, SubscriptionTableMap::COL_INSTANCE_NAME, SubscriptionTableMap::COL_INPUT_UUID, SubscriptionTableMap::COL_USER_ID, SubscriptionTableMap::COL_CHANNEL_ID, SubscriptionTableMap::COL_SUBSCRIPTION_ID, SubscriptionTableMap::COL_STARTED, SubscriptionTableMap::COL_STOPPED, SubscriptionTableMap::COL_TITLE, SubscriptionTableMap::COL_SERVICE, ),
+        self::TYPE_FIELDNAME     => array('id', 'instance_name', 'input_uuid', 'user_id', 'channel_id', 'subscription_id', 'started', 'stopped', 'title', 'service', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, )
     );
 
     /**
@@ -142,11 +147,11 @@ class SubscriptionTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('Id' => 0, 'InstanceName' => 1, 'UserId' => 2, 'ChannelId' => 3, 'SubscriptionId' => 4, 'Started' => 5, 'Stopped' => 6, 'Title' => 7, 'Service' => 8, ),
-        self::TYPE_CAMELNAME     => array('id' => 0, 'instanceName' => 1, 'userId' => 2, 'channelId' => 3, 'subscriptionId' => 4, 'started' => 5, 'stopped' => 6, 'title' => 7, 'service' => 8, ),
-        self::TYPE_COLNAME       => array(SubscriptionTableMap::COL_ID => 0, SubscriptionTableMap::COL_INSTANCE_NAME => 1, SubscriptionTableMap::COL_USER_ID => 2, SubscriptionTableMap::COL_CHANNEL_ID => 3, SubscriptionTableMap::COL_SUBSCRIPTION_ID => 4, SubscriptionTableMap::COL_STARTED => 5, SubscriptionTableMap::COL_STOPPED => 6, SubscriptionTableMap::COL_TITLE => 7, SubscriptionTableMap::COL_SERVICE => 8, ),
-        self::TYPE_FIELDNAME     => array('id' => 0, 'instance_name' => 1, 'user_id' => 2, 'channel_id' => 3, 'subscription_id' => 4, 'started' => 5, 'stopped' => 6, 'title' => 7, 'service' => 8, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, )
+        self::TYPE_PHPNAME       => array('Id' => 0, 'InstanceName' => 1, 'InputUuid' => 2, 'UserId' => 3, 'ChannelId' => 4, 'SubscriptionId' => 5, 'Started' => 6, 'Stopped' => 7, 'Title' => 8, 'Service' => 9, ),
+        self::TYPE_CAMELNAME     => array('id' => 0, 'instanceName' => 1, 'inputUuid' => 2, 'userId' => 3, 'channelId' => 4, 'subscriptionId' => 5, 'started' => 6, 'stopped' => 7, 'title' => 8, 'service' => 9, ),
+        self::TYPE_COLNAME       => array(SubscriptionTableMap::COL_ID => 0, SubscriptionTableMap::COL_INSTANCE_NAME => 1, SubscriptionTableMap::COL_INPUT_UUID => 2, SubscriptionTableMap::COL_USER_ID => 3, SubscriptionTableMap::COL_CHANNEL_ID => 4, SubscriptionTableMap::COL_SUBSCRIPTION_ID => 5, SubscriptionTableMap::COL_STARTED => 6, SubscriptionTableMap::COL_STOPPED => 7, SubscriptionTableMap::COL_TITLE => 8, SubscriptionTableMap::COL_SERVICE => 9, ),
+        self::TYPE_FIELDNAME     => array('id' => 0, 'instance_name' => 1, 'input_uuid' => 2, 'user_id' => 3, 'channel_id' => 4, 'subscription_id' => 5, 'started' => 6, 'stopped' => 7, 'title' => 8, 'service' => 9, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, )
     );
 
     /**
@@ -168,6 +173,7 @@ class SubscriptionTableMap extends TableMap
         // columns
         $this->addPrimaryKey('id', 'Id', 'INTEGER', true, null, null);
         $this->addForeignKey('instance_name', 'InstanceName', 'VARCHAR', 'instance', 'name', true, 255, null);
+        $this->addForeignKey('input_uuid', 'InputUuid', 'VARCHAR', 'input', 'uuid', false, 255, null);
         $this->addForeignKey('user_id', 'UserId', 'INTEGER', 'user', 'id', false, null, null);
         $this->addForeignKey('channel_id', 'ChannelId', 'INTEGER', 'channel', 'id', true, null, null);
         $this->addColumn('subscription_id', 'SubscriptionId', 'INTEGER', true, null, null);
@@ -187,6 +193,13 @@ class SubscriptionTableMap extends TableMap
   array (
     0 => ':instance_name',
     1 => ':name',
+  ),
+), null, null, null, false);
+        $this->addRelation('Input', '\\Jalle19\\StatusManager\\Database\\Input', RelationMap::MANY_TO_ONE, array (
+  0 =>
+  array (
+    0 => ':input_uuid',
+    1 => ':uuid',
   ),
 ), null, null, null, false);
         $this->addRelation('User', '\\Jalle19\\StatusManager\\Database\\User', RelationMap::MANY_TO_ONE, array (
@@ -348,6 +361,7 @@ class SubscriptionTableMap extends TableMap
         if (null === $alias) {
             $criteria->addSelectColumn(SubscriptionTableMap::COL_ID);
             $criteria->addSelectColumn(SubscriptionTableMap::COL_INSTANCE_NAME);
+            $criteria->addSelectColumn(SubscriptionTableMap::COL_INPUT_UUID);
             $criteria->addSelectColumn(SubscriptionTableMap::COL_USER_ID);
             $criteria->addSelectColumn(SubscriptionTableMap::COL_CHANNEL_ID);
             $criteria->addSelectColumn(SubscriptionTableMap::COL_SUBSCRIPTION_ID);
@@ -358,6 +372,7 @@ class SubscriptionTableMap extends TableMap
         } else {
             $criteria->addSelectColumn($alias . '.id');
             $criteria->addSelectColumn($alias . '.instance_name');
+            $criteria->addSelectColumn($alias . '.input_uuid');
             $criteria->addSelectColumn($alias . '.user_id');
             $criteria->addSelectColumn($alias . '.channel_id');
             $criteria->addSelectColumn($alias . '.subscription_id');

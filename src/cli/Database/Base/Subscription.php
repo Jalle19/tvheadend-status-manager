@@ -7,6 +7,8 @@ use \Exception;
 use \PDO;
 use Jalle19\StatusManager\Database\Channel as ChildChannel;
 use Jalle19\StatusManager\Database\ChannelQuery as ChildChannelQuery;
+use Jalle19\StatusManager\Database\Input as ChildInput;
+use Jalle19\StatusManager\Database\InputQuery as ChildInputQuery;
 use Jalle19\StatusManager\Database\Instance as ChildInstance;
 use Jalle19\StatusManager\Database\InstanceQuery as ChildInstanceQuery;
 use Jalle19\StatusManager\Database\SubscriptionQuery as ChildSubscriptionQuery;
@@ -82,6 +84,13 @@ abstract class Subscription implements ActiveRecordInterface
     protected $instance_name;
 
     /**
+     * The value for the input_uuid field.
+     *
+     * @var        string
+     */
+    protected $input_uuid;
+
+    /**
      * The value for the user_id field.
      *
      * @var        int
@@ -134,6 +143,11 @@ abstract class Subscription implements ActiveRecordInterface
      * @var        ChildInstance
      */
     protected $aInstance;
+
+    /**
+     * @var        ChildInput
+     */
+    protected $aInput;
 
     /**
      * @var        ChildUser
@@ -399,6 +413,16 @@ abstract class Subscription implements ActiveRecordInterface
     }
 
     /**
+     * Get the [input_uuid] column value.
+     *
+     * @return string
+     */
+    public function getInputUuid()
+    {
+        return $this->input_uuid;
+    }
+
+    /**
      * Get the [user_id] column value.
      *
      * @return int
@@ -531,6 +555,30 @@ abstract class Subscription implements ActiveRecordInterface
 
         return $this;
     } // setInstanceName()
+
+    /**
+     * Set the value of [input_uuid] column.
+     *
+     * @param string $v new value
+     * @return $this|\Jalle19\StatusManager\Database\Subscription The current object (for fluent API support)
+     */
+    public function setInputUuid($v)
+    {
+        if ($v !== null) {
+            $v = (string) $v;
+        }
+
+        if ($this->input_uuid !== $v) {
+            $this->input_uuid = $v;
+            $this->modifiedColumns[SubscriptionTableMap::COL_INPUT_UUID] = true;
+        }
+
+        if ($this->aInput !== null && $this->aInput->getUuid() !== $v) {
+            $this->aInput = null;
+        }
+
+        return $this;
+    } // setInputUuid()
 
     /**
      * Set the value of [user_id] column.
@@ -722,25 +770,28 @@ abstract class Subscription implements ActiveRecordInterface
             $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : SubscriptionTableMap::translateFieldName('InstanceName', TableMap::TYPE_PHPNAME, $indexType)];
             $this->instance_name = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : SubscriptionTableMap::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : SubscriptionTableMap::translateFieldName('InputUuid', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->input_uuid = (null !== $col) ? (string) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : SubscriptionTableMap::translateFieldName('UserId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->user_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : SubscriptionTableMap::translateFieldName('ChannelId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : SubscriptionTableMap::translateFieldName('ChannelId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->channel_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : SubscriptionTableMap::translateFieldName('SubscriptionId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : SubscriptionTableMap::translateFieldName('SubscriptionId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->subscription_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 5 + $startcol : SubscriptionTableMap::translateFieldName('Started', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : SubscriptionTableMap::translateFieldName('Started', TableMap::TYPE_PHPNAME, $indexType)];
             $this->started = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 6 + $startcol : SubscriptionTableMap::translateFieldName('Stopped', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : SubscriptionTableMap::translateFieldName('Stopped', TableMap::TYPE_PHPNAME, $indexType)];
             $this->stopped = (null !== $col) ? PropelDateTime::newInstance($col, null, 'DateTime') : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 7 + $startcol : SubscriptionTableMap::translateFieldName('Title', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : SubscriptionTableMap::translateFieldName('Title', TableMap::TYPE_PHPNAME, $indexType)];
             $this->title = (null !== $col) ? (string) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 8 + $startcol : SubscriptionTableMap::translateFieldName('Service', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 9 + $startcol : SubscriptionTableMap::translateFieldName('Service', TableMap::TYPE_PHPNAME, $indexType)];
             $this->service = (null !== $col) ? (string) $col : null;
             $this->resetModified();
 
@@ -750,7 +801,7 @@ abstract class Subscription implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 9; // 9 = SubscriptionTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 10; // 10 = SubscriptionTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException(sprintf('Error populating %s object', '\\Jalle19\\StatusManager\\Database\\Subscription'), 0, $e);
@@ -774,6 +825,9 @@ abstract class Subscription implements ActiveRecordInterface
     {
         if ($this->aInstance !== null && $this->instance_name !== $this->aInstance->getName()) {
             $this->aInstance = null;
+        }
+        if ($this->aInput !== null && $this->input_uuid !== $this->aInput->getUuid()) {
+            $this->aInput = null;
         }
         if ($this->aUser !== null && $this->user_id !== $this->aUser->getId()) {
             $this->aUser = null;
@@ -821,6 +875,7 @@ abstract class Subscription implements ActiveRecordInterface
         if ($deep) {  // also de-associate any related objects?
 
             $this->aInstance = null;
+            $this->aInput = null;
             $this->aUser = null;
             $this->aChannel = null;
         } // if (deep)
@@ -934,6 +989,13 @@ abstract class Subscription implements ActiveRecordInterface
                 $this->setInstance($this->aInstance);
             }
 
+            if ($this->aInput !== null) {
+                if ($this->aInput->isModified() || $this->aInput->isNew()) {
+                    $affectedRows += $this->aInput->save($con);
+                }
+                $this->setInput($this->aInput);
+            }
+
             if ($this->aUser !== null) {
                 if ($this->aUser->isModified() || $this->aUser->isNew()) {
                     $affectedRows += $this->aUser->save($con);
@@ -991,6 +1053,9 @@ abstract class Subscription implements ActiveRecordInterface
         if ($this->isColumnModified(SubscriptionTableMap::COL_INSTANCE_NAME)) {
             $modifiedColumns[':p' . $index++]  = 'instance_name';
         }
+        if ($this->isColumnModified(SubscriptionTableMap::COL_INPUT_UUID)) {
+            $modifiedColumns[':p' . $index++]  = 'input_uuid';
+        }
         if ($this->isColumnModified(SubscriptionTableMap::COL_USER_ID)) {
             $modifiedColumns[':p' . $index++]  = 'user_id';
         }
@@ -1028,6 +1093,9 @@ abstract class Subscription implements ActiveRecordInterface
                         break;
                     case 'instance_name':
                         $stmt->bindValue($identifier, $this->instance_name, PDO::PARAM_STR);
+                        break;
+                    case 'input_uuid':
+                        $stmt->bindValue($identifier, $this->input_uuid, PDO::PARAM_STR);
                         break;
                     case 'user_id':
                         $stmt->bindValue($identifier, $this->user_id, PDO::PARAM_INT);
@@ -1119,24 +1187,27 @@ abstract class Subscription implements ActiveRecordInterface
                 return $this->getInstanceName();
                 break;
             case 2:
-                return $this->getUserId();
+                return $this->getInputUuid();
                 break;
             case 3:
-                return $this->getChannelId();
+                return $this->getUserId();
                 break;
             case 4:
-                return $this->getSubscriptionId();
+                return $this->getChannelId();
                 break;
             case 5:
-                return $this->getStarted();
+                return $this->getSubscriptionId();
                 break;
             case 6:
-                return $this->getStopped();
+                return $this->getStarted();
                 break;
             case 7:
-                return $this->getTitle();
+                return $this->getStopped();
                 break;
             case 8:
+                return $this->getTitle();
+                break;
+            case 9:
                 return $this->getService();
                 break;
             default:
@@ -1171,20 +1242,21 @@ abstract class Subscription implements ActiveRecordInterface
         $result = array(
             $keys[0] => $this->getId(),
             $keys[1] => $this->getInstanceName(),
-            $keys[2] => $this->getUserId(),
-            $keys[3] => $this->getChannelId(),
-            $keys[4] => $this->getSubscriptionId(),
-            $keys[5] => $this->getStarted(),
-            $keys[6] => $this->getStopped(),
-            $keys[7] => $this->getTitle(),
-            $keys[8] => $this->getService(),
+            $keys[2] => $this->getInputUuid(),
+            $keys[3] => $this->getUserId(),
+            $keys[4] => $this->getChannelId(),
+            $keys[5] => $this->getSubscriptionId(),
+            $keys[6] => $this->getStarted(),
+            $keys[7] => $this->getStopped(),
+            $keys[8] => $this->getTitle(),
+            $keys[9] => $this->getService(),
         );
-        if ($result[$keys[5]] instanceof \DateTime) {
-            $result[$keys[5]] = $result[$keys[5]]->format('c');
-        }
-
         if ($result[$keys[6]] instanceof \DateTime) {
             $result[$keys[6]] = $result[$keys[6]]->format('c');
+        }
+
+        if ($result[$keys[7]] instanceof \DateTime) {
+            $result[$keys[7]] = $result[$keys[7]]->format('c');
         }
 
         $virtualColumns = $this->virtualColumns;
@@ -1207,6 +1279,21 @@ abstract class Subscription implements ActiveRecordInterface
                 }
 
                 $result[$key] = $this->aInstance->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->aInput) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'input';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'input';
+                        break;
+                    default:
+                        $key = 'Input';
+                }
+
+                $result[$key] = $this->aInput->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
             if (null !== $this->aUser) {
 
@@ -1279,24 +1366,27 @@ abstract class Subscription implements ActiveRecordInterface
                 $this->setInstanceName($value);
                 break;
             case 2:
-                $this->setUserId($value);
+                $this->setInputUuid($value);
                 break;
             case 3:
-                $this->setChannelId($value);
+                $this->setUserId($value);
                 break;
             case 4:
-                $this->setSubscriptionId($value);
+                $this->setChannelId($value);
                 break;
             case 5:
-                $this->setStarted($value);
+                $this->setSubscriptionId($value);
                 break;
             case 6:
-                $this->setStopped($value);
+                $this->setStarted($value);
                 break;
             case 7:
-                $this->setTitle($value);
+                $this->setStopped($value);
                 break;
             case 8:
+                $this->setTitle($value);
+                break;
+            case 9:
                 $this->setService($value);
                 break;
         } // switch()
@@ -1332,25 +1422,28 @@ abstract class Subscription implements ActiveRecordInterface
             $this->setInstanceName($arr[$keys[1]]);
         }
         if (array_key_exists($keys[2], $arr)) {
-            $this->setUserId($arr[$keys[2]]);
+            $this->setInputUuid($arr[$keys[2]]);
         }
         if (array_key_exists($keys[3], $arr)) {
-            $this->setChannelId($arr[$keys[3]]);
+            $this->setUserId($arr[$keys[3]]);
         }
         if (array_key_exists($keys[4], $arr)) {
-            $this->setSubscriptionId($arr[$keys[4]]);
+            $this->setChannelId($arr[$keys[4]]);
         }
         if (array_key_exists($keys[5], $arr)) {
-            $this->setStarted($arr[$keys[5]]);
+            $this->setSubscriptionId($arr[$keys[5]]);
         }
         if (array_key_exists($keys[6], $arr)) {
-            $this->setStopped($arr[$keys[6]]);
+            $this->setStarted($arr[$keys[6]]);
         }
         if (array_key_exists($keys[7], $arr)) {
-            $this->setTitle($arr[$keys[7]]);
+            $this->setStopped($arr[$keys[7]]);
         }
         if (array_key_exists($keys[8], $arr)) {
-            $this->setService($arr[$keys[8]]);
+            $this->setTitle($arr[$keys[8]]);
+        }
+        if (array_key_exists($keys[9], $arr)) {
+            $this->setService($arr[$keys[9]]);
         }
     }
 
@@ -1398,6 +1491,9 @@ abstract class Subscription implements ActiveRecordInterface
         }
         if ($this->isColumnModified(SubscriptionTableMap::COL_INSTANCE_NAME)) {
             $criteria->add(SubscriptionTableMap::COL_INSTANCE_NAME, $this->instance_name);
+        }
+        if ($this->isColumnModified(SubscriptionTableMap::COL_INPUT_UUID)) {
+            $criteria->add(SubscriptionTableMap::COL_INPUT_UUID, $this->input_uuid);
         }
         if ($this->isColumnModified(SubscriptionTableMap::COL_USER_ID)) {
             $criteria->add(SubscriptionTableMap::COL_USER_ID, $this->user_id);
@@ -1507,6 +1603,7 @@ abstract class Subscription implements ActiveRecordInterface
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
         $copyObj->setInstanceName($this->getInstanceName());
+        $copyObj->setInputUuid($this->getInputUuid());
         $copyObj->setUserId($this->getUserId());
         $copyObj->setChannelId($this->getChannelId());
         $copyObj->setSubscriptionId($this->getSubscriptionId());
@@ -1591,6 +1688,57 @@ abstract class Subscription implements ActiveRecordInterface
         }
 
         return $this->aInstance;
+    }
+
+    /**
+     * Declares an association between this object and a ChildInput object.
+     *
+     * @param  ChildInput $v
+     * @return $this|\Jalle19\StatusManager\Database\Subscription The current object (for fluent API support)
+     * @throws PropelException
+     */
+    public function setInput(ChildInput $v = null)
+    {
+        if ($v === null) {
+            $this->setInputUuid(NULL);
+        } else {
+            $this->setInputUuid($v->getUuid());
+        }
+
+        $this->aInput = $v;
+
+        // Add binding for other direction of this n:n relationship.
+        // If this object has already been added to the ChildInput object, it will not be re-added.
+        if ($v !== null) {
+            $v->addSubscription($this);
+        }
+
+
+        return $this;
+    }
+
+
+    /**
+     * Get the associated ChildInput object
+     *
+     * @param  ConnectionInterface $con Optional Connection object.
+     * @return ChildInput The associated ChildInput object.
+     * @throws PropelException
+     */
+    public function getInput(ConnectionInterface $con = null)
+    {
+        if ($this->aInput === null && (($this->input_uuid !== "" && $this->input_uuid !== null))) {
+            $this->aInput = ChildInputQuery::create()->findPk($this->input_uuid, $con);
+            /* The following can be used additionally to
+                guarantee the related object contains a reference
+                to this object.  This level of coupling may, however, be
+                undesirable since it could result in an only partially populated collection
+                in the referenced object.
+                $this->aInput->addSubscriptions($this);
+             */
+        }
+
+        return $this->aInput;
     }
 
     /**
@@ -1705,6 +1853,9 @@ abstract class Subscription implements ActiveRecordInterface
         if (null !== $this->aInstance) {
             $this->aInstance->removeSubscription($this);
         }
+        if (null !== $this->aInput) {
+            $this->aInput->removeSubscription($this);
+        }
         if (null !== $this->aUser) {
             $this->aUser->removeSubscription($this);
         }
@@ -1713,6 +1864,7 @@ abstract class Subscription implements ActiveRecordInterface
         }
         $this->id = null;
         $this->instance_name = null;
+        $this->input_uuid = null;
         $this->user_id = null;
         $this->channel_id = null;
         $this->subscription_id = null;
@@ -1741,6 +1893,7 @@ abstract class Subscription implements ActiveRecordInterface
         } // if ($deep)
 
         $this->aInstance = null;
+        $this->aInput = null;
         $this->aUser = null;
         $this->aChannel = null;
     }

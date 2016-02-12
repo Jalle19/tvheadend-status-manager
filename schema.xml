@@ -60,6 +60,7 @@
     <table name="subscription" phpName="Subscription">
         <column name="id" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
         <column name="instance_name" type="varchar" size="255" required="true"/>
+        <column name="input_uuid" type="varchar" size="255" required="true"/>
         <!-- ticket and DVR subscriptions don't have a user -->
         <column name="user_id" type="integer" defaultValue="NULL"/>
         <column name="channel_id" type="integer" required="true"/>
@@ -71,6 +72,10 @@
 
         <foreign-key foreignTable="instance" phpName="Instance" refPhpName="Subscription">
             <reference local="instance_name" foreign="name"/>
+        </foreign-key>
+
+        <foreign-key foreignTable="input" phpName="Input" refPhpName="Subscription">
+            <reference local="input_uuid" foreign="uuid"/>
         </foreign-key>
 
         <foreign-key foreignTable="user" phpName="User" refPhpName="Subscription">

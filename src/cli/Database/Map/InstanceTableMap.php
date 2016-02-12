@@ -148,6 +148,13 @@ class InstanceTableMap extends TableMap
     1 => ':name',
   ),
 ), null, null, 'Connections', false);
+        $this->addRelation('Input', '\\Jalle19\\StatusManager\\Database\\Input', RelationMap::ONE_TO_MANY, array (
+  0 =>
+  array (
+    0 => ':instance_name',
+    1 => ':name',
+  ),
+), null, null, 'Inputs', false);
         $this->addRelation('Channel', '\\Jalle19\\StatusManager\\Database\\Channel', RelationMap::ONE_TO_MANY, array (
   0 =>
   array (
