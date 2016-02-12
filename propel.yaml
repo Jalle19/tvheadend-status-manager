@@ -22,4 +22,5 @@ propel:
       autoPackage: true
   paths:
     phpDir: src/cli
+    sqlDir: sql
     migrationDir: migrations
