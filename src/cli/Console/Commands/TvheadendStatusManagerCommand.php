@@ -66,6 +66,28 @@ class TvheadendStatusManagerCommand extends Command
 		$configuration = $this->parseConfiguration($input);
 
 		// Configure the logger
+		$logger = $this->configureLogger($input, $output, $configuration);
+
+		// Configure Propel
+		$this->configurePropel($configuration, $logger);
+
+		// Start the application
+		$statusManager = new StatusManager($configuration, $logger);
+		$statusManager->run();
+	}
+
+
+	/**
+	 * Configures and returns the logger instance
+	 *
+	 * @param InputInterface  $input
+	 * @param OutputInterface $output
+	 * @param Configuration   $configuration
+	 *
+	 * @return Logger
+	 */
+	private function configureLogger(InputInterface $input, OutputInterface $output, Configuration $configuration)
+	{
 		$consoleHandler = new ConsoleHandler($output);
 		$consoleHandler->setFormatter(new ColoredLineFormatter(null, "[%datetime%] %level_name%: %message%\n"));
 
@@ -79,12 +101,7 @@ class TvheadendStatusManagerCommand extends Command
 			$logger->pushHandler($fileHandler);
 		}
 
-		// Configure Propel
-		$this->configurePropel($configuration, $logger);
-
-		// Start the application
-		$statusManager = new StatusManager($configuration, $logger);
-		$statusManager->run();
+		return $logger;
 	}
 
 
