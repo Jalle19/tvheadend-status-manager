@@ -27,6 +27,11 @@ class Configuration
 	private $_databasePath;
 
 	/**
+	 * @var string the log file path
+	 */
+	private $_logPath;
+
+	/**
 	 * @var Instance[] the instances
 	 */
 	private $_instances;
@@ -64,6 +69,24 @@ class Configuration
 	public function getDatabasePath()
 	{
 		return $this->_databasePath;
+	}
+
+
+	/**
+	 * @return string
+	 */
+	public function getLogPath()
+	{
+		return $this->_logPath;
+	}
+
+
+	/**
+	 * @param string $logPath
+	 */
+	public function setLogPath($logPath)
+	{
+		$this->_logPath = $logPath;
 	}
 
 

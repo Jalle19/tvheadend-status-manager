@@ -7,6 +7,7 @@ use Jalle19\StatusManager\Configuration;
 use Jalle19\StatusManager\Exception\InvalidConfigurationException;
 use Jalle19\StatusManager\Instance;
 use Jalle19\StatusManager\StatusManager;
+use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\PsrLogMessageProcessor;
 use Propel\Runtime\ServiceContainer\StandardServiceContainer;
@@ -41,6 +42,7 @@ class TvheadendStatusManagerCommand extends Command
 		// Add arguments
 		$this->addArgument('configFile', InputArgument::REQUIRED, 'The path to the configuration file');
 		$this->addArgument('databaseFile', InputArgument::REQUIRED, 'The path to the database');
+		$this->addArgument('logFile', InputArgument::OPTIONAL, 'The path to the log file');
 
 		// Add options
 		$this->addOption('updateInterval', 'i', InputOption::VALUE_REQUIRED, 'The status update interval (in seconds)',
@@ -64,11 +66,14 @@ class TvheadendStatusManagerCommand extends Command
 		$configuration = $this->parseConfiguration($input);
 
 		// Configure the logger
-		$handler = new ConsoleHandler($output);
-		$handler->setFormatter(new ColoredLineFormatter(null, "[%datetime%] %level_name%: %message%\n"));
+		$consoleHandler = new ConsoleHandler($output);
+		$consoleHandler->setFormatter(new ColoredLineFormatter(null, "[%datetime%] %level_name%: %message%\n"));
+
+		$fileHandler = new StreamHandler($configuration->getLogPath());
 
 		$logger = new Logger(self::COMMAND_NAME);
-		$logger->pushHandler($handler);
+		$logger->pushHandler($consoleHandler);
+		$logger->pushHandler($fileHandler);
 		$logger->pushProcessor(new PsrLogMessageProcessor());
 
 		// Configure Propel
@@ -127,6 +132,7 @@ class TvheadendStatusManagerCommand extends Command
 
 		$configFile   = $input->getArgument('configFile');
 		$databaseFile = $input->getArgument('databaseFile');
+		$logFile      = $input->getArgument('logFile');
 
 		// Parse the configuration file
 		$configuration = parse_ini_file($configFile, true);
@@ -165,6 +171,8 @@ class TvheadendStatusManagerCommand extends Command
 		$listenPort = $input->getOption(Configuration::OPTION_LISTEN_PORT);
 		$config->setListenPort($listenPort);
 
+		$config->setLogPath($logFile);
+
 		return $config;
 	}
 
@@ -178,6 +186,7 @@ class TvheadendStatusManagerCommand extends Command
 	{
 		$configFile   = $input->getArgument('configFile');
 		$databasePath = $input->getArgument('databaseFile');
+		$logFile      = $input->getArgument('logFile');
 
 		// Check that the configuration file exists
 		if (!file_exists($configFile))
@@ -188,6 +197,10 @@ class TvheadendStatusManagerCommand extends Command
 			throw new InvalidConfigurationException('The specified database path does not exist');
 		else if (!is_writable($databasePath))
 			throw new InvalidConfigurationException('The specified database path is not writable');
+
+		// Check that the directory of the log file path is writable
+		if ($logFile !== null && !is_writable(dirname($logFile)))
+			throw new InvalidConfigurationException('The specified log file path is not writable');
 	}
 
 
