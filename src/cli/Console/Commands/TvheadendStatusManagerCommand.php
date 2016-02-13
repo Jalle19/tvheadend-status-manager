@@ -60,6 +60,9 @@ class TvheadendStatusManagerCommand extends Command
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
+		// Parse the configuration
+		$configuration = $this->parseConfiguration($input);
+
 		// Configure the logger
 		$handler = new ConsoleHandler($output);
 		$handler->setFormatter(new ColoredLineFormatter(null, "[%datetime%] %level_name%: %message%\n"));
@@ -67,9 +70,6 @@ class TvheadendStatusManagerCommand extends Command
 		$logger = new Logger(self::COMMAND_NAME);
 		$logger->pushHandler($handler);
 		$logger->pushProcessor(new PsrLogMessageProcessor());
-
-		// Parse the configuration
-		$configuration = $this->parseConfiguration($input);
 
 		// Configure Propel
 		$this->configurePropel($configuration, $logger);
