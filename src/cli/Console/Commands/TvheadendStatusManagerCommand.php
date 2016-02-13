@@ -152,7 +152,7 @@ class TvheadendStatusManagerCommand extends Command
 			switch (self::getSectionType($section))
 			{
 				case Configuration::SECTION_TYPE_INSTANCE:
-					$instances[] = $this->parseInstance($section, $values);
+					$instances[] = self::parseInstance($section, $values);
 					break;
 			}
 		}
@@ -213,7 +213,7 @@ class TvheadendStatusManagerCommand extends Command
 	 *
 	 * @return Instance
 	 */
-	private function parseInstance($section, $values)
+	private static function parseInstance($section, $values)
 	{
 		$name    = substr($section, 9);
 		$address = $values['address'];
