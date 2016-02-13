@@ -23,8 +23,34 @@ broadcasts these updates to potential clients over a Websocket
 4. Copy `app/database.sqlite.example` to `app/database.sqlite`
 4. Copy `app/config.ini.example` to `app/config.ini` and configure your instances
 5. Start the CLI application with `./app/tvheadend-status-manager app/config.ini app/database.sqlite`. You may want to 
-add `-vv` (or even `-vvv`) to the command to get more output in the console.
+add `-vv` (or even `-vvv`) to the command to get more output in the console. See the Usage section below for additional 
+parameters
 6. Browse to `http://192.168.47.47/` to use the web interface
+
+## Usage
+
+```
+./app/tvheadend-status-manager --help
+Usage:
+  tvheadend-status-manager [options] [--] <configFile> <databaseFile> [<logFile>]
+
+Arguments:
+  configFile                           The path to the configuration file
+  databaseFile                         The path to the database
+  logFile                              The path to the log file
+
+Options:
+  -i, --updateInterval=UPDATEINTERVAL  The status update interval (in seconds) [default: 1]
+  -l, --listenAddress=LISTENADDRESS    The address the Websocket server should be listening on [default: "0.0.0.0"]
+  -p, --listenPort=LISTENPORT          The port the Websocket server should be listening on [default: 9333]
+  -h, --help                           Display this help message
+  -q, --quiet                          Do not output any message
+  -V, --version                        Display this application version
+      --ansi                           Force ANSI output
+      --no-ansi                        Disable ANSI output
+  -n, --no-interaction                 Do not ask any interactive question
+  -v|vv|vvv, --verbose                 Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+```
 
 ## License
 
