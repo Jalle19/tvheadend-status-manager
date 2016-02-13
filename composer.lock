@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "1ef74fc20bde0be5ba964f88f136246a",
-    "content-hash": "5cb24d646f9d0afc03c7e7f671106cff",
+    "hash": "8af17af72c4d13948436333820401c85",
+    "content-hash": "2db847d92c9cadf69d6b02b8f89bd427",
     "packages": [
         {
             "name": "bramus/ansi-php",
@@ -387,16 +387,16 @@
         },
         {
             "name": "jalle19/php-tvheadend",
-            "version": "dev-master",
+            "version": "0.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Jalle19/php-tvheadend.git",
-                "reference": "6fa84993e45f068abcbcf6efcfeff11cda996e85"
+                "reference": "38ab45f6dd18243bb8f01a98f7c689549a1a9d5b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/6fa84993e45f068abcbcf6efcfeff11cda996e85",
-                "reference": "6fa84993e45f068abcbcf6efcfeff11cda996e85",
+                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/38ab45f6dd18243bb8f01a98f7c689549a1a9d5b",
+                "reference": "38ab45f6dd18243bb8f01a98f7c689549a1a9d5b",
                 "shasum": ""
             },
             "require": {
@@ -410,6 +410,7 @@
                     "Jalle19\\tvheadend\\": "src"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GNU GPL v2.0"
             ],
@@ -420,11 +421,7 @@
                 }
             ],
             "description": "Library for communicating with tvheadend",
-            "support": {
-                "source": "https://github.com/Jalle19/php-tvheadend/tree/master",
-                "issues": "https://github.com/Jalle19/php-tvheadend/issues"
-            },
-            "time": "2016-02-11 15:53:05"
+            "time": "2016-02-13 09:22:18"
         },
         {
             "name": "kevinlebrun/colors.php",
@@ -1826,7 +1823,6 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "jalle19/php-tvheadend": 20,
         "propel/propel": 20
     },
     "prefer-stable": false,
