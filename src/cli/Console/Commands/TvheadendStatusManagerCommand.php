@@ -69,12 +69,15 @@ class TvheadendStatusManagerCommand extends Command
 		$consoleHandler = new ConsoleHandler($output);
 		$consoleHandler->setFormatter(new ColoredLineFormatter(null, "[%datetime%] %level_name%: %message%\n"));
 
-		$fileHandler = new StreamHandler($configuration->getLogPath());
-
 		$logger = new Logger(self::COMMAND_NAME);
 		$logger->pushHandler($consoleHandler);
-		$logger->pushHandler($fileHandler);
 		$logger->pushProcessor(new PsrLogMessageProcessor());
+
+		if ($configuration->getLogPath() !== null)
+		{
+			$fileHandler = new StreamHandler($configuration->getLogPath());
+			$logger->pushHandler($fileHandler);
+		}
 
 		// Configure Propel
 		$this->configurePropel($configuration, $logger);
