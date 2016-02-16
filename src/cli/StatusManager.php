@@ -3,13 +3,14 @@
 namespace Jalle19\StatusManager;
 
 use Jalle19\StatusManager\Database;
+use Jalle19\StatusManager\Event\Events;
+use Jalle19\StatusManager\Event\InstanceStatusUpdatesEvent;
 use Jalle19\StatusManager\Subscription\StateChangeParser;
 use Psr\Log\LoggerInterface;
-use Ratchet\ConnectionInterface;
 use Ratchet\Http\HttpServer;
-use Ratchet\MessageComponentInterface;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  * Class StatusManager
@@ -17,7 +18,7 @@ use Ratchet\WebSocket\WsServer;
  * @copyright Copyright &copy; Sam Stenvall 2015-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class StatusManager implements MessageComponentInterface
+class StatusManager
 {
 
 	/**
@@ -46,9 +47,14 @@ class StatusManager implements MessageComponentInterface
 	private $_websocket;
 
 	/**
-	 * @var \SplObjectStorage the connected clients
+	 * @var WebSocketManager
 	 */
-	private $_connectedClients;
+	private $_WebSocketManager;
+
+	/**
+	 * @var EventDispatcher
+	 */
+	private $_eventDispatcher;
 
 	/**
 	 * @var PersistenceManager the persistence manager
@@ -64,10 +70,9 @@ class StatusManager implements MessageComponentInterface
 	 */
 	public function __construct(Configuration $configuration, LoggerInterface $logger)
 	{
-		$this->_configuration    = $configuration;
-		$this->_logger           = $logger;
-		$this->_connectedClients = new \SplObjectStorage();
-		$this->_instances        = new \SplObjectStorage();
+		$this->_configuration = $configuration;
+		$this->_logger        = $logger;
+		$this->_instances     = new \SplObjectStorage();
 
 		// Attach a state to each instance
 		foreach ($this->_configuration->getInstances() as $instance)
@@ -75,6 +80,25 @@ class StatusManager implements MessageComponentInterface
 
 		// Start the persistence manager
 		$this->_persistenceManager = new PersistenceManager($logger);
+
+		// Create our WebSocket handler
+		$this->_WebSocketManager = new WebSocketManager($logger);
+
+		// Configure the event dispatcher
+		$this->configureEventDispatcher();
+	}
+
+
+	/**
+	 * Configures the event dispatcher and attaches event listeners to it
+	 */
+	private function configureEventDispatcher()
+	{
+		$this->_eventDispatcher = new EventDispatcher();
+
+		// WebSocket events
+		$this->_eventDispatcher->addListener(Events::INSTANCE_STATUS_UPDATES,
+			[$this->_WebSocketManager, 'onInstanceStatusUpdates']);
 	}
 
 
@@ -88,7 +112,7 @@ class StatusManager implements MessageComponentInterface
 		$port    = $this->_configuration->getListenPort();
 
 		$this->_websocket = IoServer::factory(
-			new HttpServer(new WsServer($this)),
+			new HttpServer(new WsServer($this->_WebSocketManager)),
 			$port,
 			$address
 		);
@@ -163,8 +187,8 @@ class StatusManager implements MessageComponentInterface
 				$this->_persistenceManager->onSubscriptionStateChange($instanceName, $subscriptionStateChange);
 		}
 
-		// Broadcast the status messages to all connected clients
-		$this->broadcastMessages($statusCollection);
+		$this->_eventDispatcher->dispatch(Events::INSTANCE_STATUS_UPDATES,
+			new InstanceStatusUpdatesEvent($statusCollection));
 	}
 
 
@@ -242,61 +266,6 @@ class StatusManager implements MessageComponentInterface
 		}
 
 		return $collection;
-	}
-
-
-	/**
-	 * Broadcasts the specified messages to all connected clients
-	 *
-	 * @param InstanceStatusCollection $messages
-	 */
-	private function broadcastMessages(InstanceStatusCollection $messages)
-	{
-		$this->_logger->debug('Broadcasting statuses to all clients');
-
-		foreach ($this->_connectedClients as $client)
-		{
-			/* @var ConnectionInterface $client */
-			$client->send(json_encode($messages));
-		}
-	}
-
-
-	/**
-	 * @inheritdoc
-	 */
-	public function onOpen(ConnectionInterface $conn)
-	{
-		$this->_logger->info('Got client connection');
-		$this->_connectedClients->attach($conn);
-	}
-
-
-	/**
-	 * @inheritdoc
-	 */
-	public function onClose(ConnectionInterface $conn)
-	{
-		$this->_logger->info('Got client disconnect');
-		$this->_connectedClients->detach($conn);
-	}
-
-
-	/**
-	 * @inheritdoc
-	 */
-	public function onError(ConnectionInterface $conn, \Exception $e)
-	{
-		// TODO: Implement onError() method.
-	}
-
-
-	/**
-	 * @inheritdoc
-	 */
-	public function onMessage(ConnectionInterface $from, $msg)
-	{
-		// TODO: Implement onMessage() method.
 	}
 
 }

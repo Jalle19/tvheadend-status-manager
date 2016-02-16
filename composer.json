@@ -13,7 +13,7 @@
         "symfony/console": "^2.7",
         "jalle19/php-tvheadend": "~0.1.0",
         "symfony/monolog-bridge": "^2.7",
-        "symfony/event-dispatcher": "^2.7",
+        "symfony/event-dispatcher": "^3.0",
         "cboden/ratchet": "^0.3.3",
         "bramus/monolog-colored-line-formatter": "^2.0",
         "propel/propel": "~2.0@dev"
