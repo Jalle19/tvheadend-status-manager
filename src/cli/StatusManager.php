@@ -3,8 +3,13 @@
 namespace Jalle19\StatusManager;
 
 use Jalle19\StatusManager\Database;
+use Jalle19\StatusManager\Event\ConnectionSeenEvent;
 use Jalle19\StatusManager\Event\Events;
+use Jalle19\StatusManager\Event\InputSeenEvent;
+use Jalle19\StatusManager\Event\InstanceSeenEvent;
 use Jalle19\StatusManager\Event\InstanceStatusUpdatesEvent;
+use Jalle19\StatusManager\Event\SubscriptionSeenEvent;
+use Jalle19\StatusManager\Event\SubscriptionStateChangeEvent;
 use Jalle19\StatusManager\Subscription\StateChangeParser;
 use Psr\Log\LoggerInterface;
 use Ratchet\Http\HttpServer;
@@ -78,11 +83,9 @@ class StatusManager
 		foreach ($this->_configuration->getInstances() as $instance)
 			$this->_instances->attach($instance, new InstanceState());
 
-		// Start the persistence manager
+		// Create manager instances
 		$this->_persistenceManager = new PersistenceManager($logger);
-
-		// Create our WebSocket handler
-		$this->_WebSocketManager = new WebSocketManager($logger);
+		$this->_WebSocketManager   = new WebSocketManager($logger);
 
 		// Configure the event dispatcher
 		$this->configureEventDispatcher();
@@ -96,9 +99,17 @@ class StatusManager
 	{
 		$this->_eventDispatcher = new EventDispatcher();
 
-		// WebSocket events
-		$this->_eventDispatcher->addListener(Events::INSTANCE_STATUS_UPDATES,
-			[$this->_WebSocketManager, 'onInstanceStatusUpdates']);
+		$eventDefinitions = [
+			[Events::INSTANCE_STATUS_UPDATES, $this->_WebSocketManager, 'onInstanceStatusUpdates'],
+			[Events::INSTANCE_SEEN, $this->_persistenceManager, 'onInstanceSeen'],
+			[Events::CONNECTION_SEEN, $this->_persistenceManager, 'onConnectionSeen'],
+			[Events::INPUT_SEEN, $this->_persistenceManager, 'onInputSeen'],
+			[Events::SUBSCRIPTION_SEEN, $this->_persistenceManager, 'onSubscriptionSeen'],
+			[Events::SUBSCRIPTION_STATE_CHANGE, $this->_persistenceManager, 'onSubscriptionStateChange'],
+		];
+
+		foreach ($eventDefinitions as $eventDefinition)
+			$this->_eventDispatcher->addListener($eventDefinition[0], [$eventDefinition[1], $eventDefinition[2]]);
 	}
 
 
@@ -142,7 +153,7 @@ class StatusManager
 				'port'    => $instance->getPort(),
 			]);
 
-			$this->_persistenceManager->onInstanceSeen($instance);
+			$this->_eventDispatcher->dispatch(Events::INSTANCE_SEEN, new InstanceSeenEvent($instance));
 		}
 
 		// Start the main loop
@@ -172,19 +183,28 @@ class StatusManager
 
 			// Persist connections
 			foreach ($instanceStatus->getConnections() as $connection)
-				$this->_persistenceManager->onConnectionSeen($instanceName, $connection);
+			{
+				$this->_eventDispatcher->dispatch(Events::CONNECTION_SEEN,
+					new ConnectionSeenEvent($instanceName, $connection));
+			}
 
 			// Persist inputs
-			foreach($instanceStatus->getInputs() as $input)
-				$this->_persistenceManager->onInputSeen($instanceName, $input);
+			foreach ($instanceStatus->getInputs() as $input)
+				$this->_eventDispatcher->dispatch(Events::INPUT_SEEN, new InputSeenEvent($instanceName, $input));
 
 			// Persist running subscriptions
 			foreach ($instanceStatus->getSubscriptions() as $subscription)
-				$this->_persistenceManager->onSubscriptionSeen($instanceName, $subscription);
+			{
+				$this->_eventDispatcher->dispatch(Events::SUBSCRIPTION_SEEN,
+					new SubscriptionSeenEvent($instanceName, $subscription));
+			}
 
 			// Handle subscription state changes
 			foreach ($instanceStatus->getSubscriptionStateChanges() as $subscriptionStateChange)
-				$this->_persistenceManager->onSubscriptionStateChange($instanceName, $subscriptionStateChange);
+			{
+				$this->_eventDispatcher->dispatch(Events::SUBSCRIPTION_STATE_CHANGE,
+					new SubscriptionStateChangeEvent($instanceName, $subscriptionStateChange));
+			}
 		}
 
 		$this->_eventDispatcher->dispatch(Events::INSTANCE_STATUS_UPDATES,

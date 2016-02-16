@@ -14,4 +14,10 @@ final class Events
 
 	const INSTANCE_STATUS_UPDATES = 'status.instanceUpdates';
 
+	const INSTANCE_SEEN             = 'persistence.instanceSeen';
+	const CONNECTION_SEEN           = 'persistence.connectionSeen';
+	const INPUT_SEEN                = 'persistence.inputSeen';
+	const SUBSCRIPTION_SEEN         = 'persistence.subscriptionSeen';
+	const SUBSCRIPTION_STATE_CHANGE = 'persistence.subscriptionStateChange';
+
 }

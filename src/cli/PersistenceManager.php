@@ -14,9 +14,13 @@ use Jalle19\StatusManager\Database\Subscription;
 use Jalle19\StatusManager\Database\SubscriptionQuery;
 use Jalle19\StatusManager\Database\User;
 use Jalle19\StatusManager\Database\UserQuery;
+use Jalle19\StatusManager\Event\ConnectionSeenEvent;
+use Jalle19\StatusManager\Event\InputSeenEvent;
+use Jalle19\StatusManager\Event\InstanceSeenEvent;
+use Jalle19\StatusManager\Event\SubscriptionSeenEvent;
+use Jalle19\StatusManager\Event\SubscriptionStateChangeEvent;
 use Jalle19\StatusManager\Subscription\StateChange;
 use Jalle19\tvheadend\model\ConnectionStatus;
-use Jalle19\tvheadend\model\InputStatus;
 use Jalle19\tvheadend\model\SubscriptionStatus;
 use Jalle19\tvheadend\Tvheadend;
 use Psr\Log\LoggerInterface;
@@ -47,12 +51,14 @@ class PersistenceManager
 
 
 	/**
-	 * @param Tvheadend $instance
+	 * @param InstanceSeenEvent $event
 	 *
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	public function onInstanceSeen(Tvheadend $instance)
+	public function onInstanceSeen(InstanceSeenEvent $event)
 	{
+		$instance = $event->getInstance();
+
 		if ($this->hasInstance($instance))
 			return;
 
@@ -78,11 +84,13 @@ class PersistenceManager
 
 
 	/**
-	 * @param string           $instanceName
-	 * @param ConnectionStatus $connectionStatus
+	 * @param ConnectionSeenEvent $event
 	 */
-	public function onConnectionSeen($instanceName, ConnectionStatus $connectionStatus)
+	public function onConnectionSeen(ConnectionSeenEvent $event)
 	{
+		$instanceName     = $event->getInstance();
+		$connectionStatus = $event->getConnection();
+
 		if ($this->hasConnection($instanceName, $connectionStatus))
 			return;
 
@@ -110,11 +118,13 @@ class PersistenceManager
 
 
 	/**
-	 * @param string      $instanceName
-	 * @param InputStatus $inputStatus
+	 * @param InputSeenEvent $event
 	 */
-	public function onInputSeen($instanceName, InputStatus $inputStatus)
+	public function onInputSeen(InputSeenEvent $event)
 	{
+		$instanceName = $event->getInstance();
+		$inputStatus  = $event->getInput();
+
 		// Update the input and started fields for existing inputs
 		if ($this->hasInput($inputStatus->uuid))
 		{
@@ -188,13 +198,15 @@ class PersistenceManager
 
 
 	/**
-	 * @param string             $instanceName
-	 * @param SubscriptionStatus $status
+	 * @param SubscriptionSeenEvent $event
 	 *
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	public function onSubscriptionSeen($instanceName, SubscriptionStatus $status)
+	public function onSubscriptionSeen(SubscriptionSeenEvent $event)
 	{
+		$instanceName = $event->getInstance();
+		$status       = $event->getSubscription();
+
 		// Ignore EPG grabber subscriptions
 		if ($status->getType() === SubscriptionStatus::TYPE_EPGGRAB)
 			return;
@@ -251,11 +263,13 @@ class PersistenceManager
 
 
 	/**
-	 * @param string      $instanceName
-	 * @param StateChange $stateChange
+	 * @param SubscriptionStateChangeEvent $event
 	 */
-	public function onSubscriptionStateChange($instanceName, StateChange $stateChange)
+	public function onSubscriptionStateChange(SubscriptionStateChangeEvent $event)
 	{
+		$instanceName = $event->getInstance();
+		$stateChange  = $event->getStateChange();
+
 		// We only need to persist subscription stops
 		if ($stateChange->getState() === StateChange::STATE_SUBSCRIPTION_STARTED)
 			return;
