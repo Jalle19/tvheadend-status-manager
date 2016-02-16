@@ -154,50 +154,6 @@ class PersistenceManager
 
 
 	/**
-	 * @param string $instanceName
-	 * @param string $userName
-	 *
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 */
-	public function onUserSeen($instanceName, $userName)
-	{
-		if ($this->hasUser($instanceName, $userName))
-			return;
-
-		$user = new User();
-		$user->setInstanceName($instanceName)->setName($userName);
-		$user->save();
-
-		$this->_logger->info('Stored new user (instance: {instanceName}, username: {userName})', [
-			'instanceName' => $instanceName,
-			'userName'     => $userName,
-		]);
-	}
-
-
-	/**
-	 * @param string $instanceName
-	 * @param string $channelName
-	 *
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 */
-	public function onChannelSeen($instanceName, $channelName)
-	{
-		if ($this->hasChannel($instanceName, $channelName))
-			return;
-
-		$channel = new Channel();
-		$channel->setInstanceName($instanceName)->setName($channelName);
-		$channel->save();
-
-		$this->_logger->info('Stored new channel (instance: {instanceName}, name: {channelName})', [
-			'instanceName' => $instanceName,
-			'channelName'  => $channelName,
-		]);
-	}
-
-
-	/**
 	 * @param SubscriptionSeenEvent $event
 	 *
 	 * @throws \Propel\Runtime\Exception\PropelException
@@ -303,6 +259,49 @@ class PersistenceManager
 				'userName'     => $user !== null ? $user->getName() : 'N/A',
 				'channelName'  => $channel->getName(),
 			]);
+	}
+
+	/**
+	 * @param string $instanceName
+	 * @param string $userName
+	 *
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function onUserSeen($instanceName, $userName)
+	{
+		if ($this->hasUser($instanceName, $userName))
+			return;
+
+		$user = new User();
+		$user->setInstanceName($instanceName)->setName($userName);
+		$user->save();
+
+		$this->_logger->info('Stored new user (instance: {instanceName}, username: {userName})', [
+			'instanceName' => $instanceName,
+			'userName'     => $userName,
+		]);
+	}
+
+
+	/**
+	 * @param string $instanceName
+	 * @param string $channelName
+	 *
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	private function onChannelSeen($instanceName, $channelName)
+	{
+		if ($this->hasChannel($instanceName, $channelName))
+			return;
+
+		$channel = new Channel();
+		$channel->setInstanceName($instanceName)->setName($channelName);
+		$channel->save();
+
+		$this->_logger->info('Stored new channel (instance: {instanceName}, name: {channelName})', [
+			'instanceName' => $instanceName,
+			'channelName'  => $channelName,
+		]);
 	}
 
 
