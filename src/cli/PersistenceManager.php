@@ -201,7 +201,7 @@ class PersistenceManager
 		if ($this->hasSubscription($instance, $user, $channel, $status))
 			return;
 
-		// Determine which input the subscription uses
+		// Try to determine which input is used by the subscription
 		$input = InputQuery::create()->filterBySubscriptionStatus($instanceName, $status)->findOne();
 
 		if ($input === null)
@@ -212,8 +212,6 @@ class PersistenceManager
 					'userName'     => $user !== null ? $user->getName() : 'N/A',
 					'channelName'  => $channel->getName(),
 				]);
-
-			return;
 		}
 
 		$subscription = new Subscription();

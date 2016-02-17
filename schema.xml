@@ -60,7 +60,8 @@
     <table name="subscription" phpName="Subscription">
         <column name="id" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
         <column name="instance_name" type="varchar" size="255" required="true"/>
-        <column name="input_uuid" type="varchar" size="255" required="true"/>
+        <!-- we cannot always tie a subscription to an input due to an API limitation -->
+        <column name="input_uuid" type="varchar" size="255"/>
         <!-- ticket and DVR subscriptions don't have a user -->
         <column name="user_id" type="integer" defaultValue="NULL"/>
         <column name="channel_id" type="integer" required="true"/>
