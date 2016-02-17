@@ -17,7 +17,7 @@ class Configuration
 	const OPTION_LISTEN_ADDRESS  = 'listenAddress';
 	const OPTION_LISTEN_PORT     = 'listenPort';
 
-	const DEFAULT_UPDATE_INTERVAL = 1;
+	const DEFAULT_UPDATE_INTERVAL = 2;
 	const DEFAULT_LISTEN_ADDRESS  = '0.0.0.0';
 	const DEFAULT_LISTEN_PORT     = 9333;
 
