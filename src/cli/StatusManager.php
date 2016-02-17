@@ -100,6 +100,7 @@ class StatusManager
 		$this->_eventDispatcher = new EventDispatcher();
 
 		$eventDefinitions = [
+			[Events::MAIN_LOOP_STARTING, $this->_persistenceManager, 'onMainLoopStarted'],
 			[Events::INSTANCE_STATUS_UPDATES, $this->_WebSocketManager, 'onInstanceStatusUpdates'],
 			[Events::INSTANCE_SEEN, $this->_persistenceManager, 'onInstanceSeen'],
 			[Events::CONNECTION_SEEN, $this->_persistenceManager, 'onConnectionSeen'],
@@ -155,6 +156,8 @@ class StatusManager
 
 			$this->_eventDispatcher->dispatch(Events::INSTANCE_SEEN, new InstanceSeenEvent($instance));
 		}
+
+		$this->_eventDispatcher->dispatch(Events::MAIN_LOOP_STARTING);
 
 		// Start the main loop
 		$this->_logger->info('Starting the Websocket server on {address}:{port}', [

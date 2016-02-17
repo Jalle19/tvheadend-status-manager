@@ -51,6 +51,19 @@ class PersistenceManager
 
 
 	/**
+	 * Removes stale subscriptions that haven't received a stop event
+	 */
+	public function onMainLoopStarted()
+	{
+		$numRemoved = SubscriptionQuery::create()->filterByStopped(null)->deleteAll();
+
+		$this->_logger->info('Removed {numRemoved} stale subscriptions', [
+			'numRemoved' => $numRemoved,
+		]);
+	}
+
+
+	/**
 	 * @param InstanceSeenEvent $event
 	 *
 	 * @throws \Propel\Runtime\Exception\PropelException
