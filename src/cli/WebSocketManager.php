@@ -5,7 +5,11 @@ namespace Jalle19\StatusManager;
 use Jalle19\StatusManager\Event\InstanceStatusUpdatesEvent;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
+use Ratchet\Http\HttpServer;
 use Ratchet\MessageComponentInterface;
+use Ratchet\Server\IoServer;
+use Ratchet\WebSocket\WsServer;
+use React\EventLoop\LoopInterface;
 
 /**
  * Handles events related to the WebSocket. Events are either triggered from Ratchet (onOpen etc.)
@@ -24,6 +28,16 @@ class WebSocketManager implements MessageComponentInterface
 	private $_logger;
 
 	/**
+	 * @var Configuration
+	 */
+	private $_configuration;
+
+	/**
+	 * @var IoServer the Websocket server
+	 */
+	private $_websocket;
+
+	/**
 	 * @var \SplObjectStorage the connected clients
 	 */
 	private $_connectedClients;
@@ -33,11 +47,35 @@ class WebSocketManager implements MessageComponentInterface
 	 * WebSocketEventHandler constructor.
 	 *
 	 * @param LoggerInterface $logger
+	 * @param Configuration   $configuration
+	 * @param LoopInterface   $loop
 	 */
-	public function __construct(LoggerInterface $logger)
+	public function __construct(LoggerInterface $logger, Configuration $configuration, LoopInterface $loop)
 	{
 		$this->_logger           = $logger;
+		$this->_configuration    = $configuration;
 		$this->_connectedClients = new \SplObjectStorage();
+
+		// Create the WebSocket server
+		$this->_websocket = IoServer::factory(
+			new HttpServer(new WsServer($this)),
+			$this->_configuration->getListenPort(),
+			$this->_configuration->getListenAddress()
+		);
+
+		$this->_websocket->loop = $loop;
+	}
+
+
+	/**
+	 * Called right before the main loop is started
+	 */
+	public function onMainLoopStarted()
+	{
+		$this->_logger->info('Starting the Websocket server on {address}:{port}', [
+			'address' => $this->_configuration->getListenAddress(),
+			'port'    => $this->_configuration->getListenPort(),
+		]);
 	}
 
 

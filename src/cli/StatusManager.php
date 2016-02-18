@@ -12,9 +12,7 @@ use Jalle19\StatusManager\Event\SubscriptionSeenEvent;
 use Jalle19\StatusManager\Event\SubscriptionStateChangeEvent;
 use Jalle19\StatusManager\Subscription\StateChangeParser;
 use Psr\Log\LoggerInterface;
-use Ratchet\Http\HttpServer;
-use Ratchet\Server\IoServer;
-use Ratchet\WebSocket\WsServer;
+use React\EventLoop\Factory;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
@@ -47,11 +45,6 @@ class StatusManager
 	private $_logger;
 
 	/**
-	 * @var IoServer the Websocket server
-	 */
-	private $_websocket;
-
-	/**
 	 * @var WebSocketManager
 	 */
 	private $_webSocketManager;
@@ -82,13 +75,27 @@ class StatusManager
 		// Attach a state to each instance
 		foreach ($this->_configuration->getInstances() as $instance)
 			$this->_instances->attach($instance, new InstanceState());
+	}
 
-		// Create manager instances
-		$this->_persistenceManager = new PersistenceManager($logger);
-		$this->_webSocketManager   = new WebSocketManager($logger);
 
-		// Configure the event dispatcher
+	/**
+	 * Runs the application
+	 */
+	public function run()
+	{
+		// Configure the main event loop
+		$eventLoop = Factory::create();
+		$eventLoop->addPeriodicTimer($this->_configuration->getUpdateInterval(),
+			[$this, 'handleInstanceUpdates']);
+
+		// Configure managers
+		$this->_webSocketManager   = new WebSocketManager($this->_logger, $this->_configuration, $eventLoop);
+		$this->_persistenceManager = new PersistenceManager($this->_logger);
+
 		$this->configureEventDispatcher();
+
+		$this->_eventDispatcher->dispatch(Events::MAIN_LOOP_STARTING);
+		$eventLoop->run();
 	}
 
 
@@ -100,7 +107,9 @@ class StatusManager
 		$this->_eventDispatcher = new EventDispatcher();
 
 		$eventDefinitions = [
+			[Events::MAIN_LOOP_STARTING, $this, 'onMainLoopStarted'],
 			[Events::MAIN_LOOP_STARTING, $this->_persistenceManager, 'onMainLoopStarted'],
+			[Events::MAIN_LOOP_STARTING, $this->_webSocketManager, 'onMainLoopStarted'],
 			[Events::INSTANCE_STATUS_UPDATES, $this->_webSocketManager, 'onInstanceStatusUpdates'],
 			[Events::INSTANCE_SEEN, $this->_persistenceManager, 'onInstanceSeen'],
 			[Events::CONNECTION_SEEN, $this->_persistenceManager, 'onConnectionSeen'],
@@ -115,24 +124,10 @@ class StatusManager
 
 
 	/**
-	 * Runs the application
+	 * Called right before the main loop is started
 	 */
-	public function run()
+	public function onMainLoopStarted()
 	{
-		// Configure the WebSocket server
-		$address = $this->_configuration->getListenAddress();
-		$port    = $this->_configuration->getListenPort();
-
-		$this->_websocket = IoServer::factory(
-			new HttpServer(new WsServer($this->_webSocketManager)),
-			$port,
-			$address
-		);
-
-		// Add the instance polling mechanism to the event loop
-		$this->_websocket->loop->addPeriodicTimer($this->_configuration->getUpdateInterval(),
-			[$this, 'handleInstanceUpdates']);
-
 		// Log information about the database
 		$this->_logger->debug('Using database at {databasePath}', [
 			'databasePath' => $this->_configuration->getDatabasePath(),
@@ -156,16 +151,6 @@ class StatusManager
 
 			$this->_eventDispatcher->dispatch(Events::INSTANCE_SEEN, new InstanceSeenEvent($instance));
 		}
-
-		$this->_eventDispatcher->dispatch(Events::MAIN_LOOP_STARTING);
-
-		// Start the main loop
-		$this->_logger->info('Starting the Websocket server on {address}:{port}', [
-			'address' => $address,
-			'port'    => $port,
-		]);
-
-		$this->_websocket->run();
 	}
 
 
