@@ -54,7 +54,7 @@ class StatusManager
 	/**
 	 * @var WebSocketManager
 	 */
-	private $_WebSocketManager;
+	private $_webSocketManager;
 
 	/**
 	 * @var EventDispatcher
@@ -85,7 +85,7 @@ class StatusManager
 
 		// Create manager instances
 		$this->_persistenceManager = new PersistenceManager($logger);
-		$this->_WebSocketManager   = new WebSocketManager($logger);
+		$this->_webSocketManager   = new WebSocketManager($logger);
 
 		// Configure the event dispatcher
 		$this->configureEventDispatcher();
@@ -101,7 +101,7 @@ class StatusManager
 
 		$eventDefinitions = [
 			[Events::MAIN_LOOP_STARTING, $this->_persistenceManager, 'onMainLoopStarted'],
-			[Events::INSTANCE_STATUS_UPDATES, $this->_WebSocketManager, 'onInstanceStatusUpdates'],
+			[Events::INSTANCE_STATUS_UPDATES, $this->_webSocketManager, 'onInstanceStatusUpdates'],
 			[Events::INSTANCE_SEEN, $this->_persistenceManager, 'onInstanceSeen'],
 			[Events::CONNECTION_SEEN, $this->_persistenceManager, 'onConnectionSeen'],
 			[Events::INPUT_SEEN, $this->_persistenceManager, 'onInputSeen'],
@@ -124,7 +124,7 @@ class StatusManager
 		$port    = $this->_configuration->getListenPort();
 
 		$this->_websocket = IoServer::factory(
-			new HttpServer(new WsServer($this->_WebSocketManager)),
+			new HttpServer(new WsServer($this->_webSocketManager)),
 			$port,
 			$address
 		);
