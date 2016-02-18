@@ -176,8 +176,8 @@ class PersistenceManager
 		$instanceName = $event->getInstance();
 		$status       = $event->getSubscription();
 
-		// Ignore EPG grabber subscriptions
-		if ($status->getType() === SubscriptionStatus::TYPE_EPGGRAB)
+		// Ignore certain subscriptions
+		if (in_array($status->getType(), [SubscriptionStatus::TYPE_EPGGRAB, SubscriptionStatus::TYPE_SERVICE_OR_MUX]))
 			return;
 
 		// Determine the username to store for the subscription
