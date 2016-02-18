@@ -2,7 +2,6 @@
 
 namespace Jalle19\StatusManager;
 
-use Jalle19\StatusManager\Database;
 use Jalle19\StatusManager\Event\ConnectionSeenEvent;
 use Jalle19\StatusManager\Event\Events;
 use Jalle19\StatusManager\Event\InputSeenEvent;
