@@ -10,6 +10,8 @@ use Jalle19\StatusManager\StatusManager;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\PsrLogMessageProcessor;
+use Propel\Runtime\Connection\ConnectionManagerSingle;
+use Propel\Runtime\Propel;
 use Propel\Runtime\ServiceContainer\StandardServiceContainer;
 use Psr\Log\LoggerInterface;
 use Symfony\Bridge\Monolog\Handler\ConsoleHandler;
@@ -66,7 +68,7 @@ class TvheadendStatusManagerCommand extends Command
 		$configuration = $this->parseConfiguration($input);
 
 		// Configure the logger
-		$logger = $this->configureLogger($input, $output, $configuration);
+		$logger = $this->configureLogger($output, $configuration);
 
 		// Configure Propel
 		$this->configurePropel($configuration, $logger);
@@ -113,10 +115,10 @@ class TvheadendStatusManagerCommand extends Command
 	private function configurePropel(Configuration $configuration, LoggerInterface $logger)
 	{
 		/* @var StandardServiceContainer $serviceContainer */
-		$serviceContainer = \Propel\Runtime\Propel::getServiceContainer();
+		$serviceContainer = Propel::getServiceContainer();
 		$serviceContainer->checkVersion('2.0.0-dev');
 		$serviceContainer->setAdapterClass('tvheadend_status_manager', 'sqlite');
-		$manager = new \Propel\Runtime\Connection\ConnectionManagerSingle();
+		$manager = new ConnectionManagerSingle();
 		$manager->setConfiguration([
 			'classname'  => 'Propel\\Runtime\\Connection\\ConnectionWrapper',
 			'dsn'        => 'sqlite:' . $configuration->getDatabasePath(),
@@ -144,6 +146,7 @@ class TvheadendStatusManagerCommand extends Command
 	 * @param InputInterface $input
 	 *
 	 * @return Configuration the parsed configuration
+	 * @throws InvalidConfigurationException if the configuration contains unrecoverable errors
 	 */
 	private function parseConfiguration(InputInterface $input)
 	{
