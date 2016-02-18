@@ -84,12 +84,12 @@ class WebSocketManager implements MessageComponentInterface
 	public function onInstanceStatusUpdates(InstanceStatusUpdatesEvent $event)
 	{
 		$this->_logger->debug('Broadcasting statuses to all clients');
-		$messages = $event->getInstanceStatusCollection();
+		$message = new Message(Message::TYPE_STATUS_UPDATES, $event->getInstanceStatusCollection());
 
 		foreach ($this->_connectedClients as $client)
 		{
 			/* @var ConnectionInterface $client */
-			$client->send(json_encode($messages));
+			$client->send(json_encode($message));
 		}
 	}
 

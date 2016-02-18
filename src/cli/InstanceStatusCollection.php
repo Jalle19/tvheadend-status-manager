@@ -42,9 +42,7 @@ class InstanceStatusCollection implements \JsonSerializable
 	 */
 	public function jsonSerialize()
 	{
-		return [
-			'instances' => $this->_messages,
-		];
+		return $this->_messages;
 	}
 
 }

@@ -123,7 +123,22 @@ statusManagerApp.controller('StatusController', function($scope, lodash) {
    * @param event
    */
   websocket.onmessage = function(event) {
-    $scope.instances = JSON.parse(event.data).instances;
+    // Parse the data into a message
+    var data = JSON.parse(event.data);
+    var message = parseMessage(data);
+
+    switch(message.message) {
+      case MESSAGE_TYPE_STATUS_UPDATES:
+        handleInstanceUpdates(message.payload);
+    }
+  };
+
+  /**
+   * Handles instance update messages
+   * @param instances
+   */
+  handleInstanceUpdates = function(instances) {
+    $scope.instances = instances;
 
     $scope.instances.forEach(function(instance) {
       var name = instance.instanceName;
