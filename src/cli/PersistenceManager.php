@@ -55,7 +55,7 @@ class PersistenceManager
 	 */
 	public function onMainLoopStarted()
 	{
-		$numRemoved = SubscriptionQuery::create()->filterByStopped(null)->deleteAll();
+		$numRemoved = SubscriptionQuery::create()->filterByStopped(null)->delete();
 
 		$this->_logger->info('Removed {numRemoved} stale subscriptions', [
 			'numRemoved' => $numRemoved,
