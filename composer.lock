@@ -387,16 +387,16 @@
         },
         {
             "name": "jalle19/php-tvheadend",
-            "version": "0.1.0",
+            "version": "0.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Jalle19/php-tvheadend.git",
-                "reference": "38ab45f6dd18243bb8f01a98f7c689549a1a9d5b"
+                "reference": "c592a16625d11e4d5bacbdd5fe3d817b881592a1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/38ab45f6dd18243bb8f01a98f7c689549a1a9d5b",
-                "reference": "38ab45f6dd18243bb8f01a98f7c689549a1a9d5b",
+                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/c592a16625d11e4d5bacbdd5fe3d817b881592a1",
+                "reference": "c592a16625d11e4d5bacbdd5fe3d817b881592a1",
                 "shasum": ""
             },
             "require": {
@@ -421,7 +421,7 @@
                 }
             ],
             "description": "Library for communicating with tvheadend",
-            "time": "2016-02-13 09:22:18"
+            "time": "2016-02-17 21:48:34"
         },
         {
             "name": "kevinlebrun/colors.php",
@@ -597,7 +597,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/propelorm/Propel2/zipball/4157132edc2149d06fc46173845ca29352dc86ff",
+                "url": "https://api.github.com/repos/propelorm/Propel2/zipball/67696347de254b185bf54f9028e923922df432a5",
                 "reference": "4157132edc2149d06fc46173845ca29352dc86ff",
                 "shasum": ""
             },
