@@ -10,6 +10,7 @@ use Ratchet\MessageComponentInterface;
 use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
 use React\EventLoop\LoopInterface;
+use React\Socket\Server as ServerSocket;
 
 /**
  * Handles events related to the WebSocket. Events are either triggered from Ratchet (onOpen etc.)
@@ -56,14 +57,12 @@ class WebSocketManager implements MessageComponentInterface
 		$this->_configuration    = $configuration;
 		$this->_connectedClients = new \SplObjectStorage();
 
-		// Create the WebSocket server
-		$this->_websocket = IoServer::factory(
-			new HttpServer(new WsServer($this)),
-			$this->_configuration->getListenPort(),
-			$this->_configuration->getListenAddress()
-		);
+		// Create the socket to listen on
+		$socket = new ServerSocket($loop);
+		$socket->listen($this->_configuration->getListenPort(), $this->_configuration->getListenAddress());
 
-		$this->_websocket->loop = $loop;
+		// Create the WebSocket server
+		$this->_websocket = new IoServer(new HttpServer(new WsServer($this)), $socket, $loop);
 	}
 
 
