@@ -10,4 +10,4 @@
 	grunt less
 	grunt concat
 
-}
+}  > /dev/null 2>&1
