@@ -1,10 +1,9 @@
 .vagrant
 /vendor/
-node_modules
+/src/client/node_modules
 composer.phar
 .idea/workspace.xml
 .idea/dictionaries/*
 
 app/config.ini
 app/database.sqlite
-src/client/bower_components

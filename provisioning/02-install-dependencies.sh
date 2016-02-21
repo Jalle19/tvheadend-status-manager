@@ -4,9 +4,10 @@
 	cd /vagrant
 	php composer.phar install
 
+	cd /vagrant/src/client
 	npm install
-	bower install --allow-root
 
 	grunt less
+	grunt concat
 
-} > /dev/null 2>&1
+}

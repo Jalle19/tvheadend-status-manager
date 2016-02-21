@@ -17,6 +17,15 @@
   },
   "devDependencies": {
     "grunt-contrib-less": "~1.2.0",
+    "grunt-contrib-concat": "~1.0.0",
+    "grunt-contrib-watch": "~0.6.1",
     "grunt": "~0.4.5"
+  },
+  "dependencies": {
+    "jquery-flot": "~0.8.3",
+    "angular-flot": "0.0.16",
+    "angular": "~1.5.0",
+    "reconnectingwebsocket": "~1.0.0",
+    "ng-lodash": "~0.2.3"
   }
 }

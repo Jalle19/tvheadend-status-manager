@@ -2,7 +2,7 @@ server {
 	listen 80 default_server;
 	listen [::]:80 default_server ipv6only=on;
 
-	root /vagrant/src/client;
+	root /vagrant/src/client/app;
 	index index.html index.htm;
 	sendfile off;
 

@@ -12,4 +12,4 @@
 
 	# restart nginx
 	service nginx restart
-} > /dev/null 2>&1
+}
