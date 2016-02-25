@@ -18,13 +18,10 @@ module.exports = function(grunt) {
       },
       dist: {
         src: [
-          'node_modules/angular/angular.js',
-          'node_modules/angular-flot/angular-flot.js',
-          'node_modules/jquery-flot/jquery.js',
-          'node_modules/jquery-flot/jquery.flot.js',
-          'node_modules/ng-lodash/build/ng-lodash.js',
           'node_modules/reconnectingwebsocket/reconnecting-websocket.js',
-          'app/js/vendor/jquery-flot-axislabels/jquery.flot.axislabels.js'
+          'node_modules/knockout/build/output/knockout-latest.debug.js',
+          'node_modules/moment/moment.js',
+          'node_modules/jquery/dist/jquery.js'
         ],
         dest: 'app/js/vendor/vendor.js'
       }
