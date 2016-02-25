@@ -69,7 +69,7 @@
         <column name="started" type="timestamp" required="true"/>
         <column name="stopped" type="timestamp" defaultVaue="NULL"/>
         <column name="title" type="varchar" size="255" required="true"/>
-        <column name="service" type="varchar" size="255" required="true"/>
+        <column name="service" type="varchar" size="255" defaultValue="NULL"/>
 
         <foreign-key foreignTable="instance" phpName="Instance" refPhpName="Subscription">
             <reference local="instance_name" foreign="name"/>
