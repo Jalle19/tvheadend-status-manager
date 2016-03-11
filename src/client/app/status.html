@@ -14,20 +14,33 @@
 <body>
 
 <div class="container-fluid">
-  <h1>Tvheadend Status Manager</h1>
 
-  <p>
-    Aggregating streaming status manager for tvheadend instances
-  </p>
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
 
-  <p class="bg-success" data-bind="visible: connected()">
-    Connected
-    <span data-bind="visible: instances.length > 0">, managing <span data-bind="text: instances.length"></span> instance(s)</span>
-  </p>
+      <div class="navbar-header">
+        <a class="navbar-brand" href="index.html">Tvheadend Status Manager</a>
+      </div>
 
-  <p class="bg-danger" data-bind="visible: !connected()">
-    Disconnected
-  </p>
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="status.html">Streaming status</a></li>
+        </ul>
+
+        <div class="nav navbar-right navbar-text connection-status">
+          <p class="bg-success" data-bind="visible: connected()">
+            Connected
+            <span data-bind="visible: instances().length > 0">, managing <span
+                data-bind="text: instances().length"></span> instance(s)</span>
+          </p>
+
+          <p class="bg-danger" data-bind="visible: !connected()">
+            Disconnected
+          </p>
+        </div>
+      </div>
+    </div>
+  </nav>
 
   <h4>Subscriptions</h4>
 
