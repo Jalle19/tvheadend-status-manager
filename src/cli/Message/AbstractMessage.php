@@ -12,8 +12,9 @@ namespace Jalle19\StatusManager\Message;
 abstract class AbstractMessage implements \JsonSerializable
 {
 
-	const TYPE_STATUS_UPDATES              = 'statusUpdates';
-	const TYPE_STATISTICS_POPULAR_CHANNELS = 'statisticsPopularChannels';
+	const TYPE_STATUS_UPDATES            = 'statusUpdates';
+	const TYPE_POPULAR_CHANNELS_REQUEST  = 'popularChannelsRequest';
+	const TYPE_POPULAR_CHANNELS_RESPONSE = 'popularChannelsResponse';
 
 	/**
 	 * @var string

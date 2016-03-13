@@ -4,6 +4,7 @@ namespace Jalle19\StatusManager\Message;
 
 use Jalle19\StatusManager\Exception\MalformedRequestException;
 use Jalle19\StatusManager\Exception\UnknownRequestException;
+use Jalle19\StatusManager\Message\Request\PopularChannelsRequest;
 
 /**
  * Factory for turning raw client messages into respective message objects.
@@ -34,8 +35,8 @@ class Factory
 
 		switch ($type)
 		{
-			case AbstractMessage::TYPE_STATISTICS_POPULAR_CHANNELS:
-				return new StatisticsPopularChannelsMessage($type, $parameters);
+			case AbstractMessage::TYPE_POPULAR_CHANNELS_REQUEST:
+				return new PopularChannelsRequest($parameters);
 			default:
 				throw new UnknownRequestException('Unknown message "' . $type . '"');
 		}

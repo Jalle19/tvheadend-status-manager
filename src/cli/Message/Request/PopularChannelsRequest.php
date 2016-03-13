@@ -1,16 +1,17 @@
 <?php
 
-namespace Jalle19\StatusManager\Message;
+namespace Jalle19\StatusManager\Message\Request;
 
 use Jalle19\StatusManager\Exception\MalformedRequestException;
+use Jalle19\StatusManager\Message\AbstractMessage;
 
 /**
- * Class StatisticsPopularChannelsMessage
- * @package   Jalle19\StatusManager\Message
+ * Class PopularChannelsRequest
+ * @package   Jalle19\StatusManager\Message\Request
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class StatisticsPopularChannelsMessage extends AbstractMessage
+class PopularChannelsRequest extends AbstractMessage
 {
 
 	/**
@@ -25,11 +26,15 @@ class StatisticsPopularChannelsMessage extends AbstractMessage
 
 
 	/**
-	 * @inheritdoc
+	 * PopularChannelsRequest constructor.
+	 *
+	 * @param string $parameters
+	 *
+	 * @throws MalformedRequestException
 	 */
-	public function __construct($type, $parameters)
+	public function __construct($parameters)
 	{
-		parent::__construct($type, $parameters);
+		parent::__construct(self::TYPE_POPULAR_CHANNELS_REQUEST, $parameters);
 
 		/* @var \stdClass $parameters */
 		if (!isset($parameters->instanceName) || empty($parameters->instanceName))
@@ -39,6 +44,24 @@ class StatisticsPopularChannelsMessage extends AbstractMessage
 
 		if (isset($parameters->limit))
 			$this->_limit = $parameters->limit;
+	}
+
+
+	/**
+	 * @return string
+	 */
+	public function getInstanceName()
+	{
+		return $this->_instanceName;
+	}
+
+
+	/**
+	 * @return int
+	 */
+	public function getLimit()
+	{
+		return $this->_limit;
 	}
 
 }

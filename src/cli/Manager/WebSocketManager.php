@@ -5,8 +5,11 @@ namespace Jalle19\StatusManager\Manager;
 use Jalle19\StatusManager\Application;
 use Jalle19\StatusManager\Event\InstanceStatusUpdatesEvent;
 use Jalle19\StatusManager\Exception\MalformedRequestException;
+use Jalle19\StatusManager\Exception\UnhandledMessageException;
 use Jalle19\StatusManager\Exception\UnknownRequestException;
+use Jalle19\StatusManager\Message\AbstractMessage;
 use Jalle19\StatusManager\Message\Factory as MessageFactory;
+use Jalle19\StatusManager\Message\Handler\DelegatesMessagesTrait;
 use Jalle19\StatusManager\Message\StatusUpdatesMessage;
 use Ratchet\ConnectionInterface;
 use Ratchet\Http\HttpServer;
@@ -26,6 +29,8 @@ use React\Socket\Server as ServerSocket;
  */
 class WebSocketManager extends AbstractManager implements MessageComponentInterface
 {
+
+	use DelegatesMessagesTrait;
 
 	/**
 	 * @var IoServer the Websocket server
@@ -136,6 +141,18 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 			$logger->debug('Got message from client (type: {messageType})', [
 				'messageType' => $message->getType(),
 			]);
+
+			// Attempt to delegate the message
+			try
+			{
+				$this->sendMessage($this->tryDelegateMessage($message), $from);
+			}
+			catch (UnhandledMessageException $e)
+			{
+				$logger->error('Unhandled message (type: {messageType})', [
+					'messageType' => $message->getType(),
+				]);
+			}
 		}
 		catch (MalformedRequestException $e)
 		{

@@ -6,6 +6,7 @@ use Jalle19\StatusManager\Configuration\Configuration;
 use Jalle19\StatusManager\Event\Events;
 use Jalle19\StatusManager\Manager\InstanceStateManager;
 use Jalle19\StatusManager\Manager\PersistenceManager;
+use Jalle19\StatusManager\Manager\StatisticsManager;
 use Jalle19\StatusManager\Manager\StatusManager;
 use Jalle19\StatusManager\Manager\WebSocketManager;
 use Psr\Log\LoggerInterface;
@@ -59,6 +60,11 @@ class Application
 	 */
 	private $_persistenceManager;
 
+	/**
+	 * @var StatisticsManager
+	 */
+	private $_statisticsManager;
+
 
 	/**
 	 * Application constructor.
@@ -85,6 +91,9 @@ class Application
 		$this->_instanceStateManager = new InstanceStateManager($this);
 		$this->_webSocketManager     = new WebSocketManager($this, $eventLoop);
 		$this->_persistenceManager   = new PersistenceManager($this);
+		$this->_statisticsManager    = new StatisticsManager($this);
+
+		$this->_webSocketManager->registerMessageHandler($this->_statisticsManager);
 
 		$this->configureEventDispatcher();
 
