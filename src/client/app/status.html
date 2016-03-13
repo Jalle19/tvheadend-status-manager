@@ -28,13 +28,13 @@
         </ul>
 
         <div class="nav navbar-right navbar-text connection-status">
-          <p class="bg-success" data-bind="visible: connected()">
+          <p class="bg-success connected" data-bind="visible: connected()">
             Connected
             <span data-bind="visible: instances().length > 0">, managing <span
                 data-bind="text: instances().length"></span> instance(s)</span>
           </p>
 
-          <p class="bg-danger" data-bind="visible: !connected()">
+          <p class="bg-danger disconnected" data-bind="visible: !connected()">
             Disconnected
           </p>
         </div>
