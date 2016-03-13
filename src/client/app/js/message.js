@@ -1,5 +1,7 @@
 // Define message types
 var MESSAGE_TYPE_STATUS_UPDATES = 'statusUpdates';
+var MESSAGE_TYPE_POPULAR_CHANNELS_REQUEST = 'popularChannelsRequest';
+var MESSAGE_TYPE_POPULAR_CHANNELS_RESPONSE = 'popularChannelsResponse';
 
 /**
  * Represents a message
