@@ -85,7 +85,7 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 		foreach ($this->_connectedClients as $client)
 		{
 			/* @var ConnectionInterface $client */
-			$client->send(json_encode($message));
+			$this->sendMessage($message, $client);
 		}
 	}
 
@@ -148,6 +148,16 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 			// The server itself sometimes sends out messages that are received here, hence debug
 			$logger->debug('Got unknown message from client');
 		}
+	}
+
+
+	/**
+	 * @param AbstractMessage     $message
+	 * @param ConnectionInterface $target
+	 */
+	private function sendMessage(AbstractMessage $message, ConnectionInterface $target)
+	{
+		$target->send(json_encode($message));
 	}
 
 }
