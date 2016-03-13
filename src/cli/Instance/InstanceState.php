@@ -1,11 +1,11 @@
 <?php
 
-namespace Jalle19\StatusManager;
+namespace Jalle19\StatusManager\Instance;
 
 /**
  * Represents the reachability of an instance.
  *
- * @package   Jalle19\StatusManager
+ * @package   Jalle19\StatusManager\Instance
  * @copyright Copyright &copy; Sam Stenvall 2015-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */

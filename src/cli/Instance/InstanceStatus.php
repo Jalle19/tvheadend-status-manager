@@ -1,6 +1,6 @@
 <?php
 
-namespace Jalle19\StatusManager;
+namespace Jalle19\StatusManager\Instance;
 
 use Jalle19\StatusManager\Subscription\StateChange;
 use Jalle19\tvheadend\model\ConnectionStatus;
@@ -9,7 +9,7 @@ use Jalle19\tvheadend\model\SubscriptionStatus;
 
 /**
  * Class InstanceStatus
- * @package   Jalle19\StatusManager
+ * @package   Jalle19\StatusManager\Instance
  * @copyright Copyright &copy; Sam Stenvall 2015-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
@@ -104,7 +104,7 @@ class InstanceStatus implements \JsonSerializable
 
 
 	/**
-	 * @return Subscription\StateChange[]
+	 * @return StateChange[]
 	 */
 	public function getSubscriptionStateChanges()
 	{

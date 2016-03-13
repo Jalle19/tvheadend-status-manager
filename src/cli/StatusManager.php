@@ -12,6 +12,8 @@ use Jalle19\StatusManager\Event\InstanceStateEvent;
 use Jalle19\StatusManager\Event\InstanceStatusUpdatesEvent;
 use Jalle19\StatusManager\Event\SubscriptionSeenEvent;
 use Jalle19\StatusManager\Event\SubscriptionStateChangeEvent;
+use Jalle19\StatusManager\Instance\InstanceStatus;
+use Jalle19\StatusManager\Instance\InstanceStatusCollection;
 use Jalle19\StatusManager\Subscription\StateChangeParser;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\Factory;

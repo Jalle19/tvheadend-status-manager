@@ -2,7 +2,7 @@
 
 namespace Jalle19\StatusManager\Message;
 
-use Jalle19\StatusManager\InstanceStatusCollection;
+use Jalle19\StatusManager\Instance\InstanceStatusCollection;
 
 /**
  * Class StatusUpdatesMessage
