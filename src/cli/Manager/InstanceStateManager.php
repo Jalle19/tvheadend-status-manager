@@ -1,7 +1,8 @@
 <?php
 
-namespace Jalle19\StatusManager;
+namespace Jalle19\StatusManager\Manager;
 
+use Jalle19\StatusManager\Application;
 use Jalle19\StatusManager\Configuration\Instance;
 use Jalle19\StatusManager\Event\Events;
 use Jalle19\StatusManager\Event\InstanceCollectionEvent;
@@ -11,7 +12,7 @@ use Jalle19\StatusManager\Instance\InstanceState;
 /**
  * Keeps track of the reachability for all configures instances.
  *
- * @package   Jalle19\StatusManager
+ * @package   Jalle19\StatusManager\Manager
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */

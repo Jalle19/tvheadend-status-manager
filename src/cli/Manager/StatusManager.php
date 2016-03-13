@@ -1,6 +1,6 @@
 <?php
 
-namespace Jalle19\StatusManager;
+namespace Jalle19\StatusManager\Manager;
 
 use Jalle19\StatusManager\Configuration\Instance;
 use Jalle19\StatusManager\Event\ConnectionSeenEvent;
@@ -18,7 +18,7 @@ use Jalle19\StatusManager\Subscription\StateChangeParser;
 
 /**
  * Class StatusManager
- * @package   Jalle19\StatusManager
+ * @package   Jalle19\StatusManager\Manager
  * @copyright Copyright &copy; Sam Stenvall 2015-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */

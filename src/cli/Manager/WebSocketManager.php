@@ -1,8 +1,12 @@
 <?php
 
-namespace Jalle19\StatusManager;
+namespace Jalle19\StatusManager\Manager;
 
+use Jalle19\StatusManager\Application;
 use Jalle19\StatusManager\Event\InstanceStatusUpdatesEvent;
+use Jalle19\StatusManager\Exception\MalformedRequestException;
+use Jalle19\StatusManager\Exception\UnknownRequestException;
+use Jalle19\StatusManager\Message\Factory as MessageFactory;
 use Jalle19\StatusManager\Message\StatusUpdatesMessage;
 use Ratchet\ConnectionInterface;
 use Ratchet\Http\HttpServer;
@@ -116,11 +120,34 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 
 
 	/**
-	 * @inheritdoc
+	 * Dispatches incoming client messages to the appropriate handlers
+	 *
+	 * @param ConnectionInterface $from
+	 * @param string              $msg
 	 */
 	public function onMessage(ConnectionInterface $from, $msg)
 	{
-		// TODO: Implement onMessage() method.
+		$logger = $this->getApplication()->getLogger();
+
+		try
+		{
+			$message = MessageFactory::factory($msg);
+
+			$logger->debug('Got message from client (type: {messageType})', [
+				'messageType' => $message->getType(),
+			]);
+		}
+		catch (MalformedRequestException $e)
+		{
+			$logger->error('Got malformed message from client (reason: {reason})', [
+				'reason' => $e->getMessage(),
+			]);
+		}
+		catch (UnknownRequestException $e)
+		{
+			// The server itself sometimes sends out messages that are received here, hence debug
+			$logger->debug('Got unknown message from client');
+		}
 	}
 
 }

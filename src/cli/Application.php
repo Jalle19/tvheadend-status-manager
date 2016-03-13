@@ -4,6 +4,10 @@ namespace Jalle19\StatusManager;
 
 use Jalle19\StatusManager\Configuration\Configuration;
 use Jalle19\StatusManager\Event\Events;
+use Jalle19\StatusManager\Manager\InstanceStateManager;
+use Jalle19\StatusManager\Manager\PersistenceManager;
+use Jalle19\StatusManager\Manager\StatusManager;
+use Jalle19\StatusManager\Manager\WebSocketManager;
 use Psr\Log\LoggerInterface;
 use React\EventLoop\Factory as EventLoopFactory;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -51,7 +55,7 @@ class Application
 	private $_webSocketManager;
 
 	/**
-	 * @var PersistenceManager the persistence manager
+	 * @var PersistenceManager
 	 */
 	private $_persistenceManager;
 
