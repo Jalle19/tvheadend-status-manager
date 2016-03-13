@@ -29,6 +29,9 @@ websocket.onmessage = function(event) {
   var data = JSON.parse(event.data);
   var message = parseMessage(data);
 
-  if (message.message === MESSAGE_TYPE_STATUS_UPDATES)
-    handleInstanceUpdates(message.payload);
+  switch (message.type) {
+    case MESSAGE_TYPE_STATUS_UPDATES:
+      handleInstanceUpdates(message.payload);
+      break;
+  }
 };

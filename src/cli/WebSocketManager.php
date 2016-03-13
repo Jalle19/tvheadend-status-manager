@@ -3,6 +3,7 @@
 namespace Jalle19\StatusManager;
 
 use Jalle19\StatusManager\Event\InstanceStatusUpdatesEvent;
+use Jalle19\StatusManager\Message\StatusUpdatesMessage;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
 use Ratchet\Http\HttpServer;
@@ -84,7 +85,7 @@ class WebSocketManager implements MessageComponentInterface
 	public function onInstanceStatusUpdates(InstanceStatusUpdatesEvent $event)
 	{
 		$this->_logger->debug('Broadcasting statuses to all clients');
-		$message = new Message(Message::TYPE_STATUS_UPDATES, $event->getInstanceStatusCollection());
+		$message = new StatusUpdatesMessage($event->getInstanceStatusCollection());
 
 		foreach ($this->_connectedClients as $client)
 		{

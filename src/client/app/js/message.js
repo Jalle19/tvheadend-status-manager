@@ -4,11 +4,12 @@ var MESSAGE_TYPE_STATUS_UPDATES = 'statusUpdates';
 /**
  * Represents a message
  * @param type
+ * @param payload
  * @constructor
  */
-var Message = function(type) {
-  this.message = type;
-  this.payload = undefined;
+var Message = function(type, payload) {
+  this.type = type;
+  this.payload = payload;
 };
 
 /**
@@ -17,9 +18,9 @@ var Message = function(type) {
  * @returns {Message|*}
  */
 function parseMessage(data) {
-  message = new Message(data.message);
+  message = new Message(data.type);
 
-  switch (data.message) {
+  switch (data.type) {
     case MESSAGE_TYPE_STATUS_UPDATES:
       message.payload = data.payload;
   }
