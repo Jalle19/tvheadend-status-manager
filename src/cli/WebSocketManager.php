@@ -2,6 +2,7 @@
 
 namespace Jalle19\StatusManager;
 
+use Jalle19\StatusManager\Configuration\Configuration;
 use Jalle19\StatusManager\Event\InstanceStatusUpdatesEvent;
 use Jalle19\StatusManager\Message\StatusUpdatesMessage;
 use Psr\Log\LoggerInterface;

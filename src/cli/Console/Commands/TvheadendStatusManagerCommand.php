@@ -3,9 +3,9 @@
 namespace Jalle19\StatusManager\Console\Commands;
 
 use Bramus\Monolog\Formatter\ColoredLineFormatter;
-use Jalle19\StatusManager\Configuration;
+use Jalle19\StatusManager\Configuration\Configuration;
+use Jalle19\StatusManager\Configuration\Instance;
 use Jalle19\StatusManager\Exception\InvalidConfigurationException;
-use Jalle19\StatusManager\Instance;
 use Jalle19\StatusManager\StatusManager;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -107,7 +107,7 @@ class TvheadendStatusManagerCommand extends Command
 
 
 	/**
-	 * Configurs the database
+	 * Configures the database
 	 *
 	 * @param Configuration   $configuration
 	 * @param LoggerInterface $logger

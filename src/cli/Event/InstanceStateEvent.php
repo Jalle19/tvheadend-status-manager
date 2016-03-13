@@ -2,7 +2,7 @@
 
 namespace Jalle19\StatusManager\Event;
 
-use Jalle19\StatusManager\Instance;
+use Jalle19\StatusManager\Configuration\Instance;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
