@@ -101,7 +101,7 @@ class WebSocketManager implements MessageComponentInterface
 	 */
 	public function onOpen(ConnectionInterface $conn)
 	{
-		$this->_logger->info('Got client connection');
+		$this->_logger->debug('Got client connection');
 		$this->_connectedClients->attach($conn);
 	}
 
@@ -111,7 +111,7 @@ class WebSocketManager implements MessageComponentInterface
 	 */
 	public function onClose(ConnectionInterface $conn)
 	{
-		$this->_logger->info('Got client disconnect');
+		$this->_logger->debug('Got client disconnect');
 		$this->_connectedClients->detach($conn);
 	}
 
