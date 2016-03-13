@@ -19,11 +19,7 @@ var Message = function(type, payload) {
  */
 function parseMessage(data) {
   message = new Message(data.type);
-
-  switch (data.type) {
-    case MESSAGE_TYPE_STATUS_UPDATES:
-      message.payload = data.payload;
-  }
+  message.payload = data.payload;
 
   return message;
 }
