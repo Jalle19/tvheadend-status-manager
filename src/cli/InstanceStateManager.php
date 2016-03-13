@@ -3,6 +3,8 @@
 namespace Jalle19\StatusManager;
 
 use Jalle19\StatusManager\Configuration\Instance;
+use Jalle19\StatusManager\Event\Events;
+use Jalle19\StatusManager\Event\InstanceCollectionEvent;
 use Jalle19\StatusManager\Event\InstanceStateEvent;
 use Jalle19\StatusManager\Instance\InstanceState;
 
@@ -39,6 +41,17 @@ class InstanceStateManager extends AbstractManager
 		// Attach a state to each instance
 		foreach ($application->getConfiguration()->getInstances() as $instance)
 			$this->_instances->attach($instance, new InstanceState());
+	}
+
+
+	/**
+	 * Handler for the INSTANCE_COLLECTION_REQUEST event
+	 */
+	public function onInstanceCollectionRequest()
+	{
+		// Respond with the instances and their current state
+		$this->getApplication()->getEventDispatcher()
+		     ->dispatch(Events::INSTANCE_COLLECTION, new InstanceCollectionEvent($this->_instances));
 	}
 
 
@@ -109,26 +122,6 @@ class InstanceStateManager extends AbstractManager
 		}
 		else
 			$instanceState->incrementRetryCount();
-	}
-
-
-	/**
-	 * @return \SplObjectStorage
-	 */
-	public function getInstances()
-	{
-		return $this->_instances;
-	}
-
-
-	/**
-	 * @param Instance $instance
-	 *
-	 * @return bool
-	 */
-	public function isReachable(Instance $instance)
-	{
-		return $this->getInstanceState($instance)->isReachable();
 	}
 
 

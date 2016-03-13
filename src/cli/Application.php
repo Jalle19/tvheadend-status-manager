@@ -86,7 +86,7 @@ class Application
 
 		// Configure the event loop and start the application
 		$eventLoop->addPeriodicTimer($this->_configuration->getUpdateInterval(),
-			[$this->_statusManager, 'handleInstanceUpdates']);
+			[$this->_statusManager, 'requestInstances']);
 
 		$this->_eventDispatcher->dispatch(Events::MAIN_LOOP_STARTING);
 		$eventLoop->run();
@@ -121,42 +121,6 @@ class Application
 
 
 	/**
-	 * @return StatusManager
-	 */
-	public function getStatusManager()
-	{
-		return $this->_statusManager;
-	}
-
-
-	/**
-	 * @return InstanceStateManager
-	 */
-	public function getInstanceStateManager()
-	{
-		return $this->_instanceStateManager;
-	}
-
-
-	/**
-	 * @return WebSocketManager
-	 */
-	public function getWebSocketManager()
-	{
-		return $this->_webSocketManager;
-	}
-
-
-	/**
-	 * @return PersistenceManager
-	 */
-	public function getPersistenceManager()
-	{
-		return $this->_persistenceManager;
-	}
-
-
-	/**
 	 * Configures the event dispatcher and attaches event listeners to it
 	 */
 	private function configureEventDispatcher()
@@ -167,6 +131,8 @@ class Application
 			[Events::MAIN_LOOP_STARTING, $this->_statusManager, 'onMainLoopStarted'],
 			[Events::MAIN_LOOP_STARTING, $this->_persistenceManager, 'onMainLoopStarted'],
 			[Events::MAIN_LOOP_STARTING, $this->_webSocketManager, 'onMainLoopStarted'],
+			[Events::INSTANCE_COLLECTION_REQUEST, $this->_instanceStateManager, 'onInstanceCollectionRequest'],
+			[Events::INSTANCE_COLLECTION, $this->_statusManager, 'onInstanceCollection'],
 			[Events::INSTANCE_STATUS_UPDATES, $this->_webSocketManager, 'onInstanceStatusUpdates'],
 			[Events::INSTANCE_STATE_REACHABLE, $this->_instanceStateManager, 'onInstanceReachable'],
 			[Events::INSTANCE_STATE_UNREACHABLE, $this->_instanceStateManager, 'onInstanceUnreachable'],

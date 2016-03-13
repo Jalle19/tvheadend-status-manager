@@ -6,6 +6,7 @@ use Jalle19\StatusManager\Configuration\Instance;
 use Jalle19\StatusManager\Event\ConnectionSeenEvent;
 use Jalle19\StatusManager\Event\Events;
 use Jalle19\StatusManager\Event\InputSeenEvent;
+use Jalle19\StatusManager\Event\InstanceCollectionEvent;
 use Jalle19\StatusManager\Event\InstanceSeenEvent;
 use Jalle19\StatusManager\Event\InstanceStateEvent;
 use Jalle19\StatusManager\Event\InstanceStatusUpdatesEvent;
@@ -60,14 +61,26 @@ class StatusManager extends AbstractManager
 
 
 	/**
-	 * Handles the updates polled from the instances
+	 * Called periodically by the event loop. Here we inform the instance state manager
+	 * that it should send us the current set of instances and their respective state.
 	 */
-	public function handleInstanceUpdates()
+	public function requestInstances()
+	{
+		$this->getApplication()->getEventDispatcher()->dispatch(Events::INSTANCE_COLLECTION_REQUEST);
+	}
+
+
+	/**
+	 * Handles the INSTANCE_COLLECTION event
+	 *
+	 * @param InstanceCollectionEvent $event
+	 */
+	public function onInstanceCollection(InstanceCollectionEvent $event)
 	{
 		$logger          = $this->getApplication()->getLogger();
 		$eventDispatcher = $this->getApplication()->getEventDispatcher();
 
-		$statusCollection = $this->getStatusMessages();
+		$statusCollection = $this->getStatusMessages($event->getInstances());
 
 		foreach ($statusCollection->getInstanceStatuses() as $instanceStatus)
 		{
@@ -111,24 +124,25 @@ class StatusManager extends AbstractManager
 	/**
 	 * Retrieves and returns all status messages for the configured
 	 * instances
+	 *
+	 * @param \SplObjectStorage $instances the instances and their state
+	 *
 	 * @return InstanceStatusCollection
 	 */
-	private function getStatusMessages()
+	private function getStatusMessages($instances)
 	{
-		$instanceStateManager = $this->getApplication()->getInstanceStateManager();
-		$eventDispatcher      = $this->getApplication()->getEventDispatcher();
-
-		$instances  = $instanceStateManager->getInstances();
-		$collection = new InstanceStatusCollection();
+		$eventDispatcher = $this->getApplication()->getEventDispatcher();
+		$collection      = new InstanceStatusCollection();
 
 		foreach ($instances as $instance)
 		{
 			/* @var Instance $instance */
-			$tvheadend    = $instance->getInstance();
-			$instanceName = $instance->getName();
+			$tvheadend     = $instance->getInstance();
+			$instanceName  = $instance->getName();
+			$instanceState = $instances[$instance];
 
 			// Collect statuses from currently reachable instances
-			if ($instanceStateManager->isReachable($instance))
+			if ($instanceState->isReachable())
 			{
 				try
 				{

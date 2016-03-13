@@ -14,6 +14,9 @@ final class Events
 
 	const MAIN_LOOP_STARTING = 'mainLoop.starting';
 
+	const INSTANCE_COLLECTION_REQUEST = 'status.instanceCollectionRequest';
+	const INSTANCE_COLLECTION         = 'status.instanceCollection';
+
 	const INSTANCE_STATUS_UPDATES        = 'status.instanceUpdates';
 	const INSTANCE_STATE_REACHABLE       = 'status.instanceReachable';
 	const INSTANCE_STATE_UNREACHABLE     = 'status.instanceUnreachable';
