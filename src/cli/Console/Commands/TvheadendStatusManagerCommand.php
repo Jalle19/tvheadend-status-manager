@@ -168,10 +168,10 @@ class TvheadendStatusManagerCommand extends Command
 		// Parse sections
 		foreach ($configuration as $section => $values)
 		{
-			switch (self::getSectionType($section))
+			switch (Configuration::getSectionType($section))
 			{
 				case Configuration::SECTION_TYPE_INSTANCE:
-					$instances[] = self::parseInstance($section, $values);
+					$instances[] = Configuration::parseInstance($section, $values);
 					break;
 			}
 		}
@@ -223,49 +223,6 @@ class TvheadendStatusManagerCommand extends Command
 		// Check that the directory of the log file path is writable
 		if ($logFile !== null && !is_writable(dirname($logFile)))
 			throw new InvalidConfigurationException('The specified log file path is not writable');
-	}
-
-
-	/**
-	 * @param string $section
-	 * @param array  $values
-	 *
-	 * @return Instance
-	 */
-	private static function parseInstance($section, $values)
-	{
-		$name    = substr($section, 9);
-		$address = $values['address'];
-		$port    = intval($values['port']);
-
-		$instance = new Instance($name, $address, $port);
-
-		// Optionally set ignored users
-		if (isset($values['ignoredUsers']))
-			$instance->setIgnoredUsers($values['ignoredUsers']);
-
-		// Optionally set credentials
-		if (isset($values['username']) && isset($values['password']))
-			$instance->setCredentials($values['username'], $values['password']);
-
-		return $instance;
-	}
-
-
-	/**
-	 * Returns the determined section type based on the specified section name
-	 *
-	 * @param string $section
-	 *
-	 * @return string
-	 * @throws InvalidConfigurationException if the section type could not be determined
-	 */
-	private static function getSectionType($section)
-	{
-		if (substr($section, 0, 8) === 'instance')
-			return Configuration::SECTION_TYPE_INSTANCE;
-
-		throw new InvalidConfigurationException('Unknown section "' . $section . '"');
 	}
 
 }
