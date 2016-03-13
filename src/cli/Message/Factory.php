@@ -41,4 +41,13 @@ class Factory
 		}
 	}
 
+
+	/**
+	 * Don't allow instantiation
+	 */
+	private function __construct()
+	{
+		
+	}
+
 }
