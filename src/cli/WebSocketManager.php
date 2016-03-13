@@ -2,10 +2,8 @@
 
 namespace Jalle19\StatusManager;
 
-use Jalle19\StatusManager\Configuration\Configuration;
 use Jalle19\StatusManager\Event\InstanceStatusUpdatesEvent;
 use Jalle19\StatusManager\Message\StatusUpdatesMessage;
-use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
 use Ratchet\Http\HttpServer;
 use Ratchet\MessageComponentInterface;
@@ -22,18 +20,8 @@ use React\Socket\Server as ServerSocket;
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class WebSocketManager implements MessageComponentInterface
+class WebSocketManager extends AbstractManager implements MessageComponentInterface
 {
-
-	/**
-	 * @var LoggerInterface the logger
-	 */
-	private $_logger;
-
-	/**
-	 * @var Configuration
-	 */
-	private $_configuration;
 
 	/**
 	 * @var IoServer the Websocket server
@@ -47,21 +35,21 @@ class WebSocketManager implements MessageComponentInterface
 
 
 	/**
-	 * WebSocketEventHandler constructor.
+	 * WebSocketManager constructor.
 	 *
-	 * @param LoggerInterface $logger
-	 * @param Configuration   $configuration
-	 * @param LoopInterface   $loop
+	 * @param Application   $application
+	 * @param LoopInterface $loop
 	 */
-	public function __construct(LoggerInterface $logger, Configuration $configuration, LoopInterface $loop)
+	public function __construct(Application $application, LoopInterface $loop)
 	{
-		$this->_logger           = $logger;
-		$this->_configuration    = $configuration;
+		parent::__construct($application);
+
 		$this->_connectedClients = new \SplObjectStorage();
+		$configuration           = $application->getConfiguration();
 
 		// Create the socket to listen on
 		$socket = new ServerSocket($loop);
-		$socket->listen($this->_configuration->getListenPort(), $this->_configuration->getListenAddress());
+		$socket->listen($configuration->getListenPort(), $configuration->getListenAddress());
 
 		// Create the WebSocket server
 		$this->_websocket = new IoServer(new HttpServer(new WsServer($this)), $socket, $loop);
@@ -73,9 +61,11 @@ class WebSocketManager implements MessageComponentInterface
 	 */
 	public function onMainLoopStarted()
 	{
-		$this->_logger->info('Starting the Websocket server on {address}:{port}', [
-			'address' => $this->_configuration->getListenAddress(),
-			'port'    => $this->_configuration->getListenPort(),
+		$configuration = $this->getApplication()->getConfiguration();
+
+		$this->getApplication()->getLogger()->info('Starting the Websocket server on {address}:{port}', [
+			'address' => $configuration->getListenAddress(),
+			'port'    => $configuration->getListenPort(),
 		]);
 	}
 
@@ -85,7 +75,7 @@ class WebSocketManager implements MessageComponentInterface
 	 */
 	public function onInstanceStatusUpdates(InstanceStatusUpdatesEvent $event)
 	{
-		$this->_logger->debug('Broadcasting statuses to all clients');
+		$this->getApplication()->getLogger()->debug('Broadcasting statuses to all clients');
 		$message = new StatusUpdatesMessage($event->getInstanceStatusCollection());
 
 		foreach ($this->_connectedClients as $client)
@@ -101,7 +91,7 @@ class WebSocketManager implements MessageComponentInterface
 	 */
 	public function onOpen(ConnectionInterface $conn)
 	{
-		$this->_logger->debug('Got client connection');
+		$this->getApplication()->getLogger()->debug('Got client connection');
 		$this->_connectedClients->attach($conn);
 	}
 
@@ -111,7 +101,7 @@ class WebSocketManager implements MessageComponentInterface
 	 */
 	public function onClose(ConnectionInterface $conn)
 	{
-		$this->_logger->debug('Got client disconnect');
+		$this->getApplication()->getLogger()->debug('Got client disconnect');
 		$this->_connectedClients->detach($conn);
 	}
 

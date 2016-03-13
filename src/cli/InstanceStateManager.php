@@ -5,7 +5,6 @@ namespace Jalle19\StatusManager;
 use Jalle19\StatusManager\Configuration\Instance;
 use Jalle19\StatusManager\Event\InstanceStateEvent;
 use Jalle19\StatusManager\Instance\InstanceState;
-use Psr\Log\LoggerInterface;
 
 /**
  * Keeps track of the reachability for all configures instances.
@@ -14,7 +13,7 @@ use Psr\Log\LoggerInterface;
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class InstanceStateManager
+class InstanceStateManager extends AbstractManager
 {
 
 	/**
@@ -23,27 +22,22 @@ class InstanceStateManager
 	const UNREACHABLE_CYCLES_UNTIL_RETRY = 10;
 
 	/**
-	 * @var LoggerInterface
-	 */
-	private $_logger;
-
-	/**
 	 * @var \SplObjectStorage the instances to connect to and their individual state
 	 */
 	private $_instances;
 
 
 	/**
-	 * @param LoggerInterface $logger
-	 * @param Instance[]      $instances
+	 * @inheritdoc
 	 */
-	public function __construct(LoggerInterface $logger, array $instances)
+	public function __construct(Application $application)
 	{
-		$this->_logger    = $logger;
+		parent::__construct($application);
+
 		$this->_instances = new \SplObjectStorage();
 
 		// Attach a state to each instance
-		foreach ($instances as $instance)
+		foreach ($application->getConfiguration()->getInstances() as $instance)
 			$this->_instances->attach($instance, new InstanceState());
 	}
 
@@ -61,9 +55,10 @@ class InstanceStateManager
 		// Update reachability state now that we know the instance is reachable
 		if ($instanceState->getReachability() === InstanceState::MAYBE_REACHABLE)
 		{
-			$this->_logger->info('Instance {instanceName} is now reachable, will start polling for updates', [
-				'instanceName' => $instance->getName(),
-			]);
+			$this->getApplication()->getLogger()
+			     ->info('Instance {instanceName} is now reachable, will start polling for updates', [
+				     'instanceName' => $instance->getName(),
+			     ]);
 
 			$instanceState->setReachability(InstanceState::REACHABLE);
 		}
@@ -83,7 +78,7 @@ class InstanceStateManager
 		// Mark the instance as unreachable
 		$message = 'Instance {instanceName} not reachable, will wait for {cycles} cycles before retrying';
 
-		$this->_logger->alert($message, [
+		$this->getApplication()->getLogger()->alert($message, [
 			'instanceName' => $instance->getName(),
 			'cycles'       => self::UNREACHABLE_CYCLES_UNTIL_RETRY,
 		]);
@@ -108,7 +103,7 @@ class InstanceStateManager
 			$instanceState->setReachability(InstanceState::MAYBE_REACHABLE);
 			$instanceState->resetRetryCount();
 
-			$this->_logger->info('Retrying instance {instanceName} during next cycle', [
+			$this->getApplication()->getLogger()->info('Retrying instance {instanceName} during next cycle', [
 				'instanceName' => $instance->getName(),
 			]);
 		}

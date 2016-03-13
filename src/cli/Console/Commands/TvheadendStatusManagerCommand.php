@@ -3,10 +3,9 @@
 namespace Jalle19\StatusManager\Console\Commands;
 
 use Bramus\Monolog\Formatter\ColoredLineFormatter;
+use Jalle19\StatusManager\Application;
 use Jalle19\StatusManager\Configuration\Configuration;
-use Jalle19\StatusManager\Configuration\Instance;
 use Jalle19\StatusManager\Exception\InvalidConfigurationException;
-use Jalle19\StatusManager\StatusManager;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\PsrLogMessageProcessor;
@@ -74,8 +73,8 @@ class TvheadendStatusManagerCommand extends Command
 		$this->configurePropel($configuration, $logger);
 
 		// Start the application
-		$statusManager = new StatusManager($configuration, $logger);
-		$statusManager->run();
+		$application = new Application($configuration, $logger);
+		$application->run();
 	}
 
 

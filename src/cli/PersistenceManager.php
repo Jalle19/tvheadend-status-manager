@@ -23,7 +23,6 @@ use Jalle19\StatusManager\Subscription\StateChange;
 use Jalle19\tvheadend\model\ConnectionStatus;
 use Jalle19\tvheadend\model\SubscriptionStatus;
 use Jalle19\tvheadend\Tvheadend;
-use Psr\Log\LoggerInterface;
 
 /**
  * Handles persisting of objects to the database
@@ -32,23 +31,8 @@ use Psr\Log\LoggerInterface;
  * @copyright Copyright &copy; Sam Stenvall 2015-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class PersistenceManager
+class PersistenceManager extends AbstractManager
 {
-
-	/**
-	 * @var LoggerInterface
-	 */
-	private $_logger;
-
-
-	/**
-	 * @param LoggerInterface $logger
-	 */
-	public function __construct(LoggerInterface $logger)
-	{
-		$this->_logger = $logger;
-	}
-
 
 	/**
 	 * Removes stale subscriptions that haven't received a stop event
@@ -57,7 +41,7 @@ class PersistenceManager
 	{
 		$numRemoved = SubscriptionQuery::create()->filterByStopped(null)->delete();
 
-		$this->_logger->info('Removed {numRemoved} stale subscriptions', [
+		$this->getApplication()->getLogger()->info('Removed {numRemoved} stale subscriptions', [
 			'numRemoved' => $numRemoved,
 		]);
 	}
@@ -79,7 +63,7 @@ class PersistenceManager
 		$instanceModel->setPrimaryKey($instance->getHostname());
 		$instanceModel->save();
 
-		$this->_logger->info('Stored new instance {instanceName}', [
+		$this->getApplication()->getLogger()->info('Stored new instance {instanceName}', [
 			'instanceName' => $instance->getHostname(),
 		]);
 
@@ -89,10 +73,11 @@ class PersistenceManager
 		$user->setName(User::NAME_DVR);
 		$user->save();
 
-		$this->_logger->info('Stored new special user (instance: {instanceName}, user: {userName})', [
-			'instanceName' => $instance->getHostname(),
-			'userName'     => $user->getName(),
-		]);
+		$this->getApplication()->getLogger()
+		     ->info('Stored new special user (instance: {instanceName}, user: {userName})', [
+			     'instanceName' => $instance->getHostname(),
+			     'userName'     => $user->getName(),
+		     ]);
 	}
 
 
@@ -123,7 +108,7 @@ class PersistenceManager
 		           ->setUser($user)
 		           ->setStarted($connectionStatus->started)->setType($connectionStatus->type)->save();
 
-		$this->_logger->info('Stored new connection (instance: {instanceName}, peer: {peer})', [
+		$this->getApplication()->getLogger()->info('Stored new connection (instance: {instanceName}, peer: {peer})', [
 			'instanceName' => $instanceName,
 			'peer'         => $connectionStatus->peer,
 		]);
@@ -156,13 +141,14 @@ class PersistenceManager
 		      ->setNetwork(Input::parseNetwork($inputStatus))
 		      ->setMux(Input::parseMux($inputStatus))->save();
 
-		$this->_logger->info('Stored new input (instance: {instanceName}, network: {network}, mux: {mux}, weight: {weight})',
-			[
-				'instanceName' => $instanceName,
-				'network'      => $input->getNetwork(),
-				'mux'          => $input->getMux(),
-				'weight'       => $input->getWeight(),
-			]);
+		$this->getApplication()->getLogger()
+		     ->info('Stored new input (instance: {instanceName}, network: {network}, mux: {mux}, weight: {weight})',
+			     [
+				     'instanceName' => $instanceName,
+				     'network'      => $input->getNetwork(),
+				     'mux'          => $input->getMux(),
+				     'weight'       => $input->getWeight(),
+			     ]);
 	}
 
 
@@ -206,12 +192,13 @@ class PersistenceManager
 
 		if ($input === null)
 		{
-			$this->_logger->warning('Got subscription that cannot be tied to an input ({instanceName}, user: {userName}, channel: {channelName})',
-				[
-					'instanceName' => $instanceName,
-					'userName'     => $user !== null ? $user->getName() : 'N/A',
-					'channelName'  => $channel->getName(),
-				]);
+			$this->getApplication()->getLogger()
+			     ->warning('Got subscription that cannot be tied to an input ({instanceName}, user: {userName}, channel: {channelName})',
+				     [
+					     'instanceName' => $instanceName,
+					     'userName'     => $user !== null ? $user->getName() : 'N/A',
+					     'channelName'  => $channel->getName(),
+				     ]);
 		}
 
 		$subscription = new Subscription();
@@ -220,12 +207,13 @@ class PersistenceManager
 		             ->setService($status->service);
 		$subscription->save();
 
-		$this->_logger->info('Stored new subscription (instance: {instanceName}, user: {userName}, channel: {channelName})',
-			[
-				'instanceName' => $instanceName,
-				'userName'     => $user !== null ? $user->getName() : 'N/A',
-				'channelName'  => $channel->getName(),
-			]);
+		$this->getApplication()->getLogger()
+		     ->info('Stored new subscription (instance: {instanceName}, user: {userName}, channel: {channelName})',
+			     [
+				     'instanceName' => $instanceName,
+				     'userName'     => $user !== null ? $user->getName() : 'N/A',
+				     'channelName'  => $channel->getName(),
+			     ]);
 	}
 
 
@@ -249,11 +237,12 @@ class PersistenceManager
 		// EPG grab subscriptions are not stored so we don't want to log these with a high level
 		if ($subscription === null)
 		{
-			$this->_logger->debug('Got subscription stop without a matching start (instance: {instanceName}, subscription: {subscriptionId})',
-				[
-					'instanceName'   => $instanceName,
-					'subscriptionId' => $stateChange->getSubscriptionId(),
-				]);
+			$this->getApplication()->getLogger()
+			     ->debug('Got subscription stop without a matching start (instance: {instanceName}, subscription: {subscriptionId})',
+				     [
+					     'instanceName'   => $instanceName,
+					     'subscriptionId' => $stateChange->getSubscriptionId(),
+				     ]);
 
 			return;
 		}
@@ -264,13 +253,15 @@ class PersistenceManager
 		$user    = $subscription->getUser();
 		$channel = $subscription->getChannel();
 
-		$this->_logger->info('Stored subscription stop (instance: {instanceName}, user: {userName}, channel: {channelName})',
-			[
-				'instanceName' => $instanceName,
-				'userName'     => $user !== null ? $user->getName() : 'N/A',
-				'channelName'  => $channel->getName(),
-			]);
+		$this->getApplication()->getLogger()
+		     ->info('Stored subscription stop (instance: {instanceName}, user: {userName}, channel: {channelName})',
+			     [
+				     'instanceName' => $instanceName,
+				     'userName'     => $user !== null ? $user->getName() : 'N/A',
+				     'channelName'  => $channel->getName(),
+			     ]);
 	}
+
 
 	/**
 	 * @param string $instanceName
@@ -287,7 +278,7 @@ class PersistenceManager
 		$user->setInstanceName($instanceName)->setName($userName);
 		$user->save();
 
-		$this->_logger->info('Stored new user (instance: {instanceName}, username: {userName})', [
+		$this->getApplication()->getLogger()->info('Stored new user (instance: {instanceName}, username: {userName})', [
 			'instanceName' => $instanceName,
 			'userName'     => $userName,
 		]);
@@ -309,10 +300,11 @@ class PersistenceManager
 		$channel->setInstanceName($instanceName)->setName($channelName);
 		$channel->save();
 
-		$this->_logger->info('Stored new channel (instance: {instanceName}, name: {channelName})', [
-			'instanceName' => $instanceName,
-			'channelName'  => $channelName,
-		]);
+		$this->getApplication()->getLogger()
+		     ->info('Stored new channel (instance: {instanceName}, name: {channelName})', [
+			     'instanceName' => $instanceName,
+			     'channelName'  => $channelName,
+		     ]);
 	}
 
 
