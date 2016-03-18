@@ -5,7 +5,7 @@ namespace Jalle19\StatusManager\Console\Commands;
 use Bramus\Monolog\Formatter\ColoredLineFormatter;
 use Jalle19\StatusManager\Application;
 use Jalle19\StatusManager\Configuration\Configuration;
-use Jalle19\StatusManager\Exception\InvalidConfigurationException;
+use Jalle19\StatusManager\Configuration\Parser as ConfigurationParser;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\PsrLogMessageProcessor;
@@ -64,7 +64,7 @@ class TvheadendStatusManagerCommand extends Command
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
 		// Parse the configuration
-		$configuration = $this->parseConfiguration($input);
+		$configuration = ConfigurationParser::parseConfiguration($input);
 
 		// Configure the logger
 		$logger = $this->configureLogger($output, $configuration);
@@ -136,92 +136,6 @@ class TvheadendStatusManagerCommand extends Command
 		$serviceContainer->setDefaultDatasource('tvheadend_status_manager');
 
 		$serviceContainer->setLogger(self::COMMAND_NAME, $logger);
-	}
-
-
-	/**
-	 * Parses the application configuration
-	 *
-	 * @param InputInterface $input
-	 *
-	 * @return Configuration the parsed configuration
-	 * @throws InvalidConfigurationException if the configuration contains unrecoverable errors
-	 */
-	private function parseConfiguration(InputInterface $input)
-	{
-		$this->validateArguments($input);
-
-		$configFile   = $input->getArgument('configFile');
-		$databaseFile = $input->getArgument('databaseFile');
-		$logFile      = $input->getArgument('logFile');
-
-		// Parse the configuration file
-		$configuration = parse_ini_file($configFile, true);
-
-		// Check that the file was parsed
-		if ($configuration === false)
-			throw new InvalidConfigurationException('Failed to parse the specified configuration file');
-
-		$instances = [];
-
-		// Parse sections
-		foreach ($configuration as $section => $values)
-		{
-			switch (Configuration::getSectionType($section))
-			{
-				case Configuration::SECTION_TYPE_INSTANCE:
-					$instances[] = Configuration::parseInstance($section, $values);
-					break;
-			}
-		}
-
-		// Validate the configuration. We need at least one instance.
-		if (empty($instances))
-			throw new InvalidConfigurationException('No instances defined, you need to specify at least one instance');
-
-		// Create the configuration object
-		$config = new Configuration($databaseFile, $instances);
-
-		// Parse options
-		$updateInterval = floatval($input->getOption(Configuration::OPTION_UPDATE_INTERVAL));
-		$config->setUpdateInterval($updateInterval);
-
-		$listenAddress = $input->getOption(Configuration::OPTION_LISTEN_ADDRESS);
-		$config->setListenAddress($listenAddress);
-
-		$listenPort = $input->getOption(Configuration::OPTION_LISTEN_PORT);
-		$config->setListenPort($listenPort);
-
-		$config->setLogPath($logFile);
-
-		return $config;
-	}
-
-
-	/**
-	 * @param InputInterface $input
-	 *
-	 * @throws InvalidConfigurationException if the arguments are invalid
-	 */
-	private function validateArguments(InputInterface $input)
-	{
-		$configFile   = $input->getArgument('configFile');
-		$databasePath = $input->getArgument('databaseFile');
-		$logFile      = $input->getArgument('logFile');
-
-		// Check that the configuration file exists
-		if (!file_exists($configFile))
-			throw new InvalidConfigurationException('The specified configuration file does not exist');
-
-		// Check that the database exists and is writable
-		if (!file_exists($databasePath))
-			throw new InvalidConfigurationException('The specified database path does not exist');
-		else if (!is_writable($databasePath))
-			throw new InvalidConfigurationException('The specified database path is not writable');
-
-		// Check that the directory of the log file path is writable
-		if ($logFile !== null && !is_writable(dirname($logFile)))
-			throw new InvalidConfigurationException('The specified log file path is not writable');
 	}
 
 }

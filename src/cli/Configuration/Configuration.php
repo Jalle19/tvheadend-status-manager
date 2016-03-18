@@ -2,8 +2,6 @@
 
 namespace Jalle19\StatusManager\Configuration;
 
-use Jalle19\StatusManager\Exception\InvalidConfigurationException;
-
 /**
  * Class Configuration
  * @package   Jalle19\StatusManager\Configuration
@@ -162,49 +160,6 @@ class Configuration
 			throw new \RuntimeException('Invalid port specified');
 
 		$this->_listenPort = $listenPort;
-	}
-
-
-	/**
-	 * @param string $section
-	 * @param array  $values
-	 *
-	 * @return Instance
-	 */
-	public static function parseInstance($section, $values)
-	{
-		$name    = substr($section, 9);
-		$address = $values['address'];
-		$port    = intval($values['port']);
-
-		$instance = new Instance($name, $address, $port);
-
-		// Optionally set ignored users
-		if (isset($values['ignoredUsers']))
-			$instance->setIgnoredUsers($values['ignoredUsers']);
-
-		// Optionally set credentials
-		if (isset($values['username']) && isset($values['password']))
-			$instance->setCredentials($values['username'], $values['password']);
-
-		return $instance;
-	}
-
-
-	/**
-	 * Returns the determined section type based on the specified section name
-	 *
-	 * @param string $section
-	 *
-	 * @return string
-	 * @throws InvalidConfigurationException if the section type could not be determined
-	 */
-	public static function getSectionType($section)
-	{
-		if (substr($section, 0, 8) === 'instance')
-			return Configuration::SECTION_TYPE_INSTANCE;
-
-		throw new InvalidConfigurationException('Unknown section "' . $section . '"');
 	}
 
 }
