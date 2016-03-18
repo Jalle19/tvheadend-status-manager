@@ -429,20 +429,20 @@
         },
         {
             "name": "jalle19/php-tvheadend",
-            "version": "0.1.2",
+            "version": "0.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Jalle19/php-tvheadend.git",
-                "reference": "c592a16625d11e4d5bacbdd5fe3d817b881592a1"
+                "reference": "a75b7b63bf79aada55dce97332b64c7dc780f71f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/c592a16625d11e4d5bacbdd5fe3d817b881592a1",
-                "reference": "c592a16625d11e4d5bacbdd5fe3d817b881592a1",
+                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/a75b7b63bf79aada55dce97332b64c7dc780f71f",
+                "reference": "a75b7b63bf79aada55dce97332b64c7dc780f71f",
                 "shasum": ""
             },
             "require": {
-                "monolog/monolog": "1.12.*",
+                "monolog/monolog": "^1.12",
                 "nategood/commando": "0.2.*",
                 "zendframework/zend-http": "2.3.*"
             },
@@ -463,7 +463,7 @@
                 }
             ],
             "description": "Library for communicating with tvheadend",
-            "time": "2016-02-17 21:48:34"
+            "time": "2016-03-18 06:43:51"
         },
         {
             "name": "jalle19/single-command-application",
@@ -549,16 +549,16 @@
         },
         {
             "name": "monolog/monolog",
-            "version": "1.12.0",
+            "version": "1.18.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Seldaek/monolog.git",
-                "reference": "1fbe8c2641f2b163addf49cc5e18f144bec6b19f"
+                "reference": "a5f2734e8c16f3aa21b3da09715d10e15b4d2d45"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/1fbe8c2641f2b163addf49cc5e18f144bec6b19f",
-                "reference": "1fbe8c2641f2b163addf49cc5e18f144bec6b19f",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/a5f2734e8c16f3aa21b3da09715d10e15b4d2d45",
+                "reference": "a5f2734e8c16f3aa21b3da09715d10e15b4d2d45",
                 "shasum": ""
             },
             "require": {
@@ -569,12 +569,16 @@
                 "psr/log-implementation": "1.0.0"
             },
             "require-dev": {
-                "aws/aws-sdk-php": "~2.4, >2.4.8",
+                "aws/aws-sdk-php": "^2.4.9",
                 "doctrine/couchdb": "~1.0@dev",
                 "graylog2/gelf-php": "~1.0",
-                "phpunit/phpunit": "~4.0",
-                "raven/raven": "~0.5",
-                "ruflin/elastica": "0.90.*",
+                "jakub-onderka/php-parallel-lint": "0.9",
+                "php-console/php-console": "^3.1.3",
+                "phpunit/phpunit": "~4.5",
+                "phpunit/phpunit-mock-objects": "2.3.0",
+                "raven/raven": "^0.13",
+                "ruflin/elastica": ">=0.90 <3.0",
+                "swiftmailer/swiftmailer": "~5.3",
                 "videlalvaro/php-amqplib": "~2.4"
             },
             "suggest": {
@@ -583,6 +587,8 @@
                 "ext-amqp": "Allow sending log messages to an AMQP server (1.0+ required)",
                 "ext-mongo": "Allow sending log messages to a MongoDB server",
                 "graylog2/gelf-php": "Allow sending log messages to a GrayLog2 server",
+                "mongodb/mongodb": "Allow sending log messages to a MongoDB server via PHP Driver",
+                "php-console/php-console": "Allow sending log messages to Google Chrome",
                 "raven/raven": "Allow sending log messages to a Sentry server",
                 "rollbar/rollbar": "Allow sending log messages to Rollbar",
                 "ruflin/elastica": "Allow sending log messages to an Elastic Search server",
@@ -591,7 +597,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.12.x-dev"
+                    "dev-master": "2.0.x-dev"
                 }
             },
             "autoload": {
@@ -617,7 +623,7 @@
                 "logging",
                 "psr-3"
             ],
-            "time": "2014-12-29 21:29:35"
+            "time": "2016-03-13 16:08:35"
         },
         {
             "name": "nategood/commando",
