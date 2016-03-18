@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "a60b0dec3d24c4f7d9daa57f0d60c1a3",
-    "content-hash": "3cbd47a291c3fbbfcfb18d542d97ee10",
+    "hash": "d50cf4e00278da9c12cb442fee956359",
+    "content-hash": "bbc740bb93916661c141e10a82805100",
     "packages": [
         {
             "name": "bramus/ansi-php",
@@ -1227,27 +1227,26 @@
         },
         {
             "name": "symfony/monolog-bridge",
-            "version": "v2.7.3",
+            "version": "v3.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/monolog-bridge.git",
-                "reference": "e3d63cd6fd9ffc6dc0d22697c54db2958b95407c"
+                "reference": "a25c2e1aedd4cc915bbdf92410ed8e38f882429f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/monolog-bridge/zipball/e3d63cd6fd9ffc6dc0d22697c54db2958b95407c",
-                "reference": "e3d63cd6fd9ffc6dc0d22697c54db2958b95407c",
+                "url": "https://api.github.com/repos/symfony/monolog-bridge/zipball/a25c2e1aedd4cc915bbdf92410ed8e38f882429f",
+                "reference": "a25c2e1aedd4cc915bbdf92410ed8e38f882429f",
                 "shasum": ""
             },
             "require": {
                 "monolog/monolog": "~1.11",
-                "php": ">=5.3.9"
+                "php": ">=5.5.9"
             },
             "require-dev": {
-                "symfony/console": "~2.4",
-                "symfony/event-dispatcher": "~2.2",
-                "symfony/http-kernel": "~2.4",
-                "symfony/phpunit-bridge": "~2.7"
+                "symfony/console": "~2.8|~3.0",
+                "symfony/event-dispatcher": "~2.8|~3.0",
+                "symfony/http-kernel": "~2.8|~3.0"
             },
             "suggest": {
                 "symfony/console": "For the possibility to show log messages in console commands depending on verbosity settings. You need version ~2.3 of the console for it.",
@@ -1257,13 +1256,16 @@
             "type": "symfony-bridge",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.7-dev"
+                    "dev-master": "3.0-dev"
                 }
             },
             "autoload": {
                 "psr-4": {
                     "Symfony\\Bridge\\Monolog\\": ""
-                }
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -1281,7 +1283,7 @@
             ],
             "description": "Symfony Monolog Bridge",
             "homepage": "https://symfony.com",
-            "time": "2015-06-25 12:52:11"
+            "time": "2016-01-03 15:35:16"
         },
         {
             "name": "symfony/polyfill-mbstring",
