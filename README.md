@@ -21,8 +21,8 @@ broadcasts these updates to potential clients over a Websocket
 2. Run `vagrant up`
 3. Run `vagrant ssh`
 4. Run `./vendor/bin/propel sql:insert && ./vendor/bin/propel migration:migrate` to create the initial database
-4. Copy `app/config.ini.example` to `app/config.ini` and configure your instances
-5. Start the CLI application with `./app/tvheadend-status-manager app/config.ini app/database.sqlite`. You may want to 
+4. Copy `app/config.yml.example` to `app/config.yml` and configure your instances
+5. Start the CLI application with `./app/tvheadend-status-manager app/config.yml app/database.sqlite`. You may want to 
 add `-vv` (or even `-vvv`) to the command to get more output in the console. See the Usage section below for additional 
 parameters
 6. Browse to `http://192.168.47.47/` to use the web interface

@@ -1,0 +1,14 @@
+instances:
+  "first":
+    address: example.com
+    port: 9981
+    username: admin
+    password: admin
+    #ignoredUsers:
+    #  - someone
+      
+  "another":
+    address: another.example.com
+    port: 9981
+    username: admin
+    password: "???"

@@ -4,6 +4,8 @@ namespace Jalle19\StatusManager\Configuration;
 
 use Jalle19\StatusManager\Exception\InvalidConfigurationException;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Yaml\Exception\ParseException;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class Parser
@@ -31,28 +33,24 @@ class Parser
 		$logFile      = $input->getArgument('logFile');
 
 		// Parse the configuration file
-		$configuration = parse_ini_file($configFile, true);
-
-		// Check that the file was parsed
-		if ($configuration === false)
-			throw new InvalidConfigurationException('Failed to parse the specified configuration file');
-
-		$instances = [];
-
-		// Parse sections
-		foreach ($configuration as $section => $values)
+		try
 		{
-			switch (self::getSectionType($section))
-			{
-				case Configuration::SECTION_TYPE_INSTANCE:
-					$instances[] = self::parseInstance($section, $values);
-					break;
-			}
+			$configuration = Yaml::parse(file_get_contents($configFile));
+		}
+		catch (ParseException $e)
+		{
+			throw new InvalidConfigurationException('Failed to parse the specified configuration file: ' . $e->getMessage());
 		}
 
 		// Validate the configuration. We need at least one instance.
-		if (empty($instances))
+		if (!isset($configuration['instances']) || empty($configuration['instances']))
 			throw new InvalidConfigurationException('No instances defined, you need to specify at least one instance');
+
+		$instances = [];
+
+		// Parse instances
+		foreach ($configuration['instances'] as $name => $options)
+			$instances[] = self::parseInstance($name, $options);
 
 		// Create the configuration object
 		$config = new Configuration($databaseFile, $instances);
@@ -101,45 +99,27 @@ class Parser
 
 
 	/**
-	 * @param string $section
-	 * @param array  $values
+	 * @param string $name the name of the instance
+	 * @param array  $options
 	 *
 	 * @return Instance
 	 */
-	private static function parseInstance($section, $values)
+	private static function parseInstance($name, $options)
 	{
-		$name    = substr($section, 9);
-		$address = $values['address'];
-		$port    = intval($values['port']);
+		$address = $options['address'];
+		$port    = intval($options['port']);
 
 		$instance = new Instance($name, $address, $port);
 
 		// Optionally set ignored users
-		if (isset($values['ignoredUsers']))
-			$instance->setIgnoredUsers($values['ignoredUsers']);
+		if (isset($options['ignoredUsers']))
+			$instance->setIgnoredUsers($options['ignoredUsers']);
 
 		// Optionally set credentials
-		if (isset($values['username']) && isset($values['password']))
-			$instance->setCredentials($values['username'], $values['password']);
+		if (isset($options['username']) && isset($options['password']))
+			$instance->setCredentials($options['username'], $options['password']);
 
 		return $instance;
-	}
-
-
-	/**
-	 * Returns the determined section type based on the specified section name
-	 *
-	 * @param string $section
-	 *
-	 * @return string
-	 * @throws InvalidConfigurationException if the section type could not be determined
-	 */
-	private static function getSectionType($section)
-	{
-		if (substr($section, 0, 8) === 'instance')
-			return Configuration::SECTION_TYPE_INSTANCE;
-
-		throw new InvalidConfigurationException('Unknown section "' . $section . '"');
 	}
 
 }
