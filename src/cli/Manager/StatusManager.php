@@ -33,6 +33,7 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 	{
 		return [
 			Events::MAIN_LOOP_STARTING => 'onMainLoopStarted',
+			Events::MAIN_LOOP_TICK     => 'onMainLoopTick',
 		];
 	}
 
@@ -69,8 +70,7 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 
 
 	/**
-	 * Called periodically by the event loop. Here we inform the instance state manager
-	 * that it should send us the current set of instances and their respective state.
+	 * Called periodically by the event loop
 	 */
 	public function onMainLoopTick()
 	{

@@ -13,6 +13,7 @@ final class Events
 {
 
 	const MAIN_LOOP_STARTING = 'mainLoop.starting';
+	const MAIN_LOOP_TICK     = 'mainLoop.ticked';
 
 	const INSTANCE_STATUS_COLLECTION_REQUEST = 'status.instanceStatusCollectionRequest';
 
