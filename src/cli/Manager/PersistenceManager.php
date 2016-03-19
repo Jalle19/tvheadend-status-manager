@@ -59,7 +59,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 	{
 		$numRemoved = SubscriptionQuery::create()->filterByStopped(null)->delete();
 
-		$this->getApplication()->getLogger()->info('Removed {numRemoved} stale subscriptions', [
+		$this->logger->info('Removed {numRemoved} stale subscriptions', [
 			'numRemoved' => $numRemoved,
 		]);
 	}
@@ -81,7 +81,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$instanceModel->setPrimaryKey($instance->getHostname());
 		$instanceModel->save();
 
-		$this->getApplication()->getLogger()->info('Stored new instance {instanceName}', [
+		$this->logger->info('Stored new instance {instanceName}', [
 			'instanceName' => $instance->getHostname(),
 		]);
 
@@ -91,11 +91,11 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$user->setName(User::NAME_DVR);
 		$user->save();
 
-		$this->getApplication()->getLogger()
-		     ->info('Stored new special user (instance: {instanceName}, user: {userName})', [
-			     'instanceName' => $instance->getHostname(),
-			     'userName'     => $user->getName(),
-		     ]);
+		$this->logger
+			->info('Stored new special user (instance: {instanceName}, user: {userName})', [
+				'instanceName' => $instance->getHostname(),
+				'userName'     => $user->getName(),
+			]);
 	}
 
 
@@ -126,7 +126,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		           ->setUser($user)
 		           ->setStarted($connectionStatus->started)->setType($connectionStatus->type)->save();
 
-		$this->getApplication()->getLogger()->info('Stored new connection (instance: {instanceName}, peer: {peer})', [
+		$this->logger->info('Stored new connection (instance: {instanceName}, peer: {peer})', [
 			'instanceName' => $instanceName,
 			'peer'         => $connectionStatus->peer,
 		]);
@@ -159,14 +159,14 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		      ->setNetwork(Input::parseNetwork($inputStatus))
 		      ->setMux(Input::parseMux($inputStatus))->save();
 
-		$this->getApplication()->getLogger()
-		     ->info('Stored new input (instance: {instanceName}, network: {network}, mux: {mux}, weight: {weight})',
-			     [
-				     'instanceName' => $instanceName,
-				     'network'      => $input->getNetwork(),
-				     'mux'          => $input->getMux(),
-				     'weight'       => $input->getWeight(),
-			     ]);
+		$this->logger
+			->info('Stored new input (instance: {instanceName}, network: {network}, mux: {mux}, weight: {weight})',
+				[
+					'instanceName' => $instanceName,
+					'network'      => $input->getNetwork(),
+					'mux'          => $input->getMux(),
+					'weight'       => $input->getWeight(),
+				]);
 	}
 
 
@@ -210,13 +210,13 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 
 		if ($input === null)
 		{
-			$this->getApplication()->getLogger()
-			     ->warning('Got subscription that cannot be tied to an input ({instanceName}, user: {userName}, channel: {channelName})',
-				     [
-					     'instanceName' => $instanceName,
-					     'userName'     => $user !== null ? $user->getName() : 'N/A',
-					     'channelName'  => $channel->getName(),
-				     ]);
+			$this->logger
+				->warning('Got subscription that cannot be tied to an input ({instanceName}, user: {userName}, channel: {channelName})',
+					[
+						'instanceName' => $instanceName,
+						'userName'     => $user !== null ? $user->getName() : 'N/A',
+						'channelName'  => $channel->getName(),
+					]);
 		}
 
 		$subscription = new Subscription();
@@ -225,13 +225,13 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		             ->setService($status->service);
 		$subscription->save();
 
-		$this->getApplication()->getLogger()
-		     ->info('Stored new subscription (instance: {instanceName}, user: {userName}, channel: {channelName})',
-			     [
-				     'instanceName' => $instanceName,
-				     'userName'     => $user !== null ? $user->getName() : 'N/A',
-				     'channelName'  => $channel->getName(),
-			     ]);
+		$this->logger
+			->info('Stored new subscription (instance: {instanceName}, user: {userName}, channel: {channelName})',
+				[
+					'instanceName' => $instanceName,
+					'userName'     => $user !== null ? $user->getName() : 'N/A',
+					'channelName'  => $channel->getName(),
+				]);
 	}
 
 
@@ -255,12 +255,12 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		// EPG grab subscriptions are not stored so we don't want to log these with a high level
 		if ($subscription === null)
 		{
-			$this->getApplication()->getLogger()
-			     ->debug('Got subscription stop without a matching start (instance: {instanceName}, subscription: {subscriptionId})',
-				     [
-					     'instanceName'   => $instanceName,
-					     'subscriptionId' => $stateChange->getSubscriptionId(),
-				     ]);
+			$this->logger
+				->debug('Got subscription stop without a matching start (instance: {instanceName}, subscription: {subscriptionId})',
+					[
+						'instanceName'   => $instanceName,
+						'subscriptionId' => $stateChange->getSubscriptionId(),
+					]);
 
 			return;
 		}
@@ -271,13 +271,13 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$user    = $subscription->getUser();
 		$channel = $subscription->getChannel();
 
-		$this->getApplication()->getLogger()
-		     ->info('Stored subscription stop (instance: {instanceName}, user: {userName}, channel: {channelName})',
-			     [
-				     'instanceName' => $instanceName,
-				     'userName'     => $user !== null ? $user->getName() : 'N/A',
-				     'channelName'  => $channel->getName(),
-			     ]);
+		$this->logger
+			->info('Stored subscription stop (instance: {instanceName}, user: {userName}, channel: {channelName})',
+				[
+					'instanceName' => $instanceName,
+					'userName'     => $user !== null ? $user->getName() : 'N/A',
+					'channelName'  => $channel->getName(),
+				]);
 	}
 
 
@@ -296,7 +296,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$user->setInstanceName($instanceName)->setName($userName);
 		$user->save();
 
-		$this->getApplication()->getLogger()->info('Stored new user (instance: {instanceName}, username: {userName})', [
+		$this->logger->info('Stored new user (instance: {instanceName}, username: {userName})', [
 			'instanceName' => $instanceName,
 			'userName'     => $userName,
 		]);
@@ -318,11 +318,11 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$channel->setInstanceName($instanceName)->setName($channelName);
 		$channel->save();
 
-		$this->getApplication()->getLogger()
-		     ->info('Stored new channel (instance: {instanceName}, name: {channelName})', [
-			     'instanceName' => $instanceName,
-			     'channelName'  => $channelName,
-		     ]);
+		$this->logger
+			->info('Stored new channel (instance: {instanceName}, name: {channelName})', [
+				'instanceName' => $instanceName,
+				'channelName'  => $channelName,
+			]);
 	}
 
 

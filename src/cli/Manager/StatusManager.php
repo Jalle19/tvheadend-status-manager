@@ -43,18 +43,15 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 	 */
 	public function onMainLoopStarted()
 	{
-		$logger        = $this->getApplication()->getLogger();
-		$configuration = $this->getApplication()->getConfiguration();
-
 		// Log information about the database
-		$logger->debug('Using database at {databasePath}', [
-			'databasePath' => $configuration->getDatabasePath(),
+		$this->logger->debug('Using database at {databasePath}', [
+			'databasePath' => $this->configuration->getDatabasePath(),
 		]);
 
 		// Log information about the configured instances
-		$instances = $configuration->getInstances();
+		$instances = $this->configuration->getInstances();
 
-		$logger->info('Managing {instances} instances:', [
+		$this->logger->info('Managing {instances} instances:', [
 			'instances' => count($instances),
 		]);
 
@@ -62,13 +59,12 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 		{
 			$instance = $configuredInstance->getInstance();
 
-			$logger->info('  {address}:{port}', [
+			$this->logger->info('  {address}:{port}', [
 				'address' => $instance->getHostname(),
 				'port'    => $instance->getPort(),
 			]);
 
-			$this->getApplication()->getEventDispatcher()
-			     ->dispatch(Events::INSTANCE_SEEN, new InstanceSeenEvent($instance));
+			$this->eventDispatcher->dispatch(Events::INSTANCE_SEEN, new InstanceSeenEvent($instance));
 		}
 	}
 
@@ -79,7 +75,7 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 	 */
 	public function requestInstances()
 	{
-		$this->getApplication()->getEventDispatcher()->dispatch(Events::INSTANCE_COLLECTION_REQUEST);
+		$this->eventDispatcher->dispatch(Events::INSTANCE_COLLECTION_REQUEST);
 	}
 
 
@@ -90,46 +86,43 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 	 */
 	public function onInstanceCollection(InstanceCollectionEvent $event)
 	{
-		$logger          = $this->getApplication()->getLogger();
-		$eventDispatcher = $this->getApplication()->getEventDispatcher();
-
 		$statusCollection = $this->getStatusMessages($event->getInstances());
 
 		foreach ($statusCollection->getInstanceStatuses() as $instanceStatus)
 		{
 			$instanceName = $instanceStatus->getInstanceName();
 
-			$logger->debug('Got status updates from {instanceName}', [
+			$this->logger->debug('Got status updates from {instanceName}', [
 				'instanceName' => $instanceName,
 			]);
 
 			// Persist connections
 			foreach ($instanceStatus->getConnections() as $connection)
 			{
-				$eventDispatcher->dispatch(Events::CONNECTION_SEEN,
+				$this->eventDispatcher->dispatch(Events::CONNECTION_SEEN,
 					new ConnectionSeenEvent($instanceName, $connection));
 			}
 
 			// Persist inputs
 			foreach ($instanceStatus->getInputs() as $input)
-				$eventDispatcher->dispatch(Events::INPUT_SEEN, new InputSeenEvent($instanceName, $input));
+				$this->eventDispatcher->dispatch(Events::INPUT_SEEN, new InputSeenEvent($instanceName, $input));
 
 			// Persist running subscriptions
 			foreach ($instanceStatus->getSubscriptions() as $subscription)
 			{
-				$eventDispatcher->dispatch(Events::SUBSCRIPTION_SEEN,
+				$this->eventDispatcher->dispatch(Events::SUBSCRIPTION_SEEN,
 					new SubscriptionSeenEvent($instanceName, $subscription));
 			}
 
 			// Handle subscription state changes
 			foreach ($instanceStatus->getSubscriptionStateChanges() as $subscriptionStateChange)
 			{
-				$eventDispatcher->dispatch(Events::SUBSCRIPTION_STATE_CHANGE,
+				$this->eventDispatcher->dispatch(Events::SUBSCRIPTION_STATE_CHANGE,
 					new SubscriptionStateChangeEvent($instanceName, $subscriptionStateChange));
 			}
 		}
 
-		$eventDispatcher->dispatch(Events::INSTANCE_STATUS_UPDATES,
+		$this->eventDispatcher->dispatch(Events::INSTANCE_STATUS_UPDATES,
 			new InstanceStatusUpdatesEvent($statusCollection));
 	}
 
@@ -144,8 +137,7 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 	 */
 	private function getStatusMessages($instances)
 	{
-		$eventDispatcher = $this->getApplication()->getEventDispatcher();
-		$collection      = new InstanceStatusCollection();
+		$collection = new InstanceStatusCollection();
 
 		foreach ($instances as $instance)
 		{
@@ -166,18 +158,18 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 						$tvheadend->getConnectionStatus(),
 						StateChangeParser::parseStateChanges($tvheadend->getLogMessages())));
 
-					$eventDispatcher->dispatch(Events::INSTANCE_STATE_REACHABLE,
+					$this->eventDispatcher->dispatch(Events::INSTANCE_STATE_REACHABLE,
 						new InstanceStateEvent($instance));
 				}
 				catch (\Exception $e)
 				{
-					$eventDispatcher->dispatch(Events::INSTANCE_STATE_UNREACHABLE,
+					$this->eventDispatcher->dispatch(Events::INSTANCE_STATE_UNREACHABLE,
 						new InstanceStateEvent($instance));
 				}
 			}
 			else
 			{
-				$eventDispatcher->dispatch(Events::INSTANCE_STATE_MAYBE_REACHABLE,
+				$this->eventDispatcher->dispatch(Events::INSTANCE_STATE_MAYBE_REACHABLE,
 					new InstanceStateEvent($instance));
 			}
 		}

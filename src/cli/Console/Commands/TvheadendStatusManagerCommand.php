@@ -2,10 +2,11 @@
 
 namespace Jalle19\StatusManager\Console\Commands;
 
+use Auryn\Injector;
 use Bramus\Monolog\Formatter\ColoredLineFormatter;
-use Jalle19\StatusManager\Application;
 use Jalle19\StatusManager\Configuration\Configuration;
 use Jalle19\StatusManager\Configuration\Parser as ConfigurationParser;
+use Jalle19\StatusManager\Event\Events;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\PsrLogMessageProcessor;
@@ -13,12 +14,14 @@ use Propel\Runtime\Connection\ConnectionManagerSingle;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ServiceContainer\StandardServiceContainer;
 use Psr\Log\LoggerInterface;
+use React\EventLoop\Factory as EventLoopFactory;
 use Symfony\Bridge\Monolog\Handler\ConsoleHandler;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  * Class TvheadendStatusManagerCommand
@@ -63,18 +66,41 @@ class TvheadendStatusManagerCommand extends Command
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		// Parse the configuration
+		// Configure Propel and the logger
 		$configuration = ConfigurationParser::parseConfiguration($input);
-
-		// Configure the logger
-		$logger = $this->configureLogger($output, $configuration);
-
-		// Configure Propel
+		$logger        = $this->configureLogger($output, $configuration);
 		$this->configurePropel($configuration, $logger);
 
-		// Start the application
-		$application = new Application($configuration, $logger);
-		$application->run();
+		$injector = new Injector();
+
+		// Configure shared instances
+		$eventLoop       = EventLoopFactory::create();
+		$eventDispatcher = new EventDispatcher();
+		$aliases         = [':logger' => $logger, ':loop' => $eventLoop];
+
+		$injector->share($configuration)
+		         ->share($logger)
+		         ->share($eventDispatcher)
+		         ->share($eventLoop);
+
+		// Create managers
+		$statusManager        = $injector->make('Jalle19\StatusManager\Manager\StatusManager', $aliases);
+		$instanceStateManager = $injector->make('Jalle19\StatusManager\Manager\InstanceStateManager', $aliases);
+		$webSocketManager     = $injector->make('Jalle19\StatusManager\Manager\WebSocketManager', $aliases);
+		$persistenceManager   = $injector->make('Jalle19\StatusManager\Manager\PersistenceManager', $aliases);
+		$statisticsManager    = $injector->make('Jalle19\StatusManager\Manager\StatisticsManager', $aliases);
+
+		// Wire the event dispatcher
+		$webSocketManager->registerMessageHandler($statisticsManager);
+		$eventDispatcher->addSubscriber($statusManager);
+		$eventDispatcher->addSubscriber($instanceStateManager);
+		$eventDispatcher->addSubscriber($webSocketManager);
+		$eventDispatcher->addSubscriber($persistenceManager);
+
+		// Configure the event loop and start the application
+		$eventLoop->addPeriodicTimer($configuration->getUpdateInterval(), [$statusManager, 'requestInstances']);
+		$eventDispatcher->dispatch(Events::MAIN_LOOP_STARTING);
+		$eventLoop->run();
 	}
 
 

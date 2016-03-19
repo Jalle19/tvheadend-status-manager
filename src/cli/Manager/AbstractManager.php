@@ -2,11 +2,12 @@
 
 namespace Jalle19\StatusManager\Manager;
 
-use Jalle19\StatusManager\Application;
+use Jalle19\StatusManager\Configuration\Configuration;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * Base class for all managers. Every manager can access the application, from which common things like the
- * configuration, the logger etc. can be accessed.
+ * Base class for all managers
  *
  * @package   Jalle19\StatusManager\Manager
  * @copyright Copyright &copy; Sam Stenvall 2016-
@@ -16,28 +17,33 @@ abstract class AbstractManager
 {
 
 	/**
-	 * @var Application
+	 * @var Configuration
 	 */
-	private $_application;
+	protected $configuration;
+
+	/**
+	 * @var LoggerInterface
+	 */
+	protected $logger;
+
+	/**
+	 * @var EventDispatcher
+	 */
+	protected $eventDispatcher;
 
 
 	/**
 	 * AbstractManager constructor.
 	 *
-	 * @param Application $application
+	 * @param Configuration   $configuration
+	 * @param LoggerInterface $logger
+	 * @param EventDispatcher $eventDispatcher
 	 */
-	public function __construct(Application $application)
+	public function __construct(Configuration $configuration, LoggerInterface $logger, EventDispatcher $eventDispatcher)
 	{
-		$this->_application = $application;
-	}
-
-
-	/**
-	 * @return Application
-	 */
-	protected function getApplication()
-	{
-		return $this->_application;
+		$this->configuration   = $configuration;
+		$this->logger          = $logger;
+		$this->eventDispatcher = $eventDispatcher;
 	}
 
 }

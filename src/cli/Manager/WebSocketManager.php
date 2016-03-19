@@ -2,7 +2,7 @@
 
 namespace Jalle19\StatusManager\Manager;
 
-use Jalle19\StatusManager\Application;
+use Jalle19\StatusManager\Configuration\Configuration;
 use Jalle19\StatusManager\Event\Events;
 use Jalle19\StatusManager\Event\InstanceStatusUpdatesEvent;
 use Jalle19\StatusManager\Exception\MalformedRequestException;
@@ -12,6 +12,7 @@ use Jalle19\StatusManager\Message\AbstractMessage;
 use Jalle19\StatusManager\Message\Factory as MessageFactory;
 use Jalle19\StatusManager\Message\Handler\DelegatesMessagesTrait;
 use Jalle19\StatusManager\Message\StatusUpdatesMessage;
+use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
 use Ratchet\Http\HttpServer;
 use Ratchet\MessageComponentInterface;
@@ -19,6 +20,7 @@ use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
 use React\EventLoop\LoopInterface;
 use React\Socket\Server as ServerSocket;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -48,15 +50,20 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 	/**
 	 * WebSocketManager constructor.
 	 *
-	 * @param Application   $application
-	 * @param LoopInterface $loop
+	 * @param Configuration   $configuration
+	 * @param LoggerInterface $logger
+	 * @param EventDispatcher $eventDispatcher
+	 * @param LoopInterface   $loop
 	 */
-	public function __construct(Application $application, LoopInterface $loop)
-	{
-		parent::__construct($application);
+	public function __construct(
+		Configuration $configuration,
+		LoggerInterface $logger,
+		EventDispatcher $eventDispatcher,
+		LoopInterface $loop
+	) {
+		parent::__construct($configuration, $logger, $eventDispatcher);
 
 		$this->_connectedClients = new \SplObjectStorage();
-		$configuration           = $application->getConfiguration();
 
 		// Create the socket to listen on
 		$socket = new ServerSocket($loop);
@@ -84,11 +91,9 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 	 */
 	public function onMainLoopStarted()
 	{
-		$configuration = $this->getApplication()->getConfiguration();
-
-		$this->getApplication()->getLogger()->info('Starting the Websocket server on {address}:{port}', [
-			'address' => $configuration->getListenAddress(),
-			'port'    => $configuration->getListenPort(),
+		$this->logger->info('Starting the Websocket server on {address}:{port}', [
+			'address' => $this->configuration->getListenAddress(),
+			'port'    => $this->configuration->getListenPort(),
 		]);
 	}
 
@@ -98,7 +103,7 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 	 */
 	public function onInstanceStatusUpdates(InstanceStatusUpdatesEvent $event)
 	{
-		$this->getApplication()->getLogger()->debug('Broadcasting statuses to all clients');
+		$this->logger->debug('Broadcasting statuses to all clients');
 		$message = new StatusUpdatesMessage($event->getInstanceStatusCollection());
 
 		foreach ($this->_connectedClients as $client)
@@ -114,7 +119,7 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 	 */
 	public function onOpen(ConnectionInterface $conn)
 	{
-		$this->getApplication()->getLogger()->debug('Got client connection');
+		$this->logger->debug('Got client connection');
 		$this->_connectedClients->attach($conn);
 	}
 
@@ -124,7 +129,7 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 	 */
 	public function onClose(ConnectionInterface $conn)
 	{
-		$this->getApplication()->getLogger()->debug('Got client disconnect');
+		$this->logger->debug('Got client disconnect');
 		$this->_connectedClients->detach($conn);
 	}
 
@@ -146,13 +151,11 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 	 */
 	public function onMessage(ConnectionInterface $from, $msg)
 	{
-		$logger = $this->getApplication()->getLogger();
-
 		try
 		{
 			$message = MessageFactory::factory($msg);
 
-			$logger->debug('Got message from client (type: {messageType})', [
+			$this->logger->debug('Got message from client (type: {messageType})', [
 				'messageType' => $message->getType(),
 			]);
 
@@ -163,21 +166,21 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 			}
 			catch (UnhandledMessageException $e)
 			{
-				$logger->error('Unhandled message (type: {messageType})', [
+				$this->logger->error('Unhandled message (type: {messageType})', [
 					'messageType' => $message->getType(),
 				]);
 			}
 		}
 		catch (MalformedRequestException $e)
 		{
-			$logger->error('Got malformed message from client (reason: {reason})', [
+			$this->logger->error('Got malformed message from client (reason: {reason})', [
 				'reason' => $e->getMessage(),
 			]);
 		}
 		catch (UnknownRequestException $e)
 		{
 			// The server itself sometimes sends out messages that are received here, hence debug
-			$logger->debug('Got unknown message from client');
+			$this->logger->debug('Got unknown message from client');
 		}
 	}
 

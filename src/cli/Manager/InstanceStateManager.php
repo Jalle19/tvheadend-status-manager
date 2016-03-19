@@ -2,12 +2,14 @@
 
 namespace Jalle19\StatusManager\Manager;
 
-use Jalle19\StatusManager\Application;
+use Jalle19\StatusManager\Configuration\Configuration;
 use Jalle19\StatusManager\Configuration\Instance;
 use Jalle19\StatusManager\Event\Events;
 use Jalle19\StatusManager\Event\InstanceCollectionEvent;
 use Jalle19\StatusManager\Event\InstanceStateEvent;
 use Jalle19\StatusManager\Instance\InstanceState;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -32,16 +34,20 @@ class InstanceStateManager extends AbstractManager implements EventSubscriberInt
 
 
 	/**
-	 * @inheritdoc
+	 * InstanceStateManager constructor.
+	 *
+	 * @param Configuration   $configuration
+	 * @param LoggerInterface $logger
+	 * @param EventDispatcher $eventDispatcher
 	 */
-	public function __construct(Application $application)
+	public function __construct(Configuration $configuration, LoggerInterface $logger, EventDispatcher $eventDispatcher)
 	{
-		parent::__construct($application);
+		parent::__construct($configuration, $logger, $eventDispatcher);
 
 		$this->_instances = new \SplObjectStorage();
 
 		// Attach a state to each instance
-		foreach ($application->getConfiguration()->getInstances() as $instance)
+		foreach ($configuration->getInstances() as $instance)
 			$this->_instances->attach($instance, new InstanceState());
 	}
 
@@ -66,8 +72,8 @@ class InstanceStateManager extends AbstractManager implements EventSubscriberInt
 	public function onInstanceCollectionRequest()
 	{
 		// Respond with the instances and their current state
-		$this->getApplication()->getEventDispatcher()
-		     ->dispatch(Events::INSTANCE_COLLECTION, new InstanceCollectionEvent($this->_instances));
+		$this->eventDispatcher
+			->dispatch(Events::INSTANCE_COLLECTION, new InstanceCollectionEvent($this->_instances));
 	}
 
 
@@ -84,10 +90,10 @@ class InstanceStateManager extends AbstractManager implements EventSubscriberInt
 		// Update reachability state now that we know the instance is reachable
 		if ($instanceState->getReachability() === InstanceState::MAYBE_REACHABLE)
 		{
-			$this->getApplication()->getLogger()
-			     ->info('Instance {instanceName} is now reachable, will start polling for updates', [
-				     'instanceName' => $instance->getName(),
-			     ]);
+			$this->logger
+				->info('Instance {instanceName} is now reachable, will start polling for updates', [
+					'instanceName' => $instance->getName(),
+				]);
 
 			$instanceState->setReachability(InstanceState::REACHABLE);
 		}
@@ -107,7 +113,7 @@ class InstanceStateManager extends AbstractManager implements EventSubscriberInt
 		// Mark the instance as unreachable
 		$message = 'Instance {instanceName} not reachable, will wait for {cycles} cycles before retrying';
 
-		$this->getApplication()->getLogger()->alert($message, [
+		$this->logger->alert($message, [
 			'instanceName' => $instance->getName(),
 			'cycles'       => self::UNREACHABLE_CYCLES_UNTIL_RETRY,
 		]);
@@ -132,7 +138,7 @@ class InstanceStateManager extends AbstractManager implements EventSubscriberInt
 			$instanceState->setReachability(InstanceState::MAYBE_REACHABLE);
 			$instanceState->resetRetryCount();
 
-			$this->getApplication()->getLogger()->info('Retrying instance {instanceName} during next cycle', [
+			$this->logger->info('Retrying instance {instanceName} during next cycle', [
 				'instanceName' => $instance->getName(),
 			]);
 		}

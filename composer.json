@@ -17,7 +17,8 @@
         "bramus/monolog-colored-line-formatter": "^2.0",
         "propel/propel": "~2.0@dev",
         "jalle19/single-command-application": "^1.0",
-        "symfony/yaml": "^3.0"
+        "symfony/yaml": "^3.0",
+        "rdlowrey/auryn": "^1.4"
     },
     "autoload": {
         "psr-4": {
