@@ -20,28 +20,26 @@ class SubscriptionQuery extends BaseSubscriptionQuery
 	 * @return SubscriptionQuery
 	 * @throws \Propel\Runtime\Exception\PropelException
 	 */
-	public static function createPopularChannelsQuery(Instance $instance, User $user)
+	public function getPopularChannelsQuery(Instance $instance, User $user)
 	{
-		$query = SubscriptionQuery::create();
-
-		$query->withColumn('channel.name', 'channelName');
-		$query->withColumn('user.name', 'userName');
-		$query->withColumn('SUM((julianday(subscription.stopped) - julianday(subscription.started)) * 86400)',
+		$this->withColumn('channel.name', 'channelName');
+		$this->withColumn('user.name', 'userName');
+		$this->withColumn('SUM((julianday(subscription.stopped) - julianday(subscription.started)) * 86400)',
 			'totalTimeSeconds');
-		$query->select(['channelName', 'userName', 'totalTimeSeconds']);
-		$query->joinChannel('channel');
-		$query->joinUser('user');
-		$query->groupBy('channelName');
-		$query->orderBy('totalTimeSeconds', Criteria::DESC);
+		$this->select(['channelName', 'userName', 'totalTimeSeconds']);
+		$this->joinChannel('channel');
+		$this->joinUser('user');
+		$this->groupBy('channelName');
+		$this->orderBy('totalTimeSeconds', Criteria::DESC);
 
 		// Apply filtering
-		$query->filterByStopped(null, Criteria::NOT_EQUAL);
-		$query->filterByInstance($instance);
+		$this->filterByStopped(null, Criteria::NOT_EQUAL);
+		$this->filterByInstance($instance);
 
 		if ($user !== null)
-			$query->filterByUser($user);
+			$this->filterByUser($user);
 
-		return $query;
+		return $this;
 	}
 
 }

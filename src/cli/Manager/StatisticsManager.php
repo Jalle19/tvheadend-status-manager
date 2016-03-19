@@ -55,7 +55,7 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 		$user     = UserQuery::create()->findOneByName($userName);
 
 		// Find the subscriptions
-		$query = SubscriptionQuery::createPopularChannelsQuery($instance, $user);
+		$query = SubscriptionQuery::create()->getPopularChannelsQuery($instance, $user);
 
 		// Apply additional filters not done by the query
 		if ($limit !== null)
