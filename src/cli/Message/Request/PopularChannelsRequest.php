@@ -2,9 +2,6 @@
 
 namespace Jalle19\StatusManager\Message\Request;
 
-use Jalle19\StatusManager\Exception\MalformedRequestException;
-use Jalle19\StatusManager\Message\AbstractMessage;
-
 /**
  * Class PopularChannelsRequest
  * @package   Jalle19\StatusManager\Message\Request
@@ -13,6 +10,11 @@ use Jalle19\StatusManager\Message\AbstractMessage;
  */
 class PopularChannelsRequest extends StatisticsRequest
 {
+
+	/**
+	 * @var string
+	 */
+	private $_userName;
 
 	/**
 	 * @var int
@@ -32,6 +34,18 @@ class PopularChannelsRequest extends StatisticsRequest
 		/* @var \stdClass $parameters */
 		if (isset($parameters->limit))
 			$this->_limit = $parameters->limit;
+
+		if (isset($parameters->userName))
+			$this->_userName = $parameters->userName;
+	}
+
+
+	/**
+	 * @return string
+	 */
+	public function getUserName()
+	{
+		return $this->_userName;
 	}
 
 
