@@ -2,10 +2,15 @@
 
 namespace Jalle19\StatusManager\Manager;
 
+use Jalle19\StatusManager\Database\InstanceQuery;
+use Jalle19\StatusManager\Database\SubscriptionQuery;
+use Jalle19\StatusManager\Database\UserQuery;
 use Jalle19\StatusManager\Message\AbstractMessage;
 use Jalle19\StatusManager\Message\Handler\HandlerInterface;
 use Jalle19\StatusManager\Message\Request\PopularChannelsRequest;
+use Jalle19\StatusManager\Message\Request\StatisticsRequest;
 use Jalle19\StatusManager\Message\Response\PopularChannelsResponse;
+use Propel\Runtime\ActiveQuery\Criteria;
 
 /**
  * Class StatisticsManager
@@ -25,8 +30,11 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 		{
 			case AbstractMessage::TYPE_POPULAR_CHANNELS_REQUEST:
 				/* @var PopularChannelsRequest $message */
-				return $this->getPopularChannels($message->getInstanceName(), $message->getLimit(),
-					$message->getTimeInterval());
+				return new PopularChannelsResponse($message, $this->getPopularChannels(
+					$message->getInstanceName(),
+					$message->getUserName(),
+					$message->getLimit(),
+					$message->getTimeInterval()));
 		}
 
 		return false;
@@ -34,20 +42,68 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 
 
 	/**
-	 * @param string $instanceName
-	 * @param int    $limit
+	 * @param string      $instanceName
+	 * @param string|null $userName
+	 * @param int|null    $limit
+	 * @param string      $timeInterval
+	 *
+	 * @return array the popular channels
+	 */
+	private function getPopularChannels($instanceName, $userName, $limit, $timeInterval)
+	{
+		// Find the instance and the user
+		$instance = InstanceQuery::create()->findOneByName($instanceName);
+		$user     = UserQuery::create()->findOneByName($userName);
+
+		// Find the subscriptions
+		$query = SubscriptionQuery::create();
+		$query->withColumn('channel.name', 'channelName');
+		$query->withColumn('user.name', 'userName');
+		$query->withColumn('SUM((julianday(subscription.stopped) - julianday(subscription.started)) * 86400)',
+			'totalTimeSeconds');
+
+		$query->select(['channelName', 'userName', 'totalTimeSeconds']);
+		$query->joinChannel('channel');
+		$query->joinUser('user');
+		$query->filterByInstance($instance);
+		$query->filterByStopped(null, Criteria::NOT_EQUAL);
+		$query->groupBy('channelName');
+		$query->orderBy('totalTimeSeconds', Criteria::DESC);
+
+		// Apply various filters
+		if ($user !== null)
+			$query->filterByUser($user);
+
+		if ($limit !== null)
+			$query->limit($limit);
+
+		if ($timeInterval !== StatisticsRequest::TIME_INTERVAL_ALL_TIME)
+		{
+			$query->filterByStopped([
+				'min' => $this->getTimeIntervalTimestamp($timeInterval),
+			]);
+		}
+
+		return $query->find()->getData();
+	}
+
+
+	/**
 	 * @param string $timeInterval
 	 *
-	 * @return PopularChannelsResponse
+	 * @return int
 	 */
-	private function getPopularChannels($instanceName, $limit, $timeInterval)
+	private function getTimeIntervalTimestamp($timeInterval)
 	{
-		return new PopularChannelsResponse([
-			'foo'          => $instanceName,
-			'bar'          => [1, 2, 3],
-			'limit'        => $limit,
-			'timeInterval' => $timeInterval,
-		]);
+		$dateTime = new \DateTime();
+
+		switch ($timeInterval)
+		{
+			case StatisticsRequest::TIME_INTERVAL_LAST_MONTH:
+				$dateTime = $dateTime->modify('-1 month');
+		}
+
+		return $dateTime->getTimestamp();
 	}
 
 }
