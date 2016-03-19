@@ -6,7 +6,7 @@ use Jalle19\StatusManager\Configuration\Instance;
 use Jalle19\StatusManager\Event\ConnectionSeenEvent;
 use Jalle19\StatusManager\Event\Events;
 use Jalle19\StatusManager\Event\InputSeenEvent;
-use Jalle19\StatusManager\Event\InstanceCollectionEvent;
+use Jalle19\StatusManager\Event\InstanceStatusCollectionRequestEvent;
 use Jalle19\StatusManager\Event\InstanceSeenEvent;
 use Jalle19\StatusManager\Event\InstanceStateEvent;
 use Jalle19\StatusManager\Event\InstanceStatusUpdatesEvent;
@@ -32,8 +32,7 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 	public static function getSubscribedEvents()
 	{
 		return [
-			Events::MAIN_LOOP_STARTING  => 'onMainLoopStarted',
-			Events::INSTANCE_COLLECTION => 'onInstanceCollection',
+			Events::MAIN_LOOP_STARTING => 'onMainLoopStarted',
 		];
 	}
 
@@ -73,20 +72,13 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 	 * Called periodically by the event loop. Here we inform the instance state manager
 	 * that it should send us the current set of instances and their respective state.
 	 */
-	public function requestInstances()
+	public function onMainLoopTick()
 	{
-		$this->eventDispatcher->dispatch(Events::INSTANCE_COLLECTION_REQUEST);
-	}
+		/* @var InstanceStatusCollectionRequestEvent $event */
+		$event = $this->eventDispatcher->dispatch(Events::INSTANCE_STATUS_COLLECTION_REQUEST,
+			new InstanceStatusCollectionRequestEvent());
 
-
-	/**
-	 * Handles the INSTANCE_COLLECTION event
-	 *
-	 * @param InstanceCollectionEvent $event
-	 */
-	public function onInstanceCollection(InstanceCollectionEvent $event)
-	{
-		$statusCollection = $this->getStatusMessages($event->getInstances());
+		$statusCollection = $this->getStatusMessages($event->getInstanceStatusCollection());
 
 		foreach ($statusCollection->getInstanceStatuses() as $instanceStatus)
 		{

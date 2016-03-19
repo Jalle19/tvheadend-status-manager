@@ -98,7 +98,7 @@ class TvheadendStatusManagerCommand extends Command
 		$eventDispatcher->addSubscriber($persistenceManager);
 
 		// Configure the event loop and start the application
-		$eventLoop->addPeriodicTimer($configuration->getUpdateInterval(), [$statusManager, 'requestInstances']);
+		$eventLoop->addPeriodicTimer($configuration->getUpdateInterval(), [$statusManager, 'onMainLoopTick']);
 		$eventDispatcher->dispatch(Events::MAIN_LOOP_STARTING);
 		$eventLoop->run();
 	}

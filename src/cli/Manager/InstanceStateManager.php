@@ -5,8 +5,8 @@ namespace Jalle19\StatusManager\Manager;
 use Jalle19\StatusManager\Configuration\Configuration;
 use Jalle19\StatusManager\Configuration\Instance;
 use Jalle19\StatusManager\Event\Events;
-use Jalle19\StatusManager\Event\InstanceCollectionEvent;
 use Jalle19\StatusManager\Event\InstanceStateEvent;
+use Jalle19\StatusManager\Event\InstanceStatusCollectionRequestEvent;
 use Jalle19\StatusManager\Instance\InstanceState;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -58,22 +58,22 @@ class InstanceStateManager extends AbstractManager implements EventSubscriberInt
 	public static function getSubscribedEvents()
 	{
 		return [
-			Events::INSTANCE_COLLECTION_REQUEST    => 'onInstanceCollectionRequest',
-			Events::INSTANCE_STATE_REACHABLE       => 'onInstanceReachable',
-			Events::INSTANCE_STATE_UNREACHABLE     => 'onInstanceUnreachable',
-			Events::INSTANCE_STATE_MAYBE_REACHABLE => 'onInstanceMaybeReachable',
+			Events::INSTANCE_STATUS_COLLECTION_REQUEST => 'onInstanceStatusCollectionRequest',
+			Events::INSTANCE_STATE_REACHABLE           => 'onInstanceReachable',
+			Events::INSTANCE_STATE_UNREACHABLE         => 'onInstanceUnreachable',
+			Events::INSTANCE_STATE_MAYBE_REACHABLE     => 'onInstanceMaybeReachable',
 		];
 	}
 
 
 	/**
-	 * Handler for the INSTANCE_COLLECTION_REQUEST event
+	 * Handler for the INSTANCE_STATUS_COLLECTION_EVENT event
+	 *
+	 * @param InstanceStatusCollectionRequestEvent $event
 	 */
-	public function onInstanceCollectionRequest()
+	public function onInstanceStatusCollectionRequest($event)
 	{
-		// Respond with the instances and their current state
-		$this->eventDispatcher
-			->dispatch(Events::INSTANCE_COLLECTION, new InstanceCollectionEvent($this->_instances));
+		$event->setInstanceCollection($this->_instances);
 	}
 
 
