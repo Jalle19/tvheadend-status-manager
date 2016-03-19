@@ -10,7 +10,6 @@ use Jalle19\StatusManager\Message\Handler\HandlerInterface;
 use Jalle19\StatusManager\Message\Request\PopularChannelsRequest;
 use Jalle19\StatusManager\Message\Request\StatisticsRequest;
 use Jalle19\StatusManager\Message\Response\PopularChannelsResponse;
-use Propel\Runtime\ActiveQuery\Criteria;
 
 /**
  * Class StatisticsManager
@@ -56,24 +55,9 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 		$user     = UserQuery::create()->findOneByName($userName);
 
 		// Find the subscriptions
-		$query = SubscriptionQuery::create();
-		$query->withColumn('channel.name', 'channelName');
-		$query->withColumn('user.name', 'userName');
-		$query->withColumn('SUM((julianday(subscription.stopped) - julianday(subscription.started)) * 86400)',
-			'totalTimeSeconds');
+		$query = SubscriptionQuery::createPopularChannelsQuery($instance, $user);
 
-		$query->select(['channelName', 'userName', 'totalTimeSeconds']);
-		$query->joinChannel('channel');
-		$query->joinUser('user');
-		$query->filterByInstance($instance);
-		$query->filterByStopped(null, Criteria::NOT_EQUAL);
-		$query->groupBy('channelName');
-		$query->orderBy('totalTimeSeconds', Criteria::DESC);
-
-		// Apply various filters
-		if ($user !== null)
-			$query->filterByUser($user);
-
+		// Apply additional filters not done by the query
 		if ($limit !== null)
 			$query->limit($limit);
 
