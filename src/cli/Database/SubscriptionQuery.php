@@ -3,6 +3,8 @@
 namespace Jalle19\StatusManager\Database;
 
 use Jalle19\StatusManager\Database\Base\SubscriptionQuery as BaseSubscriptionQuery;
+use Jalle19\StatusManager\Subscription\StateChange;
+use Jalle19\tvheadend\model\SubscriptionStatus;
 use Propel\Runtime\ActiveQuery\Criteria;
 
 /**
@@ -12,6 +14,45 @@ use Propel\Runtime\ActiveQuery\Criteria;
  */
 class SubscriptionQuery extends BaseSubscriptionQuery
 {
+
+	/**
+	 * @param Instance           $instance
+	 * @param User|null          $user
+	 * @param Channel            $channel
+	 * @param SubscriptionStatus $subscription
+	 *
+	 * @return bool
+	 * @throws \Propel\Runtime\Exception\PropelException
+	 */
+	public function hasSubscription(
+		Instance $instance,
+		$user,
+		Channel $channel,
+		SubscriptionStatus $subscription
+	) {
+		// Not all subscriptions are tied to a user
+		$userId = $user !== null ? $user->getId() : null;
+
+		return $this->filterByInstance($instance)->filterByUserId($userId)
+		            ->filterByChannel($channel)
+		            ->filterBySubscriptionId($subscription->id)->filterByStarted($subscription->start)
+		            ->findOne() !== null;
+	}
+
+
+	/**
+	 * @param string $instanceName
+	 * @param int    $subscriptionId
+	 *
+	 * @return Subscription
+	 */
+	public function getNewestMatching($instanceName, $subscriptionId)
+	{
+		return $this->filterByInstanceName($instanceName)
+		            ->filterBySubscriptionId($subscriptionId)
+		            ->addDescendingOrderByColumn('started')->findOne();
+	}
+
 
 	/**
 	 * @param Instance $instance

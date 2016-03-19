@@ -19,6 +19,17 @@ class InputQuery extends BaseInputQuery
 {
 
 	/**
+	 * @param string $uuid
+	 *
+	 * @return bool
+	 */
+	public function hasInput($uuid)
+	{
+		return $this->findPk($uuid) !== null;
+	}
+
+
+	/**
 	 * @param string             $instanceName
 	 * @param SubscriptionStatus $status
 	 *

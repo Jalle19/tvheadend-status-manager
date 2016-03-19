@@ -16,9 +16,25 @@ class Input extends BaseInput
 	/**
 	 * @param InputStatus $inputStatus
 	 *
+	 * @return $this|Input
+	 */
+	public function setFromInputStatus(InputStatus $inputStatus)
+	{
+		$this->setPrimaryKey($inputStatus->uuid);
+
+		return $this->setInput($inputStatus->input)
+		            ->setWeight($inputStatus->weight)
+		            ->setNetwork(self::parseNetwork($inputStatus))
+		            ->setMux(self::parseMux($inputStatus));
+	}
+
+
+	/**
+	 * @param InputStatus $inputStatus
+	 *
 	 * @return string
 	 */
-	public static function parseMux(InputStatus $inputStatus)
+	private static function parseMux(InputStatus $inputStatus)
 	{
 		$parts = self::getStreamParts($inputStatus);
 
@@ -31,7 +47,7 @@ class Input extends BaseInput
 	 *
 	 * @return string
 	 */
-	public static function parseNetwork(InputStatus $inputStatus)
+	private static function parseNetwork(InputStatus $inputStatus)
 	{
 		$parts = self::getStreamParts($inputStatus);
 

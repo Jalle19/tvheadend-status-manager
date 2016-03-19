@@ -21,9 +21,7 @@ use Jalle19\StatusManager\Event\InstanceSeenEvent;
 use Jalle19\StatusManager\Event\SubscriptionSeenEvent;
 use Jalle19\StatusManager\Event\SubscriptionStateChangeEvent;
 use Jalle19\StatusManager\Subscription\StateChange;
-use Jalle19\tvheadend\model\ConnectionStatus;
 use Jalle19\tvheadend\model\SubscriptionStatus;
-use Jalle19\tvheadend\Tvheadend;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -74,7 +72,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 	{
 		$instance = $event->getInstance();
 
-		if ($this->hasInstance($instance))
+		if (InstanceQuery::create()->hasInstance($instance))
 			return;
 
 		$instanceModel = new Database\Instance();
@@ -107,7 +105,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$instanceName     = $event->getInstance();
 		$connectionStatus = $event->getConnection();
 
-		if ($this->hasConnection($instanceName, $connectionStatus))
+		if (ConnectionQuery::create()->hasConnection($instanceName, $connectionStatus))
 			return;
 
 		$user = null;
@@ -142,7 +140,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$inputStatus  = $event->getInput();
 
 		// Update the input and started fields for existing inputs
-		if ($this->hasInput($inputStatus->uuid))
+		if (InputQuery::create()->hasInput($inputStatus->uuid))
 		{
 			$input = InputQuery::create()->findPk($inputStatus->uuid);
 			$input->setStarted(new \DateTime())->setWeight($inputStatus->weight);
@@ -151,13 +149,9 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		}
 
 		$input = new Input();
-		$input->setPrimaryKey($inputStatus->uuid);
 		$input->setInstanceName($instanceName)
 		      ->setStarted(new \DateTime())
-		      ->setInput($inputStatus->input)
-		      ->setWeight($inputStatus->weight)
-		      ->setNetwork(Input::parseNetwork($inputStatus))
-		      ->setMux(Input::parseMux($inputStatus))->save();
+		      ->setFromInputStatus($inputStatus)->save();
 
 		$this->logger
 			->info('Stored new input (instance: {instanceName}, network: {network}, mux: {mux}, weight: {weight})',
@@ -202,7 +196,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$this->onChannelSeen($instanceName, $status->channel);
 		$channel = ChannelQuery::create()->filterByInstance($instance)->filterByName($status->channel)->findOne();
 
-		if ($this->hasSubscription($instance, $user, $channel, $status))
+		if (SubscriptionQuery::create()->hasSubscription($instance, $user, $channel, $status))
 			return;
 
 		// Try to determine which input is used by the subscription
@@ -248,9 +242,8 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 			return;
 
 		// Find the latest matching subscription
-		$subscription = SubscriptionQuery::create()->filterByInstanceName($instanceName)
-		                                 ->filterBySubscriptionId($stateChange->getSubscriptionId())
-		                                 ->addDescendingOrderByColumn('started')->findOne();
+		$subscription = SubscriptionQuery::create()
+		                                 ->getNewestMatching($instanceName, $stateChange->getSubscriptionId());
 
 		// EPG grab subscriptions are not stored so we don't want to log these with a high level
 		if ($subscription === null)
@@ -289,7 +282,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 	 */
 	private function onUserSeen($instanceName, $userName)
 	{
-		if ($this->hasUser($instanceName, $userName))
+		if (UserQuery::create()->hasUser($instanceName, $userName))
 			return;
 
 		$user = new User();
@@ -311,7 +304,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 	 */
 	private function onChannelSeen($instanceName, $channelName)
 	{
-		if ($this->hasChannel($instanceName, $channelName))
+		if (ChannelQuery::create()->hasChannel($instanceName, $channelName))
 			return;
 
 		$channel = new Channel();
@@ -323,91 +316,6 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 				'instanceName' => $instanceName,
 				'channelName'  => $channelName,
 			]);
-	}
-
-
-	/**
-	 * @param Tvheadend $instance
-	 *
-	 * @return bool whether the instance exists in the database
-	 */
-	private function hasInstance(Tvheadend $instance)
-	{
-		return InstanceQuery::create()->findPk($instance->getHostname()) !== null;
-	}
-
-
-	/**
-	 * @param                  $instanceName
-	 * @param ConnectionStatus $connectionStatus
-	 *
-	 * @return bool whether the connection exists in the database
-	 */
-	private function hasConnection($instanceName, ConnectionStatus $connectionStatus)
-	{
-		return ConnectionQuery::create()->filterByInstanceName($instanceName)->filterByPeer($connectionStatus->peer)
-		                      ->filterByStarted($connectionStatus->started)->findOne() !== null;
-	}
-
-
-	/**
-	 * @param string $uuid
-	 *
-	 * @return bool
-	 */
-	private function hasInput($uuid)
-	{
-		return InputQuery::create()->findPk($uuid) !== null;
-	}
-
-
-	/**
-	 * @param string $instanceName
-	 * @param string $userName
-	 *
-	 * @return bool
-	 */
-	private function hasUser($instanceName, $userName)
-	{
-		return UserQuery::create()->filterByInstanceName($instanceName)->filterByName($userName)->findOne() !== null;
-	}
-
-
-	/**
-	 * @param string $instanceName
-	 * @param string $channelName
-	 *
-	 * @return bool
-	 */
-	private function hasChannel($instanceName, $channelName)
-	{
-		return ChannelQuery::create()->filterByInstanceName($instanceName)->filterByName($channelName)
-		                   ->findOne() !== null;
-	}
-
-
-	/**
-	 * @param Database\Instance  $instance
-	 * @param User|null          $user
-	 * @param Channel            $channel
-	 * @param SubscriptionStatus $subscription
-	 *
-	 * @return bool
-	 * @throws \Propel\Runtime\Exception\PropelException
-	 */
-	private function hasSubscription(
-		Database\Instance $instance,
-		$user,
-		Channel $channel,
-		SubscriptionStatus $subscription
-	) {
-		// Not all subscriptions are tied to a user
-		$userId = $user !== null ? $user->getId() : null;
-
-		return SubscriptionQuery::create()->filterByInstance($instance)->filterByUserId($userId)
-		                        ->filterByChannel($channel)
-		                        ->filterBySubscriptionId($subscription->id)->filterByStarted($subscription->start)
-		                        ->findOne() !== null;
 	}
 
 }
