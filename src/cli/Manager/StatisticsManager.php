@@ -25,7 +25,8 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 		{
 			case AbstractMessage::TYPE_POPULAR_CHANNELS_REQUEST:
 				/* @var PopularChannelsRequest $message */
-				return $this->getPopularChannels($message->getInstanceName(), $message->getLimit());
+				return $this->getPopularChannels($message->getInstanceName(), $message->getLimit(),
+					$message->getTimeInterval());
 		}
 
 		return false;
@@ -35,15 +36,17 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 	/**
 	 * @param string $instanceName
 	 * @param int    $limit
+	 * @param string $timeInterval
 	 *
 	 * @return PopularChannelsResponse
 	 */
-	private function getPopularChannels($instanceName, $limit)
+	private function getPopularChannels($instanceName, $limit, $timeInterval)
 	{
 		return new PopularChannelsResponse([
-			'foo'   => $instanceName,
-			'bar'   => [1, 2, 3],
-			'limit' => $limit,
+			'foo'          => $instanceName,
+			'bar'          => [1, 2, 3],
+			'limit'        => $limit,
+			'timeInterval' => $timeInterval,
 		]);
 	}
 
