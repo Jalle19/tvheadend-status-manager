@@ -7,9 +7,13 @@ use Jalle19\StatusManager\Database\SubscriptionQuery;
 use Jalle19\StatusManager\Database\UserQuery;
 use Jalle19\StatusManager\Message\AbstractMessage;
 use Jalle19\StatusManager\Message\Handler\HandlerInterface;
+use Jalle19\StatusManager\Message\Request\MostActiveWatchersRequest;
 use Jalle19\StatusManager\Message\Request\PopularChannelsRequest;
 use Jalle19\StatusManager\Message\Request\StatisticsRequest;
+use Jalle19\StatusManager\Message\Response\MostActiveWatchersResponse;
 use Jalle19\StatusManager\Message\Response\PopularChannelsResponse;
+use Jalle19\tvheadend\exception\RequestFailedException;
+use Propel\Runtime\Exception\PropelException;
 
 /**
  * Class StatisticsManager
@@ -25,15 +29,29 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 	 */
 	public function handleMessage(AbstractMessage $message)
 	{
-		switch ($message->getType())
+		// Wrap database exceptions in the more generic RequestFailedException
+		try
 		{
-			case AbstractMessage::TYPE_POPULAR_CHANNELS_REQUEST:
-				/* @var PopularChannelsRequest $message */
-				return new PopularChannelsResponse($message, $this->getPopularChannels(
-					$message->getInstanceName(),
-					$message->getUserName(),
-					$message->getLimit(),
-					$message->getTimeInterval()));
+			switch ($message->getType())
+			{
+				case AbstractMessage::TYPE_POPULAR_CHANNELS_REQUEST:
+					/* @var PopularChannelsRequest $message */
+					return new PopularChannelsResponse($message, $this->getPopularChannels(
+						$message->getInstanceName(),
+						$message->getUserName(),
+						$message->getLimit(),
+						$message->getTimeInterval()));
+				case AbstractMessage::TYPE_MOST_ACTIVE_WATCHERS_REQUEST:
+					/* @var MostActiveWatchersRequest $message */
+					return new MostActiveWatchersResponse($message, $this->getMostActiveWatchers(
+						$message->getInstanceName(),
+						$message->getLimit(),
+						$message->getTimeInterval()));
+			}
+		}
+		catch (PropelException $e)
+		{
+			throw new RequestFailedException('A database error occured: ' . $e->getMessage());
 		}
 
 		return false;
@@ -66,6 +84,33 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 			$query->filterByStopped([
 				'min' => $this->getTimeIntervalTimestamp($timeInterval),
 			]);
+		}
+
+		return $query->find()->getData();
+	}
+
+
+	/**
+	 * @param string $instanceName
+	 * @param int    $limit
+	 * @param string $timeInterval
+	 *
+	 * @return array
+	 */
+	private function getMostActiveWatchers($instanceName, $limit, $timeInterval)
+	{
+		$instance = InstanceQuery::create()->findOneByName($instanceName);
+		$query    = UserQuery::create()->getMostActiveWatchersQuery($instance);
+
+		// Apply additional filters not done by the query
+		if ($limit !== null)
+			$query->limit($limit);
+
+		if ($timeInterval !== StatisticsRequest::TIME_INTERVAL_ALL_TIME)
+		{
+			$query->useSubscriptionQuery()->filterByStopped([
+				'min' => $this->getTimeIntervalTimestamp($timeInterval),
+			])->endUse();
 		}
 
 		return $query->find()->getData();

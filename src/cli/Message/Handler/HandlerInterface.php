@@ -2,6 +2,7 @@
 
 namespace Jalle19\StatusManager\Message\Handler;
 
+use Jalle19\StatusManager\Exception\RequestFailedException;
 use Jalle19\StatusManager\Message\AbstractMessage;
 
 /**
@@ -17,6 +18,7 @@ interface HandlerInterface
 	 * @param AbstractMessage $message
 	 *
 	 * @return AbstractMessage|false
+	 * @throws RequestFailedException if the request fails
 	 */
 	public function handleMessage(AbstractMessage $message);
 

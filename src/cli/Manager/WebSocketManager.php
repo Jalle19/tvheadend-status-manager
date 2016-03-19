@@ -12,6 +12,7 @@ use Jalle19\StatusManager\Message\AbstractMessage;
 use Jalle19\StatusManager\Message\Factory as MessageFactory;
 use Jalle19\StatusManager\Message\Handler\DelegatesMessagesTrait;
 use Jalle19\StatusManager\Message\StatusUpdatesMessage;
+use Jalle19\tvheadend\exception\RequestFailedException;
 use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
 use Ratchet\Http\HttpServer;
@@ -163,6 +164,10 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 			try
 			{
 				$this->sendMessage($this->tryDelegateMessage($message), $from);
+			}
+			catch (RequestFailedException $e)
+			{
+				$this->logger->critical('The request failed: ' . $e->getMessage());
 			}
 			catch (UnhandledMessageException $e)
 			{
