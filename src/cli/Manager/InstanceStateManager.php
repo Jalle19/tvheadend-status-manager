@@ -8,6 +8,7 @@ use Jalle19\StatusManager\Event\Events;
 use Jalle19\StatusManager\Event\InstanceCollectionEvent;
 use Jalle19\StatusManager\Event\InstanceStateEvent;
 use Jalle19\StatusManager\Instance\InstanceState;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Keeps track of the reachability for all configures instances.
@@ -16,7 +17,7 @@ use Jalle19\StatusManager\Instance\InstanceState;
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class InstanceStateManager extends AbstractManager
+class InstanceStateManager extends AbstractManager implements EventSubscriberInterface
 {
 
 	/**
@@ -42,6 +43,20 @@ class InstanceStateManager extends AbstractManager
 		// Attach a state to each instance
 		foreach ($application->getConfiguration()->getInstances() as $instance)
 			$this->_instances->attach($instance, new InstanceState());
+	}
+
+
+	/**
+	 * @inheritdoc
+	 */
+	public static function getSubscribedEvents()
+	{
+		return [
+			Events::INSTANCE_COLLECTION_REQUEST    => 'onInstanceCollectionRequest',
+			Events::INSTANCE_STATE_REACHABLE       => 'onInstanceReachable',
+			Events::INSTANCE_STATE_UNREACHABLE     => 'onInstanceUnreachable',
+			Events::INSTANCE_STATE_MAYBE_REACHABLE => 'onInstanceMaybeReachable',
+		];
 	}
 
 

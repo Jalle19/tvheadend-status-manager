@@ -3,6 +3,7 @@
 namespace Jalle19\StatusManager\Manager;
 
 use Jalle19\StatusManager\Application;
+use Jalle19\StatusManager\Event\Events;
 use Jalle19\StatusManager\Event\InstanceStatusUpdatesEvent;
 use Jalle19\StatusManager\Exception\MalformedRequestException;
 use Jalle19\StatusManager\Exception\UnhandledMessageException;
@@ -18,6 +19,7 @@ use Ratchet\Server\IoServer;
 use Ratchet\WebSocket\WsServer;
 use React\EventLoop\LoopInterface;
 use React\Socket\Server as ServerSocket;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Handles events related to the WebSocket. Events are either triggered from Ratchet (onOpen etc.)
@@ -27,7 +29,7 @@ use React\Socket\Server as ServerSocket;
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class WebSocketManager extends AbstractManager implements MessageComponentInterface
+class WebSocketManager extends AbstractManager implements MessageComponentInterface, EventSubscriberInterface
 {
 
 	use DelegatesMessagesTrait;
@@ -62,6 +64,18 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 
 		// Create the WebSocket server
 		$this->_websocket = new IoServer(new HttpServer(new WsServer($this)), $socket, $loop);
+	}
+
+
+	/**
+	 * @inheritdoc
+	 */
+	public static function getSubscribedEvents()
+	{
+		return [
+			Events::MAIN_LOOP_STARTING      => 'onMainLoopStarted',
+			Events::INSTANCE_STATUS_UPDATES => 'onInstanceStatusUpdates',
+		];
 	}
 
 

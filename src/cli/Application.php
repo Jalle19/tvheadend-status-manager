@@ -95,7 +95,12 @@ class Application
 
 		$this->_webSocketManager->registerMessageHandler($this->_statisticsManager);
 
-		$this->configureEventDispatcher();
+		// Configure the event dispatcher
+		$this->_eventDispatcher = new EventDispatcher();
+		$this->_eventDispatcher->addSubscriber($this->_statusManager);
+		$this->_eventDispatcher->addSubscriber($this->_instanceStateManager);
+		$this->_eventDispatcher->addSubscriber($this->_webSocketManager);
+		$this->_eventDispatcher->addSubscriber($this->_persistenceManager);
 
 		// Configure the event loop and start the application
 		$eventLoop->addPeriodicTimer($this->_configuration->getUpdateInterval(),
@@ -130,35 +135,6 @@ class Application
 	public function getEventDispatcher()
 	{
 		return $this->_eventDispatcher;
-	}
-
-
-	/**
-	 * Configures the event dispatcher and attaches event listeners to it
-	 */
-	private function configureEventDispatcher()
-	{
-		$this->_eventDispatcher = new EventDispatcher();
-
-		$eventDefinitions = [
-			[Events::MAIN_LOOP_STARTING, $this->_statusManager, 'onMainLoopStarted'],
-			[Events::MAIN_LOOP_STARTING, $this->_persistenceManager, 'onMainLoopStarted'],
-			[Events::MAIN_LOOP_STARTING, $this->_webSocketManager, 'onMainLoopStarted'],
-			[Events::INSTANCE_COLLECTION_REQUEST, $this->_instanceStateManager, 'onInstanceCollectionRequest'],
-			[Events::INSTANCE_COLLECTION, $this->_statusManager, 'onInstanceCollection'],
-			[Events::INSTANCE_STATUS_UPDATES, $this->_webSocketManager, 'onInstanceStatusUpdates'],
-			[Events::INSTANCE_STATE_REACHABLE, $this->_instanceStateManager, 'onInstanceReachable'],
-			[Events::INSTANCE_STATE_UNREACHABLE, $this->_instanceStateManager, 'onInstanceUnreachable'],
-			[Events::INSTANCE_STATE_MAYBE_REACHABLE, $this->_instanceStateManager, 'onInstanceMaybeReachable'],
-			[Events::INSTANCE_SEEN, $this->_persistenceManager, 'onInstanceSeen'],
-			[Events::CONNECTION_SEEN, $this->_persistenceManager, 'onConnectionSeen'],
-			[Events::INPUT_SEEN, $this->_persistenceManager, 'onInputSeen'],
-			[Events::SUBSCRIPTION_SEEN, $this->_persistenceManager, 'onSubscriptionSeen'],
-			[Events::SUBSCRIPTION_STATE_CHANGE, $this->_persistenceManager, 'onSubscriptionStateChange'],
-		];
-
-		foreach ($eventDefinitions as $eventDefinition)
-			$this->_eventDispatcher->addListener($eventDefinition[0], [$eventDefinition[1], $eventDefinition[2]]);
 	}
 
 }

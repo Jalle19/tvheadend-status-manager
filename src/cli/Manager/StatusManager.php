@@ -15,6 +15,7 @@ use Jalle19\StatusManager\Event\SubscriptionStateChangeEvent;
 use Jalle19\StatusManager\Instance\InstanceStatus;
 use Jalle19\StatusManager\Instance\InstanceStatusCollection;
 use Jalle19\StatusManager\Subscription\StateChangeParser;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Class StatusManager
@@ -22,8 +23,20 @@ use Jalle19\StatusManager\Subscription\StateChangeParser;
  * @copyright Copyright &copy; Sam Stenvall 2015-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class StatusManager extends AbstractManager
+class StatusManager extends AbstractManager implements EventSubscriberInterface
 {
+
+	/**
+	 * @inheritdoc
+	 */
+	public static function getSubscribedEvents()
+	{
+		return [
+			Events::MAIN_LOOP_STARTING  => 'onMainLoopStarted',
+			Events::INSTANCE_COLLECTION => 'onInstanceCollection',
+		];
+	}
+
 
 	/**
 	 * Called right before the main loop is started

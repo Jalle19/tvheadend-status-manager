@@ -15,6 +15,7 @@ use Jalle19\StatusManager\Database\SubscriptionQuery;
 use Jalle19\StatusManager\Database\User;
 use Jalle19\StatusManager\Database\UserQuery;
 use Jalle19\StatusManager\Event\ConnectionSeenEvent;
+use Jalle19\StatusManager\Event\Events;
 use Jalle19\StatusManager\Event\InputSeenEvent;
 use Jalle19\StatusManager\Event\InstanceSeenEvent;
 use Jalle19\StatusManager\Event\SubscriptionSeenEvent;
@@ -23,6 +24,7 @@ use Jalle19\StatusManager\Subscription\StateChange;
 use Jalle19\tvheadend\model\ConnectionStatus;
 use Jalle19\tvheadend\model\SubscriptionStatus;
 use Jalle19\tvheadend\Tvheadend;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Handles persisting of objects to the database
@@ -31,8 +33,24 @@ use Jalle19\tvheadend\Tvheadend;
  * @copyright Copyright &copy; Sam Stenvall 2015-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class PersistenceManager extends AbstractManager
+class PersistenceManager extends AbstractManager implements EventSubscriberInterface
 {
+
+	/**
+	 * @inheritdoc
+	 */
+	public static function getSubscribedEvents()
+	{
+		return [
+			Events::MAIN_LOOP_STARTING        => 'onMainLoopStarted',
+			Events::INSTANCE_SEEN             => 'onInstanceSeen',
+			Events::CONNECTION_SEEN           => 'onConnectionSeen',
+			Events::INPUT_SEEN                => 'onInputSeen',
+			Events::SUBSCRIPTION_SEEN         => 'onSubscriptionSeen',
+			Events::SUBSCRIPTION_STATE_CHANGE => 'onSubscriptionStateChange',
+		];
+	}
+
 
 	/**
 	 * Removes stale subscriptions that haven't received a stop event
