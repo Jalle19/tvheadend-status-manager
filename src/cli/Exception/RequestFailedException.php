@@ -2,8 +2,6 @@
 
 namespace Jalle19\StatusManager\Exception;
 
-use Jalle19\tvheadend\exception\BaseException;
-
 /**
  * Class RequestFailedException
  * @package   Jalle19\StatusManager\Exception
