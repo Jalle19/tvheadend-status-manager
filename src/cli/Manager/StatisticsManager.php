@@ -75,13 +75,7 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 		// Find the subscriptions
 		$query = SubscriptionQuery::create()->getPopularChannelsQuery($instance, $user);
 		$query = $this->filterByLimit($query, $limit);
-
-		if ($timeInterval !== StatisticsRequest::TIME_INTERVAL_ALL_TIME)
-		{
-			$query->filterByStopped([
-				'min' => $this->getTimeIntervalTimestamp($timeInterval),
-			]);
-		}
+		$query = $this->filterBySubscriptionStopped($timeInterval, $query);
 
 		return $query->find()->getData();
 	}
@@ -98,14 +92,9 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 	{
 		$instance = InstanceQuery::create()->findOneByName($instanceName);
 		$query    = UserQuery::create()->getMostActiveWatchersQuery($instance);
-		$query    = $this->filterByLimit($query, $limit);
 
-		if ($timeInterval !== StatisticsRequest::TIME_INTERVAL_ALL_TIME)
-		{
-			$query->useSubscriptionQuery()->filterByStopped([
-				'min' => $this->getTimeIntervalTimestamp($timeInterval),
-			])->endUse();
-		}
+		$query = $this->filterByLimit($query, $limit);
+		$query = $this->filterBySubscriptionStopped($timeInterval, $query->useSubscriptionQuery())->endUse();
 
 		return $query->find()->getData();
 	}
@@ -121,6 +110,25 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 	{
 		if ($limit !== null)
 			$query->limit($limit);
+
+		return $query;
+	}
+
+
+	/**
+	 * @param string            $timeInterval
+	 * @param SubscriptionQuery $query
+	 *
+	 * @return SubscriptionQuery
+	 */
+	private function filterBySubscriptionStopped($timeInterval, SubscriptionQuery $query)
+	{
+		if ($timeInterval !== StatisticsRequest::TIME_INTERVAL_ALL_TIME)
+		{
+			$query = $query->filterByStopped([
+				'min' => $this->getTimeIntervalTimestamp($timeInterval),
+			]);
+		}
 
 		return $query;
 	}
