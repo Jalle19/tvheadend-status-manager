@@ -74,10 +74,7 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 
 		// Find the subscriptions
 		$query = SubscriptionQuery::create()->getPopularChannelsQuery($instance, $user);
-
-		// Apply additional filters not done by the query
-		if ($limit !== null)
-			$query->limit($limit);
+		$query = $this->filterByLimit($query, $limit);
 
 		if ($timeInterval !== StatisticsRequest::TIME_INTERVAL_ALL_TIME)
 		{
@@ -101,10 +98,7 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 	{
 		$instance = InstanceQuery::create()->findOneByName($instanceName);
 		$query    = UserQuery::create()->getMostActiveWatchersQuery($instance);
-
-		// Apply additional filters not done by the query
-		if ($limit !== null)
-			$query->limit($limit);
+		$query    = $this->filterByLimit($query, $limit);
 
 		if ($timeInterval !== StatisticsRequest::TIME_INTERVAL_ALL_TIME)
 		{
@@ -114,6 +108,21 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 		}
 
 		return $query->find()->getData();
+	}
+
+
+	/**
+	 * @param mixed    $query a query instance
+	 * @param int|null $limit
+	 *
+	 * @return mixed
+	 */
+	private function filterByLimit($query, $limit)
+	{
+		if ($limit !== null)
+			$query->limit($limit);
+
+		return $query;
 	}
 
 
