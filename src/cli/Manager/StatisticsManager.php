@@ -13,6 +13,7 @@ use Jalle19\StatusManager\Message\Request\StatisticsRequest;
 use Jalle19\StatusManager\Message\Response\MostActiveWatchersResponse;
 use Jalle19\StatusManager\Message\Response\PopularChannelsResponse;
 use Jalle19\tvheadend\exception\RequestFailedException;
+use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Exception\PropelException;
 
 /**
@@ -76,6 +77,7 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 		$query = SubscriptionQuery::create()->getPopularChannelsQuery($instance, $user);
 		$query = $this->filterByLimit($query, $limit);
 		$query = $this->filterBySubscriptionStopped($timeInterval, $query);
+		$query = $this->filterIgnoredUsers($instanceName, $query->useUserQuery())->endUse();
 
 		return $query->find()->getData();
 	}
@@ -95,6 +97,7 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 
 		$query = $this->filterByLimit($query, $limit);
 		$query = $this->filterBySubscriptionStopped($timeInterval, $query->useSubscriptionQuery())->endUse();
+		$query = $this->filterIgnoredUsers($instanceName, $query);
 
 		return $query->find()->getData();
 	}
@@ -129,6 +132,24 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 				'min' => $this->getTimeIntervalTimestamp($timeInterval),
 			]);
 		}
+
+		return $query;
+	}
+
+
+	/**
+	 * @param string    $instanceName
+	 * @param UserQuery $query
+	 *
+	 * @return $this|UserQuery
+	 */
+	private function filterIgnoredUsers($instanceName, UserQuery $query)
+	{
+		$instance     = $this->configuration->getInstanceByName($instanceName);
+		$ignoredUsers = $instance->getIgnoredUsers();
+
+		foreach ($ignoredUsers as $ignoredUser)
+			$query = $query->filterByName($ignoredUser, Criteria::NOT_EQUAL);
 
 		return $query;
 	}

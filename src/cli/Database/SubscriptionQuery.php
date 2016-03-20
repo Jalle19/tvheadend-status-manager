@@ -68,8 +68,10 @@ class SubscriptionQuery extends BaseSubscriptionQuery
 		$this->withColumn('SUM((julianday(subscription.stopped) - julianday(subscription.started)) * 86400)',
 			'totalTimeSeconds');
 		$this->select(['channelName', 'userName', 'totalTimeSeconds']);
+
+		// Join the user table with useUserQuery() so the same method can be used later
 		$this->joinChannel('channel');
-		$this->joinUser('user');
+		$this->useUserQuery()->endUse();
 		$this->groupBy('channelName');
 		$this->orderBy('totalTimeSeconds', Criteria::DESC);
 

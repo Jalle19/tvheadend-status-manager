@@ -100,6 +100,21 @@ class Configuration
 
 
 	/**
+	 * @param string $name
+	 *
+	 * @return Instance|null
+	 */
+	public function getInstanceByName($name)
+	{
+		foreach ($this->_instances as $instance)
+			if ($instance->getName() === $name)
+				return $instance;
+
+		return null;
+	}
+
+
+	/**
 	 * @return float
 	 */
 	public function getUpdateInterval()
