@@ -25,6 +25,7 @@
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul class="nav navbar-nav">
           <li class="active"><a href="status.html">Streaming status</a></li>
+          <li><a href="statistics.html">Statistics</a></li>
         </ul>
 
         <div class="nav navbar-right navbar-text connection-status">
@@ -79,6 +80,11 @@
         <td data-bind="text: formatBitrate(subscription.out)"></td>
       </tr>
       <!-- /ko -->
+      <tr data-bind="visible: instance.subscriptions.length">
+        <td colspan="8">Aggregate bandwidth</td>
+        <td data-bind="text: formatBitrate(instance.subscriptionAggregates.input)"></td>
+        <td data-bind="text: formatBitrate(instance.subscriptionAggregates.output)"></td>
+      </tr>
       <tr data-bind="visible: !instance.subscriptions.length">
         <td colspan="10">No subscriptions</td>
       </tr>

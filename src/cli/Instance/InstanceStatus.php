@@ -113,6 +113,29 @@ class InstanceStatus implements \JsonSerializable
 
 
 	/**
+	 * @return array aggregate input/output bandwidth of all subscriptions
+	 */
+	public function getSubscriptionAggregates()
+	{
+		$aggregates = [
+			'input'  => 0,
+			'output' => 0,
+		];
+
+		foreach ($this->_subscriptions as $subscription)
+		{
+			// Bandwidth may be null from time to time
+			if (is_numeric($subscription->in))
+				$aggregates['input'] += $subscription->in;
+			if (is_numeric($subscription->out))
+				$aggregates['output'] += $subscription->out;
+		}
+
+		return $aggregates;
+	}
+
+
+	/**
 	 * @inheritdoc
 	 */
 	public function jsonSerialize()
@@ -123,6 +146,7 @@ class InstanceStatus implements \JsonSerializable
 			'subscriptions'            => $this->_subscriptions,
 			'connections'              => $this->_connections,
 			'subscriptionStateChanges' => $this->_subscriptionStateChanges,
+			'subscriptionAggregates'   => $this->getSubscriptionAggregates(),
 		];
 	}
 
