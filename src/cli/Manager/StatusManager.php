@@ -81,41 +81,48 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 		$statusCollection = $this->getStatusMessages($event->getInstanceStatusCollection());
 
 		foreach ($statusCollection->getInstanceStatuses() as $instanceStatus)
-		{
-			$instanceName = $instanceStatus->getInstanceName();
-
-			$this->logger->debug('Got status updates from {instanceName}', [
-				'instanceName' => $instanceName,
-			]);
-
-			// Persist connections
-			foreach ($instanceStatus->getConnections() as $connection)
-			{
-				$this->eventDispatcher->dispatch(Events::CONNECTION_SEEN,
-					new ConnectionSeenEvent($instanceName, $connection));
-			}
-
-			// Persist inputs
-			foreach ($instanceStatus->getInputs() as $input)
-				$this->eventDispatcher->dispatch(Events::INPUT_SEEN, new InputSeenEvent($instanceName, $input));
-
-			// Persist running subscriptions
-			foreach ($instanceStatus->getSubscriptions() as $subscription)
-			{
-				$this->eventDispatcher->dispatch(Events::SUBSCRIPTION_SEEN,
-					new SubscriptionSeenEvent($instanceName, $subscription));
-			}
-
-			// Handle subscription state changes
-			foreach ($instanceStatus->getSubscriptionStateChanges() as $subscriptionStateChange)
-			{
-				$this->eventDispatcher->dispatch(Events::SUBSCRIPTION_STATE_CHANGE,
-					new SubscriptionStateChangeEvent($instanceName, $subscriptionStateChange));
-			}
-		}
+			$this->handleInstanceStatus($instanceStatus);
 
 		$this->eventDispatcher->dispatch(Events::INSTANCE_STATUS_UPDATES,
 			new InstanceStatusUpdatesEvent($statusCollection));
+	}
+
+
+	/**
+	 * @param InstanceStatus $instanceStatus
+	 */
+	private function handleInstanceStatus(InstanceStatus $instanceStatus)
+	{
+		$instanceName = $instanceStatus->getInstanceName();
+
+		$this->logger->debug('Got status updates from {instanceName}', [
+			'instanceName' => $instanceName,
+		]);
+
+		// Persist connections
+		foreach ($instanceStatus->getConnections() as $connection)
+		{
+			$this->eventDispatcher->dispatch(Events::CONNECTION_SEEN,
+				new ConnectionSeenEvent($instanceName, $connection));
+		}
+
+		// Persist inputs
+		foreach ($instanceStatus->getInputs() as $input)
+			$this->eventDispatcher->dispatch(Events::INPUT_SEEN, new InputSeenEvent($instanceName, $input));
+
+		// Persist running subscriptions
+		foreach ($instanceStatus->getSubscriptions() as $subscription)
+		{
+			$this->eventDispatcher->dispatch(Events::SUBSCRIPTION_SEEN,
+				new SubscriptionSeenEvent($instanceName, $subscription));
+		}
+
+		// Handle subscription state changes
+		foreach ($instanceStatus->getSubscriptionStateChanges() as $subscriptionStateChange)
+		{
+			$this->eventDispatcher->dispatch(Events::SUBSCRIPTION_STATE_CHANGE,
+				new SubscriptionStateChangeEvent($instanceName, $subscriptionStateChange));
+		}
 	}
 
 
