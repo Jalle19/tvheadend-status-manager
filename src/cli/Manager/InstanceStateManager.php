@@ -71,7 +71,7 @@ class InstanceStateManager extends AbstractManager implements EventSubscriberInt
 	 *
 	 * @param InstanceStatusCollectionRequestEvent $event
 	 */
-	public function onInstanceStatusCollectionRequest($event)
+	public function onInstanceStatusCollectionRequest(InstanceStatusCollectionRequestEvent $event)
 	{
 		$event->setInstanceCollection($this->_instances);
 	}

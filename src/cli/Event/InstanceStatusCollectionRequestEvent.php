@@ -31,7 +31,7 @@ class InstanceStatusCollectionRequestEvent extends Event
 	/**
 	 * @param \SplObjectStorage $instanceCollection
 	 */
-	public function setInstanceCollection($instanceCollection)
+	public function setInstanceCollection(\SplObjectStorage $instanceCollection)
 	{
 		$this->_instanceCollection = $instanceCollection;
 	}

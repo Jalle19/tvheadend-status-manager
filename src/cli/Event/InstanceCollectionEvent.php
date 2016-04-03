@@ -24,7 +24,7 @@ class InstanceCollectionEvent extends Event
 	 *
 	 * @param \SplObjectStorage $instances
 	 */
-	public function __construct($instances)
+	public function __construct(\SplObjectStorage $instances)
 	{
 		$this->_instances = $instances;
 	}
