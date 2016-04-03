@@ -28,4 +28,6 @@ final class Events
 	const SUBSCRIPTION_SEEN         = 'persistence.subscriptionSeen';
 	const SUBSCRIPTION_STATE_CHANGE = 'persistence.subscriptionStateChange';
 
+	const PERSIST_INPUT_ERROR = 'persistence.inputErrorAccumulated';
+
 }

@@ -47,6 +47,24 @@
         </foreign-key>
     </table>
 
+    <table name="input_error" phpName="InputError">
+        <column name="id" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
+        <column name="input_uuid" type="varchar" size="255" required="true"/>
+        <column name="ber_average" type="double" required="true"/>
+        <column name="unc_average" type="double" required="true"/>
+        <column name="cumulative_te" type="integer" required="true"/>
+        <column name="cumulative_cc" type="integer" required="true"/>
+
+        <behavior name="timestampable">
+            <parameter name="create_column" value="created"/>
+            <parameter name="update_column" value="modified"/>
+        </behavior>
+
+        <foreign-key foreignTable="input" phpName="Input">
+            <reference local="input_uuid" foreign="uuid"/>
+        </foreign-key>
+    </table>
+
     <table name="channel" phpName="Channel">
         <column name="id" type="integer" required="true" primaryKey="true" autoIncrement="true"/>
         <column name="instance_name" type="varchar" size="255" required="true"/>

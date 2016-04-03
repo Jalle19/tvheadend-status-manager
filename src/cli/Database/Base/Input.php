@@ -6,11 +6,14 @@ use \DateTime;
 use \Exception;
 use \PDO;
 use Jalle19\StatusManager\Database\Input as ChildInput;
+use Jalle19\StatusManager\Database\InputError as ChildInputError;
+use Jalle19\StatusManager\Database\InputErrorQuery as ChildInputErrorQuery;
 use Jalle19\StatusManager\Database\InputQuery as ChildInputQuery;
 use Jalle19\StatusManager\Database\Instance as ChildInstance;
 use Jalle19\StatusManager\Database\InstanceQuery as ChildInstanceQuery;
 use Jalle19\StatusManager\Database\Subscription as ChildSubscription;
 use Jalle19\StatusManager\Database\SubscriptionQuery as ChildSubscriptionQuery;
+use Jalle19\StatusManager\Database\Map\InputErrorTableMap;
 use Jalle19\StatusManager\Database\Map\InputTableMap;
 use Jalle19\StatusManager\Database\Map\SubscriptionTableMap;
 use Propel\Runtime\Propel;
@@ -123,6 +126,12 @@ abstract class Input implements ActiveRecordInterface
     protected $aInstance;
 
     /**
+     * @var        ObjectCollection|ChildInputError[] Collection to store aggregation of ChildInputError objects.
+     */
+    protected $collInputErrors;
+    protected $collInputErrorsPartial;
+
+    /**
      * @var        ObjectCollection|ChildSubscription[] Collection to store aggregation of ChildSubscription objects.
      */
     protected $collSubscriptions;
@@ -135,6 +144,12 @@ abstract class Input implements ActiveRecordInterface
      * @var boolean
      */
     protected $alreadyInSave = false;
+
+    /**
+     * An array of objects scheduled for deletion.
+     * @var ObjectCollection|ChildInputError[]
+     */
+    protected $inputErrorsScheduledForDeletion = null;
 
     /**
      * An array of objects scheduled for deletion.
@@ -720,6 +735,8 @@ abstract class Input implements ActiveRecordInterface
         if ($deep) {  // also de-associate any related objects?
 
             $this->aInstance = null;
+            $this->collInputErrors = null;
+
             $this->collSubscriptions = null;
 
         } // if (deep)
@@ -842,6 +859,23 @@ abstract class Input implements ActiveRecordInterface
                     $affectedRows += $this->doUpdate($con);
                 }
                 $this->resetModified();
+            }
+
+            if ($this->inputErrorsScheduledForDeletion !== null) {
+                if (!$this->inputErrorsScheduledForDeletion->isEmpty()) {
+                    \Jalle19\StatusManager\Database\InputErrorQuery::create()
+                        ->filterByPrimaryKeys($this->inputErrorsScheduledForDeletion->getPrimaryKeys(false))
+                        ->delete($con);
+                    $this->inputErrorsScheduledForDeletion = null;
+                }
+            }
+
+            if ($this->collInputErrors !== null) {
+                foreach ($this->collInputErrors as $referrerFK) {
+                    if (!$referrerFK->isDeleted() && ($referrerFK->isNew() || $referrerFK->isModified())) {
+                        $affectedRows += $referrerFK->save($con);
+                    }
+                }
             }
 
             if ($this->subscriptionsScheduledForDeletion !== null) {
@@ -1075,6 +1109,21 @@ abstract class Input implements ActiveRecordInterface
                 }
 
                 $result[$key] = $this->aInstance->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            }
+            if (null !== $this->collInputErrors) {
+
+                switch ($keyType) {
+                    case TableMap::TYPE_CAMELNAME:
+                        $key = 'inputErrors';
+                        break;
+                    case TableMap::TYPE_FIELDNAME:
+                        $key = 'input_errors';
+                        break;
+                    default:
+                        $key = 'InputErrors';
+                }
+
+                $result[$key] = $this->collInputErrors->toArray(null, false, $keyType, $includeLazyLoadColumns, $alreadyDumpedObjects);
             }
             if (null !== $this->collSubscriptions) {
 
@@ -1354,6 +1403,12 @@ abstract class Input implements ActiveRecordInterface
             // the getter/setter methods for fkey referrer objects.
             $copyObj->setNew(false);
 
+            foreach ($this->getInputErrors() as $relObj) {
+                if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
+                    $copyObj->addInputError($relObj->copy($deepCopy));
+                }
+            }
+
             foreach ($this->getSubscriptions() as $relObj) {
                 if ($relObj !== $this) {  // ensure that we don't try to copy a reference to ourselves
                     $copyObj->addSubscription($relObj->copy($deepCopy));
@@ -1451,9 +1506,237 @@ abstract class Input implements ActiveRecordInterface
      */
     public function initRelation($relationName)
     {
+        if ('InputError' == $relationName) {
+            return $this->initInputErrors();
+        }
         if ('Subscription' == $relationName) {
             return $this->initSubscriptions();
         }
+    }
+
+    /**
+     * Clears out the collInputErrors collection
+     *
+     * This does not modify the database; however, it will remove any associated objects, causing
+     * them to be refetched by subsequent calls to accessor method.
+     *
+     * @return void
+     * @see        addInputErrors()
+     */
+    public function clearInputErrors()
+    {
+        $this->collInputErrors = null; // important to set this to NULL since that means it is uninitialized
+    }
+
+    /**
+     * Reset is the collInputErrors collection loaded partially.
+     */
+    public function resetPartialInputErrors($v = true)
+    {
+        $this->collInputErrorsPartial = $v;
+    }
+
+    /**
+     * Initializes the collInputErrors collection.
+     *
+     * By default this just sets the collInputErrors collection to an empty array (like clearcollInputErrors());
+     * however, you may wish to override this method in your stub class to provide setting appropriate
+     * to your application -- for example, setting the initial array to the values stored in database.
+     *
+     * @param      boolean $overrideExisting If set to true, the method call initializes
+     *                                        the collection even if it is not empty
+     *
+     * @return void
+     */
+    public function initInputErrors($overrideExisting = true)
+    {
+        if (null !== $this->collInputErrors && !$overrideExisting) {
+            return;
+        }
+
+        $collectionClassName = InputErrorTableMap::getTableMap()->getCollectionClassName();
+
+        $this->collInputErrors = new $collectionClassName;
+        $this->collInputErrors->setModel('\Jalle19\StatusManager\Database\InputError');
+    }
+
+    /**
+     * Gets an array of ChildInputError objects which contain a foreign key that references this object.
+     *
+     * If the $criteria is not null, it is used to always fetch the results from the database.
+     * Otherwise the results are fetched from the database the first time, then cached.
+     * Next time the same method is called without $criteria, the cached collection is returned.
+     * If this ChildInput is new, it will return
+     * an empty collection or the current collection; the criteria is ignored on a new object.
+     *
+     * @param      Criteria $criteria optional Criteria object to narrow the query
+     * @param      ConnectionInterface $con optional connection object
+     * @return ObjectCollection|ChildInputError[] List of ChildInputError objects
+     * @throws PropelException
+     */
+    public function getInputErrors(Criteria $criteria = null, ConnectionInterface $con = null)
+    {
+        $partial = $this->collInputErrorsPartial && !$this->isNew();
+        if (null === $this->collInputErrors || null !== $criteria  || $partial) {
+            if ($this->isNew() && null === $this->collInputErrors) {
+                // return empty collection
+                $this->initInputErrors();
+            } else {
+                $collInputErrors = ChildInputErrorQuery::create(null, $criteria)
+                    ->filterByInput($this)
+                    ->find($con);
+
+                if (null !== $criteria) {
+                    if (false !== $this->collInputErrorsPartial && count($collInputErrors)) {
+                        $this->initInputErrors(false);
+
+                        foreach ($collInputErrors as $obj) {
+                            if (false == $this->collInputErrors->contains($obj)) {
+                                $this->collInputErrors->append($obj);
+                            }
+                        }
+
+                        $this->collInputErrorsPartial = true;
+                    }
+
+                    return $collInputErrors;
+                }
+
+                if ($partial && $this->collInputErrors) {
+                    foreach ($this->collInputErrors as $obj) {
+                        if ($obj->isNew()) {
+                            $collInputErrors[] = $obj;
+                        }
+                    }
+                }
+
+                $this->collInputErrors = $collInputErrors;
+                $this->collInputErrorsPartial = false;
+            }
+        }
+
+        return $this->collInputErrors;
+    }
+
+    /**
+     * Sets a collection of ChildInputError objects related by a one-to-many relationship
+     * to the current object.
+     * It will also schedule objects for deletion based on a diff between old objects (aka persisted)
+     * and new objects from the given Propel collection.
+     *
+     * @param      Collection $inputErrors A Propel collection.
+     * @param      ConnectionInterface $con Optional connection object
+     * @return $this|ChildInput The current object (for fluent API support)
+     */
+    public function setInputErrors(Collection $inputErrors, ConnectionInterface $con = null)
+    {
+        /** @var ChildInputError[] $inputErrorsToDelete */
+        $inputErrorsToDelete = $this->getInputErrors(new Criteria(), $con)->diff($inputErrors);
+
+
+        $this->inputErrorsScheduledForDeletion = $inputErrorsToDelete;
+
+        foreach ($inputErrorsToDelete as $inputErrorRemoved) {
+            $inputErrorRemoved->setInput(null);
+        }
+
+        $this->collInputErrors = null;
+        foreach ($inputErrors as $inputError) {
+            $this->addInputError($inputError);
+        }
+
+        $this->collInputErrors = $inputErrors;
+        $this->collInputErrorsPartial = false;
+
+        return $this;
+    }
+
+    /**
+     * Returns the number of related InputError objects.
+     *
+     * @param      Criteria $criteria
+     * @param      boolean $distinct
+     * @param      ConnectionInterface $con
+     * @return int             Count of related InputError objects.
+     * @throws PropelException
+     */
+    public function countInputErrors(Criteria $criteria = null, $distinct = false, ConnectionInterface $con = null)
+    {
+        $partial = $this->collInputErrorsPartial && !$this->isNew();
+        if (null === $this->collInputErrors || null !== $criteria || $partial) {
+            if ($this->isNew() && null === $this->collInputErrors) {
+                return 0;
+            }
+
+            if ($partial && !$criteria) {
+                return count($this->getInputErrors());
+            }
+
+            $query = ChildInputErrorQuery::create(null, $criteria);
+            if ($distinct) {
+                $query->distinct();
+            }
+
+            return $query
+                ->filterByInput($this)
+                ->count($con);
+        }
+
+        return count($this->collInputErrors);
+    }
+
+    /**
+     * Method called to associate a ChildInputError object to this object
+     * through the ChildInputError foreign key attribute.
+     *
+     * @param  ChildInputError $l ChildInputError
+     * @return $this|\Jalle19\StatusManager\Database\Input The current object (for fluent API support)
+     */
+    public function addInputError(ChildInputError $l)
+    {
+        if ($this->collInputErrors === null) {
+            $this->initInputErrors();
+            $this->collInputErrorsPartial = true;
+        }
+
+        if (!$this->collInputErrors->contains($l)) {
+            $this->doAddInputError($l);
+
+            if ($this->inputErrorsScheduledForDeletion and $this->inputErrorsScheduledForDeletion->contains($l)) {
+                $this->inputErrorsScheduledForDeletion->remove($this->inputErrorsScheduledForDeletion->search($l));
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param ChildInputError $inputError The ChildInputError object to add.
+     */
+    protected function doAddInputError(ChildInputError $inputError)
+    {
+        $this->collInputErrors[]= $inputError;
+        $inputError->setInput($this);
+    }
+
+    /**
+     * @param  ChildInputError $inputError The ChildInputError object to remove.
+     * @return $this|ChildInput The current object (for fluent API support)
+     */
+    public function removeInputError(ChildInputError $inputError)
+    {
+        if ($this->getInputErrors()->contains($inputError)) {
+            $pos = $this->collInputErrors->search($inputError);
+            $this->collInputErrors->remove($pos);
+            if (null === $this->inputErrorsScheduledForDeletion) {
+                $this->inputErrorsScheduledForDeletion = clone $this->collInputErrors;
+                $this->inputErrorsScheduledForDeletion->clear();
+            }
+            $this->inputErrorsScheduledForDeletion[]= clone $inputError;
+            $inputError->setInput(null);
+        }
+
+        return $this;
     }
 
     /**
@@ -1791,6 +2074,11 @@ abstract class Input implements ActiveRecordInterface
     public function clearAllReferences($deep = false)
     {
         if ($deep) {
+            if ($this->collInputErrors) {
+                foreach ($this->collInputErrors as $o) {
+                    $o->clearAllReferences($deep);
+                }
+            }
             if ($this->collSubscriptions) {
                 foreach ($this->collSubscriptions as $o) {
                     $o->clearAllReferences($deep);
@@ -1798,6 +2086,7 @@ abstract class Input implements ActiveRecordInterface
             }
         } // if ($deep)
 
+        $this->collInputErrors = null;
         $this->collSubscriptions = null;
         $this->aInstance = null;
     }

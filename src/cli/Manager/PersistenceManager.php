@@ -8,6 +8,7 @@ use Jalle19\StatusManager\Database\ChannelQuery;
 use Jalle19\StatusManager\Database\Connection;
 use Jalle19\StatusManager\Database\ConnectionQuery;
 use Jalle19\StatusManager\Database\Input;
+use Jalle19\StatusManager\Database\InputError;
 use Jalle19\StatusManager\Database\InputQuery;
 use Jalle19\StatusManager\Database\InstanceQuery;
 use Jalle19\StatusManager\Database\Subscription;
@@ -18,6 +19,7 @@ use Jalle19\StatusManager\Event\ConnectionSeenEvent;
 use Jalle19\StatusManager\Event\Events;
 use Jalle19\StatusManager\Event\InputSeenEvent;
 use Jalle19\StatusManager\Event\InstanceSeenEvent;
+use Jalle19\StatusManager\Event\PersistInputErrorEvent;
 use Jalle19\StatusManager\Event\SubscriptionSeenEvent;
 use Jalle19\StatusManager\Event\SubscriptionStateChangeEvent;
 use Jalle19\StatusManager\Subscription\StateChange;
@@ -46,6 +48,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 			Events::INPUT_SEEN                => 'onInputSeen',
 			Events::SUBSCRIPTION_SEEN         => 'onSubscriptionSeen',
 			Events::SUBSCRIPTION_STATE_CHANGE => 'onSubscriptionStateChange',
+			Events::PERSIST_INPUT_ERROR       => 'onInputError',
 		];
 	}
 
@@ -271,6 +274,26 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 					'userName'     => $user !== null ? $user->getName() : 'N/A',
 					'channelName'  => $channel->getName(),
 				]);
+	}
+
+
+	/**
+	 * @param PersistInputErrorEvent $event
+	 */
+	public function onInputError(PersistInputErrorEvent $event)
+	{
+		$input            = $event->getInput();
+		$cumulativeErrors = $event->getCumulativeErrors();
+
+		$inputError = new InputError();
+		$inputError->setInput($input);
+		$inputError->setFromInputErrorCumulative($cumulativeErrors);
+		$inputError->save();
+		
+		$this->logger->debug('Persisted input errors (instance: {instanceName}, input: {friendlyName})', [
+			'instanceName' => $input->getInstanceName(),
+			'friendlyName' => $input->getFriendlyName(),
+		]);
 	}
 
 

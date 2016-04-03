@@ -2,8 +2,8 @@
 
 namespace Jalle19\StatusManager\Database\Map;
 
-use Jalle19\StatusManager\Database\Input;
-use Jalle19\StatusManager\Database\InputQuery;
+use Jalle19\StatusManager\Database\InputError;
+use Jalle19\StatusManager\Database\InputErrorQuery;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\InstancePoolTrait;
@@ -16,7 +16,7 @@ use Propel\Runtime\Map\TableMapTrait;
 
 
 /**
- * This class defines the structure of the 'input' table.
+ * This class defines the structure of the 'input_error' table.
  *
  *
  *
@@ -26,7 +26,7 @@ use Propel\Runtime\Map\TableMapTrait;
  * (i.e. if it's a text column type).
  *
  */
-class InputTableMap extends TableMap
+class InputErrorTableMap extends TableMap
 {
     use InstancePoolTrait;
     use TableMapTrait;
@@ -34,7 +34,7 @@ class InputTableMap extends TableMap
     /**
      * The (dot-path) name of this class
      */
-    const CLASS_NAME = 'Jalle19.StatusManager.Database.Map.InputTableMap';
+    const CLASS_NAME = 'Jalle19.StatusManager.Database.Map.InputErrorTableMap';
 
     /**
      * The default database name for this class
@@ -44,22 +44,22 @@ class InputTableMap extends TableMap
     /**
      * The table name for this class
      */
-    const TABLE_NAME = 'input';
+    const TABLE_NAME = 'input_error';
 
     /**
      * The related Propel class for this table
      */
-    const OM_CLASS = '\\Jalle19\\StatusManager\\Database\\Input';
+    const OM_CLASS = '\\Jalle19\\StatusManager\\Database\\InputError';
 
     /**
      * A class that can be returned by this tableMap
      */
-    const CLASS_DEFAULT = 'Jalle19.StatusManager.Database.Input';
+    const CLASS_DEFAULT = 'Jalle19.StatusManager.Database.InputError';
 
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 7;
+    const NUM_COLUMNS = 8;
 
     /**
      * The number of lazy-loaded columns
@@ -69,42 +69,47 @@ class InputTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 7;
+    const NUM_HYDRATE_COLUMNS = 8;
 
     /**
-     * the column name for the uuid field
+     * the column name for the id field
      */
-    const COL_UUID = 'input.uuid';
+    const COL_ID = 'input_error.id';
 
     /**
-     * the column name for the instance_name field
+     * the column name for the input_uuid field
      */
-    const COL_INSTANCE_NAME = 'input.instance_name';
+    const COL_INPUT_UUID = 'input_error.input_uuid';
 
     /**
-     * the column name for the started field
+     * the column name for the ber_average field
      */
-    const COL_STARTED = 'input.started';
+    const COL_BER_AVERAGE = 'input_error.ber_average';
 
     /**
-     * the column name for the input field
+     * the column name for the unc_average field
      */
-    const COL_INPUT = 'input.input';
+    const COL_UNC_AVERAGE = 'input_error.unc_average';
 
     /**
-     * the column name for the network field
+     * the column name for the cumulative_te field
      */
-    const COL_NETWORK = 'input.network';
+    const COL_CUMULATIVE_TE = 'input_error.cumulative_te';
 
     /**
-     * the column name for the mux field
+     * the column name for the cumulative_cc field
      */
-    const COL_MUX = 'input.mux';
+    const COL_CUMULATIVE_CC = 'input_error.cumulative_cc';
 
     /**
-     * the column name for the weight field
+     * the column name for the created field
      */
-    const COL_WEIGHT = 'input.weight';
+    const COL_CREATED = 'input_error.created';
+
+    /**
+     * the column name for the modified field
+     */
+    const COL_MODIFIED = 'input_error.modified';
 
     /**
      * The default string format for model objects of the related table
@@ -118,11 +123,11 @@ class InputTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('Uuid', 'InstanceName', 'Started', 'Input', 'Network', 'Mux', 'Weight', ),
-        self::TYPE_CAMELNAME     => array('uuid', 'instanceName', 'started', 'input', 'network', 'mux', 'weight', ),
-        self::TYPE_COLNAME       => array(InputTableMap::COL_UUID, InputTableMap::COL_INSTANCE_NAME, InputTableMap::COL_STARTED, InputTableMap::COL_INPUT, InputTableMap::COL_NETWORK, InputTableMap::COL_MUX, InputTableMap::COL_WEIGHT, ),
-        self::TYPE_FIELDNAME     => array('uuid', 'instance_name', 'started', 'input', 'network', 'mux', 'weight', ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
+        self::TYPE_PHPNAME       => array('Id', 'InputUuid', 'BerAverage', 'UncAverage', 'CumulativeTe', 'CumulativeCc', 'Created', 'Modified', ),
+        self::TYPE_CAMELNAME     => array('id', 'inputUuid', 'berAverage', 'uncAverage', 'cumulativeTe', 'cumulativeCc', 'created', 'modified', ),
+        self::TYPE_COLNAME       => array(InputErrorTableMap::COL_ID, InputErrorTableMap::COL_INPUT_UUID, InputErrorTableMap::COL_BER_AVERAGE, InputErrorTableMap::COL_UNC_AVERAGE, InputErrorTableMap::COL_CUMULATIVE_TE, InputErrorTableMap::COL_CUMULATIVE_CC, InputErrorTableMap::COL_CREATED, InputErrorTableMap::COL_MODIFIED, ),
+        self::TYPE_FIELDNAME     => array('id', 'input_uuid', 'ber_average', 'unc_average', 'cumulative_te', 'cumulative_cc', 'created', 'modified', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, )
     );
 
     /**
@@ -132,11 +137,11 @@ class InputTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('Uuid' => 0, 'InstanceName' => 1, 'Started' => 2, 'Input' => 3, 'Network' => 4, 'Mux' => 5, 'Weight' => 6, ),
-        self::TYPE_CAMELNAME     => array('uuid' => 0, 'instanceName' => 1, 'started' => 2, 'input' => 3, 'network' => 4, 'mux' => 5, 'weight' => 6, ),
-        self::TYPE_COLNAME       => array(InputTableMap::COL_UUID => 0, InputTableMap::COL_INSTANCE_NAME => 1, InputTableMap::COL_STARTED => 2, InputTableMap::COL_INPUT => 3, InputTableMap::COL_NETWORK => 4, InputTableMap::COL_MUX => 5, InputTableMap::COL_WEIGHT => 6, ),
-        self::TYPE_FIELDNAME     => array('uuid' => 0, 'instance_name' => 1, 'started' => 2, 'input' => 3, 'network' => 4, 'mux' => 5, 'weight' => 6, ),
-        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
+        self::TYPE_PHPNAME       => array('Id' => 0, 'InputUuid' => 1, 'BerAverage' => 2, 'UncAverage' => 3, 'CumulativeTe' => 4, 'CumulativeCc' => 5, 'Created' => 6, 'Modified' => 7, ),
+        self::TYPE_CAMELNAME     => array('id' => 0, 'inputUuid' => 1, 'berAverage' => 2, 'uncAverage' => 3, 'cumulativeTe' => 4, 'cumulativeCc' => 5, 'created' => 6, 'modified' => 7, ),
+        self::TYPE_COLNAME       => array(InputErrorTableMap::COL_ID => 0, InputErrorTableMap::COL_INPUT_UUID => 1, InputErrorTableMap::COL_BER_AVERAGE => 2, InputErrorTableMap::COL_UNC_AVERAGE => 3, InputErrorTableMap::COL_CUMULATIVE_TE => 4, InputErrorTableMap::COL_CUMULATIVE_CC => 5, InputErrorTableMap::COL_CREATED => 6, InputErrorTableMap::COL_MODIFIED => 7, ),
+        self::TYPE_FIELDNAME     => array('id' => 0, 'input_uuid' => 1, 'ber_average' => 2, 'unc_average' => 3, 'cumulative_te' => 4, 'cumulative_cc' => 5, 'created' => 6, 'modified' => 7, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, )
     );
 
     /**
@@ -149,20 +154,21 @@ class InputTableMap extends TableMap
     public function initialize()
     {
         // attributes
-        $this->setName('input');
-        $this->setPhpName('Input');
+        $this->setName('input_error');
+        $this->setPhpName('InputError');
         $this->setIdentifierQuoting(false);
-        $this->setClassName('\\Jalle19\\StatusManager\\Database\\Input');
+        $this->setClassName('\\Jalle19\\StatusManager\\Database\\InputError');
         $this->setPackage('Jalle19.StatusManager.Database');
-        $this->setUseIdGenerator(false);
+        $this->setUseIdGenerator(true);
         // columns
-        $this->addPrimaryKey('uuid', 'Uuid', 'VARCHAR', true, 255, null);
-        $this->addForeignKey('instance_name', 'InstanceName', 'VARCHAR', 'instance', 'name', true, 255, null);
-        $this->addColumn('started', 'Started', 'TIMESTAMP', true, null, null);
-        $this->addColumn('input', 'Input', 'VARCHAR', true, 255, null);
-        $this->addColumn('network', 'Network', 'VARCHAR', true, 255, null);
-        $this->addColumn('mux', 'Mux', 'VARCHAR', true, 255, null);
-        $this->addColumn('weight', 'Weight', 'INTEGER', true, null, null);
+        $this->addPrimaryKey('id', 'Id', 'INTEGER', true, null, null);
+        $this->addForeignKey('input_uuid', 'InputUuid', 'VARCHAR', 'input', 'uuid', true, 255, null);
+        $this->addColumn('ber_average', 'BerAverage', 'DOUBLE', true, null, null);
+        $this->addColumn('unc_average', 'UncAverage', 'DOUBLE', true, null, null);
+        $this->addColumn('cumulative_te', 'CumulativeTe', 'INTEGER', true, null, null);
+        $this->addColumn('cumulative_cc', 'CumulativeCc', 'INTEGER', true, null, null);
+        $this->addColumn('created', 'Created', 'TIMESTAMP', false, null, null);
+        $this->addColumn('modified', 'Modified', 'TIMESTAMP', false, null, null);
     } // initialize()
 
     /**
@@ -170,28 +176,27 @@ class InputTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('Instance', '\\Jalle19\\StatusManager\\Database\\Instance', RelationMap::MANY_TO_ONE, array (
+        $this->addRelation('Input', '\\Jalle19\\StatusManager\\Database\\Input', RelationMap::MANY_TO_ONE, array (
   0 =>
   array (
-    0 => ':instance_name',
-    1 => ':name',
+    0 => ':input_uuid',
+    1 => ':uuid',
   ),
 ), null, null, null, false);
-        $this->addRelation('InputError', '\\Jalle19\\StatusManager\\Database\\InputError', RelationMap::ONE_TO_MANY, array (
-  0 =>
-  array (
-    0 => ':input_uuid',
-    1 => ':uuid',
-  ),
-), null, null, 'InputErrors', false);
-        $this->addRelation('Subscription', '\\Jalle19\\StatusManager\\Database\\Subscription', RelationMap::ONE_TO_MANY, array (
-  0 =>
-  array (
-    0 => ':input_uuid',
-    1 => ':uuid',
-  ),
-), null, null, 'Subscriptions', false);
     } // buildRelations()
+
+    /**
+     *
+     * Gets the list of behaviors registered for this table
+     *
+     * @return array Associative array (name => parameters) of behaviors
+     */
+    public function getBehaviors()
+    {
+        return array(
+            'timestampable' => array('create_column' => 'created', 'update_column' => 'modified', 'disable_created_at' => 'false', 'disable_updated_at' => 'false', ),
+        );
+    } // getBehaviors()
 
     /**
      * Retrieves a string version of the primary key from the DB resultset row that can be used to uniquely identify a row in this table.
@@ -209,11 +214,11 @@ class InputTableMap extends TableMap
     public static function getPrimaryKeyHashFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
         // If the PK cannot be derived from the row, return NULL.
-        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Uuid', TableMap::TYPE_PHPNAME, $indexType)] === null) {
+        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)] === null) {
             return null;
         }
 
-        return null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Uuid', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Uuid', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Uuid', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Uuid', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Uuid', TableMap::TYPE_PHPNAME, $indexType)];
+        return null === $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)] || is_scalar($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)]) || is_callable([$row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)], '__toString']) ? (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)] : $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
     }
 
     /**
@@ -230,10 +235,10 @@ class InputTableMap extends TableMap
      */
     public static function getPrimaryKeyFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        return (string) $row[
+        return (int) $row[
             $indexType == TableMap::TYPE_NUM
                 ? 0 + $offset
-                : self::translateFieldName('Uuid', TableMap::TYPE_PHPNAME, $indexType)
+                : self::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)
         ];
     }
 
@@ -250,7 +255,7 @@ class InputTableMap extends TableMap
      */
     public static function getOMClass($withPrefix = true)
     {
-        return $withPrefix ? InputTableMap::CLASS_DEFAULT : InputTableMap::OM_CLASS;
+        return $withPrefix ? InputErrorTableMap::CLASS_DEFAULT : InputErrorTableMap::OM_CLASS;
     }
 
     /**
@@ -264,22 +269,22 @@ class InputTableMap extends TableMap
      *
      * @throws PropelException Any exceptions caught during processing will be
      *                         rethrown wrapped into a PropelException.
-     * @return array           (Input object, last column rank)
+     * @return array           (InputError object, last column rank)
      */
     public static function populateObject($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        $key = InputTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
-        if (null !== ($obj = InputTableMap::getInstanceFromPool($key))) {
+        $key = InputErrorTableMap::getPrimaryKeyHashFromRow($row, $offset, $indexType);
+        if (null !== ($obj = InputErrorTableMap::getInstanceFromPool($key))) {
             // We no longer rehydrate the object, since this can cause data loss.
             // See http://www.propelorm.org/ticket/509
             // $obj->hydrate($row, $offset, true); // rehydrate
-            $col = $offset + InputTableMap::NUM_HYDRATE_COLUMNS;
+            $col = $offset + InputErrorTableMap::NUM_HYDRATE_COLUMNS;
         } else {
-            $cls = InputTableMap::OM_CLASS;
-            /** @var Input $obj */
+            $cls = InputErrorTableMap::OM_CLASS;
+            /** @var InputError $obj */
             $obj = new $cls();
             $col = $obj->hydrate($row, $offset, false, $indexType);
-            InputTableMap::addInstanceToPool($obj, $key);
+            InputErrorTableMap::addInstanceToPool($obj, $key);
         }
 
         return array($obj, $col);
@@ -302,18 +307,18 @@ class InputTableMap extends TableMap
         $cls = static::getOMClass(false);
         // populate the object(s)
         while ($row = $dataFetcher->fetch()) {
-            $key = InputTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
-            if (null !== ($obj = InputTableMap::getInstanceFromPool($key))) {
+            $key = InputErrorTableMap::getPrimaryKeyHashFromRow($row, 0, $dataFetcher->getIndexType());
+            if (null !== ($obj = InputErrorTableMap::getInstanceFromPool($key))) {
                 // We no longer rehydrate the object, since this can cause data loss.
                 // See http://www.propelorm.org/ticket/509
                 // $obj->hydrate($row, 0, true); // rehydrate
                 $results[] = $obj;
             } else {
-                /** @var Input $obj */
+                /** @var InputError $obj */
                 $obj = new $cls();
                 $obj->hydrate($row);
                 $results[] = $obj;
-                InputTableMap::addInstanceToPool($obj, $key);
+                InputErrorTableMap::addInstanceToPool($obj, $key);
             } // if key exists
         }
 
@@ -334,21 +339,23 @@ class InputTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(InputTableMap::COL_UUID);
-            $criteria->addSelectColumn(InputTableMap::COL_INSTANCE_NAME);
-            $criteria->addSelectColumn(InputTableMap::COL_STARTED);
-            $criteria->addSelectColumn(InputTableMap::COL_INPUT);
-            $criteria->addSelectColumn(InputTableMap::COL_NETWORK);
-            $criteria->addSelectColumn(InputTableMap::COL_MUX);
-            $criteria->addSelectColumn(InputTableMap::COL_WEIGHT);
+            $criteria->addSelectColumn(InputErrorTableMap::COL_ID);
+            $criteria->addSelectColumn(InputErrorTableMap::COL_INPUT_UUID);
+            $criteria->addSelectColumn(InputErrorTableMap::COL_BER_AVERAGE);
+            $criteria->addSelectColumn(InputErrorTableMap::COL_UNC_AVERAGE);
+            $criteria->addSelectColumn(InputErrorTableMap::COL_CUMULATIVE_TE);
+            $criteria->addSelectColumn(InputErrorTableMap::COL_CUMULATIVE_CC);
+            $criteria->addSelectColumn(InputErrorTableMap::COL_CREATED);
+            $criteria->addSelectColumn(InputErrorTableMap::COL_MODIFIED);
         } else {
-            $criteria->addSelectColumn($alias . '.uuid');
-            $criteria->addSelectColumn($alias . '.instance_name');
-            $criteria->addSelectColumn($alias . '.started');
-            $criteria->addSelectColumn($alias . '.input');
-            $criteria->addSelectColumn($alias . '.network');
-            $criteria->addSelectColumn($alias . '.mux');
-            $criteria->addSelectColumn($alias . '.weight');
+            $criteria->addSelectColumn($alias . '.id');
+            $criteria->addSelectColumn($alias . '.input_uuid');
+            $criteria->addSelectColumn($alias . '.ber_average');
+            $criteria->addSelectColumn($alias . '.unc_average');
+            $criteria->addSelectColumn($alias . '.cumulative_te');
+            $criteria->addSelectColumn($alias . '.cumulative_cc');
+            $criteria->addSelectColumn($alias . '.created');
+            $criteria->addSelectColumn($alias . '.modified');
         }
     }
 
@@ -361,7 +368,7 @@ class InputTableMap extends TableMap
      */
     public static function getTableMap()
     {
-        return Propel::getServiceContainer()->getDatabaseMap(InputTableMap::DATABASE_NAME)->getTable(InputTableMap::TABLE_NAME);
+        return Propel::getServiceContainer()->getDatabaseMap(InputErrorTableMap::DATABASE_NAME)->getTable(InputErrorTableMap::TABLE_NAME);
     }
 
     /**
@@ -369,16 +376,16 @@ class InputTableMap extends TableMap
      */
     public static function buildTableMap()
     {
-        $dbMap = Propel::getServiceContainer()->getDatabaseMap(InputTableMap::DATABASE_NAME);
-        if (!$dbMap->hasTable(InputTableMap::TABLE_NAME)) {
-            $dbMap->addTableObject(new InputTableMap());
+        $dbMap = Propel::getServiceContainer()->getDatabaseMap(InputErrorTableMap::DATABASE_NAME);
+        if (!$dbMap->hasTable(InputErrorTableMap::TABLE_NAME)) {
+            $dbMap->addTableObject(new InputErrorTableMap());
         }
     }
 
     /**
-     * Performs a DELETE on the database, given a Input or Criteria object OR a primary key value.
+     * Performs a DELETE on the database, given a InputError or Criteria object OR a primary key value.
      *
-     * @param mixed               $values Criteria or Input object or primary key or array of primary keys
+     * @param mixed               $values Criteria or InputError object or primary key or array of primary keys
      *              which is used to create the DELETE statement
      * @param  ConnectionInterface $con the connection to use
      * @return int             The number of affected rows (if supported by underlying database driver).  This includes CASCADE-related rows
@@ -389,27 +396,27 @@ class InputTableMap extends TableMap
      public static function doDelete($values, ConnectionInterface $con = null)
      {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(InputTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(InputErrorTableMap::DATABASE_NAME);
         }
 
         if ($values instanceof Criteria) {
             // rename for clarity
             $criteria = $values;
-        } elseif ($values instanceof \Jalle19\StatusManager\Database\Input) { // it's a model object
+        } elseif ($values instanceof \Jalle19\StatusManager\Database\InputError) { // it's a model object
             // create criteria based on pk values
             $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
-            $criteria = new Criteria(InputTableMap::DATABASE_NAME);
-            $criteria->add(InputTableMap::COL_UUID, (array) $values, Criteria::IN);
+            $criteria = new Criteria(InputErrorTableMap::DATABASE_NAME);
+            $criteria->add(InputErrorTableMap::COL_ID, (array) $values, Criteria::IN);
         }
 
-        $query = InputQuery::create()->mergeWith($criteria);
+        $query = InputErrorQuery::create()->mergeWith($criteria);
 
         if ($values instanceof Criteria) {
-            InputTableMap::clearInstancePool();
+            InputErrorTableMap::clearInstancePool();
         } elseif (!is_object($values)) { // it's a primary key, or an array of pks
             foreach ((array) $values as $singleval) {
-                InputTableMap::removeInstanceFromPool($singleval);
+                InputErrorTableMap::removeInstanceFromPool($singleval);
             }
         }
 
@@ -417,20 +424,20 @@ class InputTableMap extends TableMap
     }
 
     /**
-     * Deletes all rows from the input table.
+     * Deletes all rows from the input_error table.
      *
      * @param ConnectionInterface $con the connection to use
      * @return int The number of affected rows (if supported by underlying database driver).
      */
     public static function doDeleteAll(ConnectionInterface $con = null)
     {
-        return InputQuery::create()->doDeleteAll($con);
+        return InputErrorQuery::create()->doDeleteAll($con);
     }
 
     /**
-     * Performs an INSERT on the database, given a Input or Criteria object.
+     * Performs an INSERT on the database, given a InputError or Criteria object.
      *
-     * @param mixed               $criteria Criteria or Input object containing data that is used to create the INSERT statement.
+     * @param mixed               $criteria Criteria or InputError object containing data that is used to create the INSERT statement.
      * @param ConnectionInterface $con the ConnectionInterface connection to use
      * @return mixed           The new primary key.
      * @throws PropelException Any exceptions caught during processing will be
@@ -439,18 +446,22 @@ class InputTableMap extends TableMap
     public static function doInsert($criteria, ConnectionInterface $con = null)
     {
         if (null === $con) {
-            $con = Propel::getServiceContainer()->getWriteConnection(InputTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(InputErrorTableMap::DATABASE_NAME);
         }
 
         if ($criteria instanceof Criteria) {
             $criteria = clone $criteria; // rename for clarity
         } else {
-            $criteria = $criteria->buildCriteria(); // build Criteria from Input object
+            $criteria = $criteria->buildCriteria(); // build Criteria from InputError object
+        }
+
+        if ($criteria->containsKey(InputErrorTableMap::COL_ID) && $criteria->keyContainsValue(InputErrorTableMap::COL_ID) ) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key ('.InputErrorTableMap::COL_ID.')');
         }
 
 
         // Set the correct dbName
-        $query = InputQuery::create()->mergeWith($criteria);
+        $query = InputErrorQuery::create()->mergeWith($criteria);
 
         // use transaction because $criteria could contain info
         // for more than one table (I guess, conceivably)
@@ -459,7 +470,7 @@ class InputTableMap extends TableMap
         });
     }
 
-} // InputTableMap
+} // InputErrorTableMap
 // This is the static code needed to register the TableMap for this table with the main Propel class.
 //
-InputTableMap::buildTableMap();
+InputErrorTableMap::buildTableMap();

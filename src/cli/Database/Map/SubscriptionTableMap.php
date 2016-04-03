@@ -180,7 +180,7 @@ class SubscriptionTableMap extends TableMap
         $this->addColumn('started', 'Started', 'TIMESTAMP', true, null, null);
         $this->addColumn('stopped', 'Stopped', 'TIMESTAMP', false, null, null);
         $this->addColumn('title', 'Title', 'VARCHAR', true, 255, null);
-        $this->addColumn('service', 'Service', 'VARCHAR', true, 255, null);
+        $this->addColumn('service', 'Service', 'VARCHAR', false, 255, null);
     } // initialize()
 
     /**

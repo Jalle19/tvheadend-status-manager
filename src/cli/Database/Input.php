@@ -30,6 +30,15 @@ class Input extends BaseInput
 
 
 	/**
+	 * @return string
+	 */
+	public function getFriendlyName()
+	{
+		return $this->getNetwork() . '/' . $this->getMux();
+	}
+
+
+	/**
 	 * @param InputStatus $inputStatus
 	 *
 	 * @return string

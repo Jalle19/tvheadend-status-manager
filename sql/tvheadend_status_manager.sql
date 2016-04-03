@@ -67,6 +67,26 @@ CREATE TABLE [input]
 );
 
 -----------------------------------------------------------------------
+-- input_error
+-----------------------------------------------------------------------
+
+DROP TABLE IF EXISTS [input_error];
+
+CREATE TABLE [input_error]
+(
+    [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    [input_uuid] VARCHAR(255) NOT NULL,
+    [ber_average] DOUBLE NOT NULL,
+    [unc_average] DOUBLE NOT NULL,
+    [cumulative_te] INTEGER NOT NULL,
+    [cumulative_cc] INTEGER NOT NULL,
+    [created] TIMESTAMP,
+    [modified] TIMESTAMP,
+    UNIQUE ([id]),
+    FOREIGN KEY ([input_uuid]) REFERENCES [input] ([uuid])
+);
+
+-----------------------------------------------------------------------
 -- channel
 -----------------------------------------------------------------------
 
@@ -91,14 +111,14 @@ CREATE TABLE [subscription]
 (
     [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     [instance_name] VARCHAR(255) NOT NULL,
-    [input_uuid] VARCHAR(255) NOT NULL,
+    [input_uuid] VARCHAR(255),
     [user_id] INTEGER,
     [channel_id] INTEGER NOT NULL,
     [subscription_id] INTEGER NOT NULL,
     [started] TIMESTAMP NOT NULL,
     [stopped] TIMESTAMP,
     [title] VARCHAR(255) NOT NULL,
-    [service] VARCHAR(255) NOT NULL,
+    [service] VARCHAR(255),
     UNIQUE ([id]),
     FOREIGN KEY ([instance_name]) REFERENCES [instance] ([name]),
     FOREIGN KEY ([input_uuid]) REFERENCES [input] ([uuid]),
