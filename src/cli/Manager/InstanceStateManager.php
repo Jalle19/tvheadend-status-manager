@@ -152,7 +152,7 @@ class InstanceStateManager extends AbstractManager implements EventSubscriberInt
 	 *
 	 * @return InstanceState
 	 */
-	private function getInstanceState(Instance $instance)
+	public function getInstanceState(Instance $instance)
 	{
 		return $this->_instances[$instance];
 	}
