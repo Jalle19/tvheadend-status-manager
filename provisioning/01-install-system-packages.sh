@@ -2,7 +2,7 @@
 
 {
 	apt-get update
-	apt-get -y install php5-cli curl nginx nodejs nodejs-legacy npm git-core
+	apt-get -y install php5-cli php5-xdebug curl nginx nodejs nodejs-legacy npm git-core
 
 	cd /vagrant
 	curl -sS https://getcomposer.org/installer | php
