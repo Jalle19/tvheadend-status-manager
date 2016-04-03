@@ -22,20 +22,20 @@ class InputSeenEvent extends AbstractInstanceEvent
 
 	/**
 	 * @param string      $instanceName
-	 * @param InputStatus $input
+	 * @param InputStatus $inputStatus
 	 */
-	public function __construct($instanceName, InputStatus $input)
+	public function __construct($instanceName, InputStatus $inputStatus)
 	{
 		parent::__construct($instanceName);
 
-		$this->_input = $input;
+		$this->_input = $inputStatus;
 	}
 
 
 	/**
 	 * @return InputStatus
 	 */
-	public function getInput()
+	public function getInputStatus()
 	{
 		return $this->_input;
 	}

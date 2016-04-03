@@ -137,7 +137,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 	public function onInputSeen(InputSeenEvent $event)
 	{
 		$instanceName = $event->getInstance();
-		$inputStatus  = $event->getInput();
+		$inputStatus  = $event->getInputStatus();
 
 		// Update the input and started fields for existing inputs
 		if (InputQuery::create()->hasInput($inputStatus->uuid))
