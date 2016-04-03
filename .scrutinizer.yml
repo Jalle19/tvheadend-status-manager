@@ -1,0 +1,27 @@
+filter:
+    excluded_paths:
+        - 'src/cli/Database/Base/*'
+        - 'src/cli/Database/Map/*'
+        - 'migrations/*'
+checks:
+    php: true
+coding_style:
+    php:
+        indentation:
+            general:
+                use_tabs: true
+        braces:
+            if:
+                always: false
+                else_on_new_line: true
+            for:
+                always: false
+            while:
+                always: false
+            try:
+                opening: new-line
+                catch_on_new_line: true
+                finally_on_new_line: true
+                
+tools:
+    external_code_coverage: true  
