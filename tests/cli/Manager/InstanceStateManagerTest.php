@@ -76,12 +76,16 @@ class InstanceStateManagerTest extends AbstractManagerTest
 		$this->assertEquals(InstanceState::REACHABLE,
 			$instanceStateManager->getInstanceState($this->getTestInstance())->getReachability());
 
+		$this->assertTrue($instanceStateManager->getInstanceState($this->getTestInstance())->isReachable());
+
 		$this->eventDispatcher->dispatch(Events::INSTANCE_STATE_UNREACHABLE,
 			new InstanceStateEvent($this->getTestInstance()));
 
 		// Assert that the instance is now unreachable
 		$this->assertEquals(InstanceState::UNREACHABLE,
 			$instanceStateManager->getInstanceState($this->getTestInstance())->getReachability());
+
+		$this->assertFalse($instanceStateManager->getInstanceState($this->getTestInstance())->isReachable());
 
 		// The instance should be maybe reachable after a full retry cycle
 		for ($i = 0; $i < InstanceStateManager::UNREACHABLE_CYCLES_UNTIL_RETRY; $i++)
@@ -93,12 +97,16 @@ class InstanceStateManagerTest extends AbstractManagerTest
 		$this->assertEquals(InstanceState::MAYBE_REACHABLE,
 			$instanceStateManager->getInstanceState($this->getTestInstance())->getReachability());
 
+		$this->assertTrue($instanceStateManager->getInstanceState($this->getTestInstance())->isReachable());
+
 		// And now if we mark it reachable it should be that
 		$this->eventDispatcher->dispatch(Events::INSTANCE_STATE_REACHABLE,
 			new InstanceStateEvent($this->getTestInstance()));
 
 		$this->assertEquals(InstanceState::REACHABLE,
 			$instanceStateManager->getInstanceState($this->getTestInstance())->getReachability());
+
+		$this->assertTrue($instanceStateManager->getInstanceState($this->getTestInstance())->isReachable());
 	}
 
 }
