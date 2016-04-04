@@ -89,7 +89,7 @@ class TvheadendStatusManagerCommand extends Command
 		$webSocketManager     = $injector->make('Jalle19\StatusManager\Manager\WebSocketManager', $aliases);
 		$persistenceManager   = $injector->make('Jalle19\StatusManager\Manager\PersistenceManager', $aliases);
 		$statisticsManager    = $injector->make('Jalle19\StatusManager\Manager\StatisticsManager', $aliases);
-		$inputErrorManager  = $injector->make('Jalle19\StatusManager\Manager\InputErrorManager', $aliases);
+		$inputErrorManager    = $injector->make('Jalle19\StatusManager\Manager\InputErrorManager', $aliases);
 
 		// Wire the event dispatcher
 		$webSocketManager->registerMessageHandler($statisticsManager);
