@@ -28,11 +28,11 @@
           <li><a href="statistics.html">Statistics</a></li>
         </ul>
 
-        <div class="nav navbar-right navbar-text connection-status">
+        <div id="connection-status" class="nav navbar-right navbar-text connection-status">
           <p class="bg-success connected" data-bind="visible: connected()">
             Connected
-            <span data-bind="visible: instances().length > 0">, managing <span
-                data-bind="text: instances().length"></span> instance(s)</span>
+            <span data-bind="visible: numInstances() > 0">, managing <span
+                data-bind="text: numInstances()"></span> instance(s)</span>
           </p>
 
           <p class="bg-danger disconnected" data-bind="visible: !connected()">
@@ -43,122 +43,125 @@
     </div>
   </nav>
 
-  <h1>Streaming status</h1>
+  <div id="streaming-status">
 
-  <h4>Subscriptions</h4>
+    <h1>Streaming status</h1>
 
-  <div data-bind="visible: !instances().length">
-    Waiting for status from server
-  </div>
+    <h4>Subscriptions</h4>
 
-  <div data-bind="foreach: { data: instances, as: 'instance' }">
-    <table class="table table-striped">
-      <caption data-bind="text: instance.instanceName"></caption>
-      <tr>
-        <th>Started:</th>
-        <th>Errors:</th>
-        <th>State:</th>
-        <th>Hostname:</th>
-        <th>Username:</th>
-        <th>Title:</th>
-        <th>Channel:</th>
-        <th>Service:</th>
-        <th>Input (kbps):</th>
-        <th>Output (kbps):</th>
-      </tr>
-      <!-- ko foreach: { data: instance.subscriptions, as: 'subscription' } -->
-      <tr>
-        <td data-bind="text: formatDate(subscription.start)"></td>
-        <td data-bind="text: subscription.errors"></td>
-        <td data-bind="text: subscription.state"></td>
-        <td data-bind="text: subscription.hostname"></td>
-        <td data-bind="text: subscription.username"></td>
-        <td data-bind="text: subscription.title"></td>
-        <td data-bind="text: subscription.channel"></td>
-        <td data-bind="text: subscription.service"></td>
-        <td data-bind="text: formatBitrate(subscription.in)"></td>
-        <td data-bind="text: formatBitrate(subscription.out)"></td>
-      </tr>
-      <!-- /ko -->
-      <tr data-bind="visible: instance.subscriptions.length">
-        <td colspan="8">Aggregate bandwidth</td>
-        <td data-bind="text: formatBitrate(instance.subscriptionAggregates.input)"></td>
-        <td data-bind="text: formatBitrate(instance.subscriptionAggregates.output)"></td>
-      </tr>
-      <tr data-bind="visible: !instance.subscriptions.length">
-        <td colspan="10">No subscriptions</td>
-      </tr>
-    </table>
+    <div data-bind="visible: !instances().length">
+      Waiting for status from server
+    </div>
 
-  </div>
+    <div data-bind="foreach: { data: instances, as: 'instance' }">
+      <table class="table table-striped">
+        <caption data-bind="text: instance.instanceName"></caption>
+        <tr>
+          <th>Started:</th>
+          <th>Errors:</th>
+          <th>State:</th>
+          <th>Hostname:</th>
+          <th>Username:</th>
+          <th>Title:</th>
+          <th>Channel:</th>
+          <th>Service:</th>
+          <th>Input (kbps):</th>
+          <th>Output (kbps):</th>
+        </tr>
+        <!-- ko foreach: { data: instance.subscriptions, as: 'subscription' } -->
+        <tr>
+          <td data-bind="text: Utilities.formatDate(subscription.start)"></td>
+          <td data-bind="text: subscription.errors"></td>
+          <td data-bind="text: subscription.state"></td>
+          <td data-bind="text: subscription.hostname"></td>
+          <td data-bind="text: subscription.username"></td>
+          <td data-bind="text: subscription.title"></td>
+          <td data-bind="text: subscription.channel"></td>
+          <td data-bind="text: subscription.service"></td>
+          <td data-bind="text: Utilities.formatBitrate(subscription.in)"></td>
+          <td data-bind="text: Utilities.formatBitrate(subscription.out)"></td>
+        </tr>
+        <!-- /ko -->
+        <tr data-bind="visible: instance.subscriptions.length">
+          <td colspan="8">Aggregate bandwidth</td>
+          <td data-bind="text: Utilities.formatBitrate(instance.subscriptionAggregates.input)"></td>
+          <td data-bind="text: Utilities.formatBitrate(instance.subscriptionAggregates.output)"></td>
+        </tr>
+        <tr data-bind="visible: !instance.subscriptions.length">
+          <td colspan="10">No subscriptions</td>
+        </tr>
+      </table>
 
-  <h4>Connections</h4>
+    </div>
 
-  <div data-bind="visible: instances().length === 0">
-    Waiting for status from server
-  </div>
+    <h4>Connections</h4>
 
-  <div data-bind="foreach: { data: instances, as: 'instance' }">
-    <table class="table table-striped">
-      <caption data-bind="text: instance.instanceName"></caption>
-      <tr>
-        <th>Peer:</th>
-        <th>Started:</th>
-        <th>Type:</th>
-        <th>User:</th>
-      </tr>
-      <!-- ko foreach: { data: instance.connections, as: 'connection' } -->
-      <tr>
-        <td data-bind="text: connection.peer"></td>
-        <td data-bind="text: formatDate(connection.started)"></td>
-        <td data-bind="text: connection.type"></td>
-        <td data-bind="text: connection.user"></td>
-      </tr>
-      <!-- /ko -->
-      <tr data-bind="visible: !instance.connections.length">
-        <td colspan="4">No connections</td>
-      </tr>
-    </table>
-  </div>
+    <div data-bind="visible: instances().length === 0">
+      Waiting for status from server
+    </div>
 
-  <h4>Inputs</h4>
+    <div data-bind="foreach: { data: instances, as: 'instance' }">
+      <table class="table table-striped">
+        <caption data-bind="text: instance.instanceName"></caption>
+        <tr>
+          <th>Peer:</th>
+          <th>Started:</th>
+          <th>Type:</th>
+          <th>User:</th>
+        </tr>
+        <!-- ko foreach: { data: instance.connections, as: 'connection' } -->
+        <tr>
+          <td data-bind="text: connection.peer"></td>
+          <td data-bind="text: Utilities.formatDate(connection.started)"></td>
+          <td data-bind="text: connection.type"></td>
+          <td data-bind="text: connection.user"></td>
+        </tr>
+        <!-- /ko -->
+        <tr data-bind="visible: !instance.connections.length">
+          <td colspan="4">No connections</td>
+        </tr>
+      </table>
+    </div>
 
-  <div data-bind="visible: !instances().length">
-    Waiting for status from server
-  </div>
+    <h4>Inputs</h4>
 
-  <div data-bind="foreach: { data: instances, as: 'instance' }">
-    <table class="table table-striped">
-      <caption data-bind="text: instance.instanceName"></caption>
-      <tr>
-        <th>Input:</th>
-        <th>Stream:</th>
-        <th>Subscriptions:</th>
-        <th>Weight:</th>
-        <th>Signal:</th>
-        <th>BER:</th>
-        <th>UNC:</th>
-        <th>Bitrate (kbps):</th>
-        <th>Continuity errors:</th>
-      </tr>
-      <!-- knockout.js doesn't allow aliases named 'input' for some retarded reason -->
-      <!-- ko foreach: { data: instance.inputs, as: '_input' } -->
-      <tr>
-        <td data-bind="text: _input.input"></td>
-        <td data-bind="text: _input.stream"></td>
-        <td data-bind="text: _input.subs"></td>
-        <td data-bind="text: _input.weight"></td>
-        <td data-bind="text: _input.signal"></td>
-        <td data-bind="text: _input.ber"></td>
-        <td data-bind="text: _input.unc"></td>
-        <td data-bind="text: formatBitrate(_input.bps)"></td>
-        <td data-bind="text: _input.cc"></td>
-      </tr>
-      <!-- /ko -->
-      <tr data-bind="visible: !instance.inputs.length">
-        <td colspan="9">No inputs</td>
-      </tr>
-    </table>
+    <div data-bind="visible: !instances().length">
+      Waiting for status from server
+    </div>
+
+    <div data-bind="foreach: { data: instances, as: 'instance' }">
+      <table class="table table-striped">
+        <caption data-bind="text: instance.instanceName"></caption>
+        <tr>
+          <th>Input:</th>
+          <th>Stream:</th>
+          <th>Subscriptions:</th>
+          <th>Weight:</th>
+          <th>Signal:</th>
+          <th>BER:</th>
+          <th>UNC:</th>
+          <th>Bitrate (kbps):</th>
+          <th>Continuity errors:</th>
+        </tr>
+        <!-- knockout.js doesn't allow aliases named 'input' for some retarded reason -->
+        <!-- ko foreach: { data: instance.inputs, as: '_input' } -->
+        <tr>
+          <td data-bind="text: _input.input"></td>
+          <td data-bind="text: _input.stream"></td>
+          <td data-bind="text: _input.subs"></td>
+          <td data-bind="text: _input.weight"></td>
+          <td data-bind="text: _input.signal"></td>
+          <td data-bind="text: _input.ber"></td>
+          <td data-bind="text: _input.unc"></td>
+          <td data-bind="text: Utilities.formatBitrate(_input.bps)"></td>
+          <td data-bind="text: _input.cc"></td>
+        </tr>
+        <!-- /ko -->
+        <tr data-bind="visible: !instance.inputs.length">
+          <td colspan="9">No inputs</td>
+        </tr>
+      </table>
+    </div>
   </div>
 
 </div>
@@ -167,6 +170,7 @@
 <script type="text/javascript" src="js/websocket.js"></script>
 <script type="text/javascript" src="js/utility.js"></script>
 <script type="text/javascript" src="js/message.js"></script>
+<script type="text/javascript" src="js/connection.js"></script>
 <script type="text/javascript" src="js/status.js"></script>
 
 </body>

@@ -1,27 +1,20 @@
-// Define message types
-var MESSAGE_TYPE_STATUS_UPDATES = 'statusUpdates';
-var MESSAGE_TYPE_POPULAR_CHANNELS_REQUEST = 'popularChannelsRequest';
-var MESSAGE_TYPE_POPULAR_CHANNELS_RESPONSE = 'popularChannelsResponse';
-
-/**
- * Represents a message
- * @param type
- * @param payload
- * @constructor
- */
-var Message = function(type, payload) {
+function Message(type, payload) {
   this.type = type;
   this.payload = payload;
+}
+
+Message.prototype = {
+  constructor: Message,
+  getType: function() {
+    return this.type;
+  },
+  getPayload: function() {
+    return this.payload;
+  }
 };
 
-/**
- * Parses the specified data into a message object
- * @param data JSON data
- * @returns {Message|*}
- */
-function parseMessage(data) {
-  message = new Message(data.type);
-  message.payload = data.payload;
-
-  return message;
-}
+Message.TYPE_STATUS_UPDATES = 'statusUpdates';
+Message.TYPE_POPULAR_CHANNELS_REQUEST = 'popularChannelsRequest';
+Message.TYPE_POPULAR_CHANNELS_RESPONSE = 'popularChannelsResponse';
+Message.TYPE_MOST_ACTIVE_WATCHERS_REQUEST = 'mostActiveWatchersRequest';
+Message.TYPE_MOST_ACTIVE_WATCHERS_RESPONSE = 'mostActiveWatchersResponse';

@@ -3,27 +3,24 @@
  * @constructor
  */
 function StatusViewModel() {
-  this.connected = ko.observable(false);
   this.instances = ko.observableArray();
 }
 
-// Create the view model and attach bindings
 var statusView = new StatusViewModel();
-ko.applyBindings(statusView);
+ko.applyBindings(statusView, document.getElementById('streaming-status'));
 
-var handleSocketOpened = function() {
-  statusView.connected(true);
-};
-
-var handleSocketClosed = function() {
-  statusView.connected(false);
+// Handle connection events
+Connection.registerEventHandler('onclose', function() {
   statusView.instances([]);
-};
+});
 
 /**
- * Handles instance update messages
- * @param instances
+ *
  */
-var handleInstanceUpdates = function(instances) {
+Connection.registerEventHandler('onmessage', function(message) {
+  if (message.getType() !== Message.TYPE_STATUS_UPDATES)
+    return;
+
+  var instances = message.getPayload();
   statusView.instances(instances);
-};
+});

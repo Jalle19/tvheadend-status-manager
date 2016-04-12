@@ -1,37 +1,75 @@
-var WEBSOCKET_HOSTNAME = '192.168.47.47';
-var WEBSOCKET_RECONNECT_INTERVAL_MS = 1000;
-
-// Connect to the server
-var websocket = new ReconnectingWebSocket('ws://' + WEBSOCKET_HOSTNAME + ':9333', null, {
-  reconnectInterval: WEBSOCKET_RECONNECT_INTERVAL_MS
-});
-
 /**
- * Called when the connection is opened
+ * Connection module
  */
-websocket.onopen = function() {
-  handleSocketOpened();
-};
+var Connection = (function() {
 
-/**
- * Called when the connection is lost
- */
-websocket.onclose = function() {
-  handleSocketClosed();
-};
+  var websocket = null;
+  var handlers = [];
 
-/**
- * Parses incoming messages
- * @param event
- */
-websocket.onmessage = function(event) {
-  // Parse the data into a message
-  var data = JSON.parse(event.data);
-  var message = parseMessage(data);
+  /**
+   * Creates the WebSocket connection and attaches event handlers to the socket
+   * @param hostname
+   * @param reconnectInterval
+   */
+  function connect(hostname, reconnectInterval) {
+    websocket = new ReconnectingWebSocket('ws://' + hostname + ':9333', null, {
+      reconnectInterval: reconnectInterval
+    });
 
-  switch (message.type) {
-    case MESSAGE_TYPE_STATUS_UPDATES:
-      handleInstanceUpdates(message.payload);
-      break;
+    /**
+     * 
+     */
+    websocket.onopen = function() {
+      triggerEvent('onopen');
+    };
+
+    /**
+     * 
+     */
+    websocket.onclose = function() {
+      triggerEvent('onclose');
+    };
+
+    /**
+     * @param event
+     */
+    websocket.onmessage = function(event) {
+      var data = JSON.parse(event.data);
+
+      triggerEvent('onmessage', new Message(data.type, data.payload));
+    };
   }
-};
+
+  /**
+   * Registers an event handler
+   * @param eventName the event the handler is interested in
+   * @param callback
+   */
+  function registerEventHandler(eventName, callback) {
+    handlers.push({
+      eventName: eventName,
+      callback: callback
+    });
+  }
+
+  /**
+   * Triggers the specified event with the associated data
+   * @param eventName
+   * @param eventData
+   */
+  function triggerEvent(eventName, eventData) {
+    handlers.forEach(function(handler) {
+      if (handler.eventName === eventName) {
+        handler.callback(eventData);
+      }
+    });
+  }
+
+  return {
+    connect: connect,
+    registerEventHandler: registerEventHandler
+  };
+
+}());
+
+Connection.connect('192.168.47.47', 1000);
