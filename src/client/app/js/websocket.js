@@ -20,14 +20,14 @@ var Connection = (function() {
      * 
      */
     websocket.onopen = function() {
-      triggerEvent('onopen');
+      triggerEvent('onopen', websocket);
     };
 
     /**
      * 
      */
     websocket.onclose = function() {
-      triggerEvent('onclose');
+      triggerEvent('onclose', websocket);
     };
 
     /**
