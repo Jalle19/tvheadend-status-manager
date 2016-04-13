@@ -185,7 +185,9 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 		catch (UnknownRequestException $e)
 		{
 			// The server itself sometimes sends out messages that are received here, hence debug
-			$this->logger->debug('Got unknown message from client');
+			$this->logger->debug('Got unknown message from client (type: {messageType})', [
+				'messageType' => $e->getType(),
+			]);
 		}
 	}
 

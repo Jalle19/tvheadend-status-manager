@@ -41,7 +41,7 @@ class Factory
 			case AbstractMessage::TYPE_MOST_ACTIVE_WATCHERS_REQUEST:
 				return new MostActiveWatchersRequest($parameters);
 			default:
-				throw new UnknownRequestException('Unknown message "' . $type . '"');
+				throw new UnknownRequestException($type);
 		}
 	}
 

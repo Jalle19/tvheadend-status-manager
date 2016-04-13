@@ -11,4 +11,31 @@ namespace Jalle19\StatusManager\Exception;
 class UnknownRequestException extends BaseException
 {
 
+	/**
+	 * @var string
+	 */
+	private $_type;
+
+
+	/**
+	 * UnknownRequestException constructor.
+	 *
+	 * @param string $type
+	 */
+	public function __construct($type)
+	{
+		parent::__construct();
+
+		$this->_type = $type;
+	}
+
+
+	/**
+	 * @return string
+	 */
+	public function getType()
+	{
+		return $this->_type;
+	}
+	
 }
