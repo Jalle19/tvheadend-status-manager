@@ -4,6 +4,7 @@ namespace Jalle19\StatusManager\Message\Handler;
 
 use Jalle19\StatusManager\Exception\UnhandledMessageException;
 use Jalle19\StatusManager\Message\AbstractMessage;
+use Ratchet\ConnectionInterface;
 
 /**
  * Class DelegatesMessagesTrait
@@ -30,17 +31,18 @@ trait DelegatesMessagesTrait
 
 
 	/**
-	 * @param AbstractMessage $message
+	 * @param AbstractMessage     $message
+	 * @param ConnectionInterface $sender
 	 *
 	 * @return AbstractMessage
 	 *
 	 * @throws UnhandledMessageException
 	 */
-	public function tryDelegateMessage(AbstractMessage $message)
+	public function tryDelegateMessage(AbstractMessage $message, ConnectionInterface $sender)
 	{
 		foreach ($this->_handlers as $handler)
 		{
-			$response = $handler->handleMessage($message);
+			$response = $handler->handleMessage($message, $sender);
 
 			if ($response !== false)
 				return $response;

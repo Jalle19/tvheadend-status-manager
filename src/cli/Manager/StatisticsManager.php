@@ -15,6 +15,7 @@ use Jalle19\StatusManager\Message\Response\PopularChannelsResponse;
 use Jalle19\tvheadend\exception\RequestFailedException;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Exception\PropelException;
+use Ratchet\ConnectionInterface;
 
 /**
  * Class StatisticsManager
@@ -28,7 +29,7 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 	/**
 	 * @inheritdoc
 	 */
-	public function handleMessage(AbstractMessage $message)
+	public function handleMessage(AbstractMessage $message, ConnectionInterface $sender)
 	{
 		// Wrap database exceptions in the more generic RequestFailedException
 		try

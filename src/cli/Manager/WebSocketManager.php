@@ -163,7 +163,8 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 			// Attempt to delegate the message
 			try
 			{
-				$this->sendMessage($this->tryDelegateMessage($message), $from);
+				$response = $this->tryDelegateMessage($message, $from);
+				$this->sendMessage($response, $from);
 			}
 			catch (RequestFailedException $e)
 			{

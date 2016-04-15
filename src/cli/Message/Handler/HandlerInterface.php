@@ -4,6 +4,7 @@ namespace Jalle19\StatusManager\Message\Handler;
 
 use Jalle19\StatusManager\Exception\RequestFailedException;
 use Jalle19\StatusManager\Message\AbstractMessage;
+use Ratchet\ConnectionInterface;
 
 /**
  * Interface HandlerInterface
@@ -15,11 +16,12 @@ interface HandlerInterface
 {
 
 	/**
-	 * @param AbstractMessage $message
+	 * @param AbstractMessage     $message
+	 * @param ConnectionInterface $sender
 	 *
 	 * @return AbstractMessage|false
 	 * @throws RequestFailedException if the request fails
 	 */
-	public function handleMessage(AbstractMessage $message);
+	public function handleMessage(AbstractMessage $message, ConnectionInterface $sender);
 
 }
