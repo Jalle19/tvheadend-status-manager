@@ -42,18 +42,22 @@ class Parser
 			throw new InvalidConfigurationException('Failed to parse the specified configuration file: ' . $e->getMessage());
 		}
 
-		// Validate the configuration. We need at least one instance.
+		// Validate the configuration
 		if (!isset($configuration['instances']) || empty($configuration['instances']))
 			throw new InvalidConfigurationException('No instances defined, you need to specify at least one instance');
 
-		$instances = [];
+		if (!isset($configuration['access_token']) || empty($configuration['access_token']))
+			throw new InvalidConfigurationException('No access token defined');
+
+		$instances   = [];
+		$accessToken = $configuration['access_token'];
 
 		// Parse instances
 		foreach ($configuration['instances'] as $name => $options)
 			$instances[] = self::parseInstance($name, $options);
 
 		// Create the configuration object
-		$config = new Configuration($databaseFile, $instances);
+		$config = new Configuration($databaseFile, $instances, $accessToken);
 
 		// Parse options
 		$updateInterval = floatval($input->getOption(Configuration::OPTION_UPDATE_INTERVAL));

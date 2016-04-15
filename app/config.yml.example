@@ -12,3 +12,5 @@ instances:
     port: 9981
     username: admin
     password: "???"
+
+access_token: longrandomstring

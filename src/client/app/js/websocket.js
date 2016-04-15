@@ -4,14 +4,19 @@
 var Connection = (function() {
 
   var websocket = null;
+  var accessToken = null;
   var handlers = [];
 
   /**
    * Creates the WebSocket connection and attaches event handlers to the socket
    * @param hostname
    * @param reconnectInterval
+   * @param token
    */
-  function connect(hostname, reconnectInterval) {
+  function connect(hostname, reconnectInterval, token) {
+    // Store the access token
+    accessToken = token;
+    
     websocket = new ReconnectingWebSocket('ws://' + hostname + ':9333', null, {
       reconnectInterval: reconnectInterval
     });
@@ -20,6 +25,9 @@ var Connection = (function() {
      * 
      */
     websocket.onopen = function() {
+      // Authenticate
+      websocket.send(JSON.stringify(new Message(Message.TYPE_AUTHENTICATION_REQUEST, accessToken)));
+      
       triggerEvent('onopen', websocket);
     };
 
@@ -72,4 +80,4 @@ var Connection = (function() {
 
 }());
 
-Connection.connect('192.168.47.47', 1000);
+Connection.connect('192.168.47.47', 1000, 'Z4zxVp87pfmSptfUWNk8');

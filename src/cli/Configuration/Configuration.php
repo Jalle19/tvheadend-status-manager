@@ -37,6 +37,11 @@ class Configuration
 	private $_instances;
 
 	/**
+	 * @var string the access token used by clients
+	 */
+	private $_accessToken;
+
+	/**
 	 * @var float the status update interval (in seconds)
 	 */
 	private $_updateInterval = self::DEFAULT_UPDATE_INTERVAL;
@@ -55,11 +60,13 @@ class Configuration
 	/**
 	 * @param string     $databasePath
 	 * @param Instance[] $_instances
+	 * @param string     $accessToken
 	 */
-	public function __construct($databasePath, array $_instances)
+	public function __construct($databasePath, array $_instances, $accessToken)
 	{
 		$this->_databasePath = $databasePath;
 		$this->_instances    = $_instances;
+		$this->_accessToken  = $accessToken;
 	}
 
 
@@ -96,6 +103,15 @@ class Configuration
 	public function getInstances()
 	{
 		return $this->_instances;
+	}
+
+
+	/**
+	 * @return string
+	 */
+	public function getAccessToken()
+	{
+		return $this->_accessToken;
 	}
 
 

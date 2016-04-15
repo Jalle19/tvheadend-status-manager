@@ -50,7 +50,7 @@ abstract class AbstractManagerTest extends \PHPUnit_Framework_TestCase
 		// Configure a single test instance
 		$this->configuration = new Configuration('/tmp', [
 			new Instance('testInstance', 'example.com', 9981),
-		]);
+		], 'accessToken');
 	}
 
 

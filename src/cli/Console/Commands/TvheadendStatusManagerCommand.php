@@ -93,6 +93,8 @@ class TvheadendStatusManagerCommand extends Command
 
 		// Wire the event dispatcher
 		$webSocketManager->registerMessageHandler($statisticsManager);
+		$webSocketManager->registerMessageHandler($webSocketManager);
+		
 		$eventDispatcher->addSubscriber($statusManager);
 		$eventDispatcher->addSubscriber($instanceStateManager);
 		$eventDispatcher->addSubscriber($webSocketManager);

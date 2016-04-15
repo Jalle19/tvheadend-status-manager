@@ -11,6 +11,9 @@ use Jalle19\StatusManager\Exception\UnknownRequestException;
 use Jalle19\StatusManager\Message\AbstractMessage;
 use Jalle19\StatusManager\Message\Factory as MessageFactory;
 use Jalle19\StatusManager\Message\Handler\DelegatesMessagesTrait;
+use Jalle19\StatusManager\Message\Handler\HandlerInterface;
+use Jalle19\StatusManager\Message\Request\AuthenticationRequest;
+use Jalle19\StatusManager\Message\Response\AuthenticationResponse;
 use Jalle19\StatusManager\Message\StatusUpdatesMessage;
 use Jalle19\tvheadend\exception\RequestFailedException;
 use Psr\Log\LoggerInterface;
@@ -26,13 +29,16 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Handles events related to the WebSocket. Events are either triggered from Ratchet (onOpen etc.)
- * or from the event dispatcher in StatusManager.
+ * or, the event dispatcher or client requests.
  *
  * @package   Jalle19\StatusManager
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class WebSocketManager extends AbstractManager implements MessageComponentInterface, EventSubscriberInterface
+class WebSocketManager extends AbstractManager implements
+	MessageComponentInterface,
+	EventSubscriberInterface,
+	HandlerInterface
 {
 
 	use DelegatesMessagesTrait;
@@ -46,6 +52,11 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 	 * @var \SplObjectStorage the connected clients
 	 */
 	private $_connectedClients;
+
+	/**
+	 * @var \SplObjectStorage the authenticated clients
+	 */
+	private $_authenticatedClients;
 
 
 	/**
@@ -64,7 +75,9 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 	) {
 		parent::__construct($configuration, $logger, $eventDispatcher);
 
-		$this->_connectedClients = new \SplObjectStorage();
+		// Keep track of clients
+		$this->_connectedClients     = new \SplObjectStorage();
+		$this->_authenticatedClients = new \SplObjectStorage();
 
 		// Create the socket to listen on
 		$socket = new ServerSocket($loop);
@@ -107,7 +120,7 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 		$this->logger->debug('Broadcasting statuses to all clients');
 		$message = new StatusUpdatesMessage($event->getInstanceStatusCollection());
 
-		foreach ($this->_connectedClients as $client)
+		foreach ($this->_authenticatedClients as $client)
 		{
 			/* @var ConnectionInterface $client */
 			$this->sendMessage($message, $client);
@@ -131,7 +144,9 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 	public function onClose(ConnectionInterface $conn)
 	{
 		$this->logger->debug('Got client disconnect');
+
 		$this->_connectedClients->detach($conn);
+		$this->_authenticatedClients->detach($conn);
 	}
 
 
@@ -141,6 +156,32 @@ class WebSocketManager extends AbstractManager implements MessageComponentInterf
 	public function onError(ConnectionInterface $conn, \Exception $e)
 	{
 		// TODO: Implement onError() method.
+	}
+
+
+	/**
+	 * @inheritdoc
+	 */
+	public function handleMessage(AbstractMessage $message, ConnectionInterface $sender)
+	{
+		if ($message->getType() !== AbstractMessage::TYPE_AUTHENTICATION_REQUEST)
+			return false;
+
+		/* @var AuthenticationRequest $message */
+		$status = AuthenticationResponse::STATUS_FAILURE;
+
+		// Add the sender to the list of authenticated clients
+		if ($message->getAccessToken() === $this->configuration->getAccessToken())
+		{
+			$status = AuthenticationResponse::STATUS_SUCCESS;
+			$this->_authenticatedClients->attach($sender);
+
+			$this->logger->info('Client authenticated successfully');
+		}
+		else
+			$this->logger->warning('Got invalid authentication request from client');
+
+		return new AuthenticationResponse($status);
 	}
 
 

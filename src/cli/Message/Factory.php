@@ -4,6 +4,7 @@ namespace Jalle19\StatusManager\Message;
 
 use Jalle19\StatusManager\Exception\MalformedRequestException;
 use Jalle19\StatusManager\Exception\UnknownRequestException;
+use Jalle19\StatusManager\Message\Request\AuthenticationRequest;
 use Jalle19\StatusManager\Message\Request\MostActiveWatchersRequest;
 use Jalle19\StatusManager\Message\Request\PopularChannelsRequest;
 
@@ -40,6 +41,8 @@ class Factory
 				return new PopularChannelsRequest($parameters);
 			case AbstractMessage::TYPE_MOST_ACTIVE_WATCHERS_REQUEST:
 				return new MostActiveWatchersRequest($parameters);
+			case AbstractMessage::TYPE_AUTHENTICATION_REQUEST:
+				return new AuthenticationRequest($parameters);
 			default:
 				throw new UnknownRequestException($type);
 		}

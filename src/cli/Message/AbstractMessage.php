@@ -12,6 +12,8 @@ namespace Jalle19\StatusManager\Message;
 abstract class AbstractMessage implements \JsonSerializable
 {
 
+	const TYPE_AUTHENTICATION_REQUEST        = 'authenticationRequest';
+	const TYPE_AUTHENTICATION_RESPONSE       = 'authenticationResponse';
 	const TYPE_STATUS_UPDATES                = 'statusUpdates';
 	const TYPE_POPULAR_CHANNELS_REQUEST      = 'popularChannelsRequest';
 	const TYPE_POPULAR_CHANNELS_RESPONSE     = 'popularChannelsResponse';
