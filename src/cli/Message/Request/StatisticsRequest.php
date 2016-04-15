@@ -34,6 +34,8 @@ abstract class StatisticsRequest extends AbstractMessage
 	 *
 	 * @param string $type
 	 * @param mixed  $parameters
+	 * 
+	 * @throws MalformedRequestException
 	 */
 	public function __construct($type, $parameters)
 	{
