@@ -44,14 +44,14 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 	public function onMainLoopStarted()
 	{
 		// Log information about the database
-		$this->logger->debug('Using database at {databasePath}', [
+		$this->logger->notice('Using database at {databasePath}', [
 			'databasePath' => $this->configuration->getDatabasePath(),
 		]);
 
 		// Log information about the configured instances
 		$instances = $this->configuration->getInstances();
 
-		$this->logger->info('Managing {instances} instances:', [
+		$this->logger->notice('Managing {instances} instances:', [
 			'instances' => count($instances),
 		]);
 
@@ -59,7 +59,7 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 		{
 			$instance = $configuredInstance->getInstance();
 
-			$this->logger->info('  {address}:{port}', [
+			$this->logger->notice('  {address}:{port}', [
 				'address' => $instance->getHostname(),
 				'port'    => $instance->getPort(),
 			]);

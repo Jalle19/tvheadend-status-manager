@@ -252,7 +252,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		if ($subscription === null)
 		{
 			$this->logger
-				->debug('Got subscription stop without a matching start (instance: {instanceName}, subscription: {subscriptionId})',
+				->error('Got subscription stop without a matching start (instance: {instanceName}, subscription: {subscriptionId})',
 					[
 						'instanceName'   => $instanceName,
 						'subscriptionId' => $stateChange->getSubscriptionId(),
@@ -290,7 +290,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$inputError->setFromInputErrorCumulative($cumulativeErrors);
 		$inputError->save();
 		
-		$this->logger->debug('Persisted input errors (instance: {instanceName}, input: {friendlyName})', [
+		$this->logger->info('Persisted input errors (instance: {instanceName}, input: {friendlyName})', [
 			'instanceName' => $input->getInstanceName(),
 			'friendlyName' => $input->getFriendlyName(),
 		]);

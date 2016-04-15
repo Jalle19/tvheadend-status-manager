@@ -105,7 +105,7 @@ class WebSocketManager extends AbstractManager implements
 	 */
 	public function onMainLoopStarted()
 	{
-		$this->logger->info('Starting the Websocket server on {address}:{port}', [
+		$this->logger->notice('Starting the Websocket server on {address}:{port}', [
 			'address' => $this->configuration->getListenAddress(),
 			'port'    => $this->configuration->getListenPort(),
 		]);
@@ -143,7 +143,7 @@ class WebSocketManager extends AbstractManager implements
 	 */
 	public function onClose(ConnectionInterface $conn)
 	{
-		$this->logger->debug('Got client disconnect');
+		$this->logger->info('Got client disconnect');
 
 		$this->_connectedClients->detach($conn);
 		$this->_authenticatedClients->detach($conn);
@@ -176,7 +176,7 @@ class WebSocketManager extends AbstractManager implements
 			$status = AuthenticationResponse::STATUS_SUCCESS;
 			$this->_authenticatedClients->attach($sender);
 
-			$this->logger->info('Client authenticated successfully');
+			$this->logger->notice('Client authenticated successfully');
 		}
 		else
 			$this->logger->warning('Got invalid authentication request from client');
@@ -209,7 +209,7 @@ class WebSocketManager extends AbstractManager implements
 			}
 			catch (RequestFailedException $e)
 			{
-				$this->logger->critical('The request failed: ' . $e->getMessage());
+				$this->logger->error('The request failed: ' . $e->getMessage());
 			}
 			catch (UnhandledMessageException $e)
 			{

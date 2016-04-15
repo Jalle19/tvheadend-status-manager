@@ -90,10 +90,9 @@ class InstanceStateManager extends AbstractManager implements EventSubscriberInt
 		// Update reachability state now that we know the instance is reachable
 		if ($instanceState->getReachability() === InstanceState::MAYBE_REACHABLE)
 		{
-			$this->logger
-				->info('Instance {instanceName} is now reachable, will start polling for updates', [
-					'instanceName' => $instance->getName(),
-				]);
+			$this->logger->notice('Instance {instanceName} is now reachable, will start polling for updates', [
+				'instanceName' => $instance->getName(),
+			]);
 
 			$instanceState->setReachability(InstanceState::REACHABLE);
 		}
@@ -113,7 +112,7 @@ class InstanceStateManager extends AbstractManager implements EventSubscriberInt
 		// Mark the instance as unreachable
 		$message = 'Instance {instanceName} not reachable, will wait for {cycles} cycles before retrying';
 
-		$this->logger->alert($message, [
+		$this->logger->warning($message, [
 			'instanceName' => $instance->getName(),
 			'cycles'       => self::UNREACHABLE_CYCLES_UNTIL_RETRY,
 		]);
