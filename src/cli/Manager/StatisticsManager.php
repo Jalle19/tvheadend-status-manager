@@ -148,6 +148,9 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 		$instance     = $this->configuration->getInstanceByName($instanceName);
 		$ignoredUsers = $instance->getIgnoredUsers();
 
+		// Always ignore system users
+		$ignoredUsers[] = User::NAME_DVR;
+
 		foreach ($ignoredUsers as $ignoredUser)
 			$query = $query->filterByName($ignoredUser, Criteria::NOT_EQUAL);
 
