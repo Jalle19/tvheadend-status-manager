@@ -187,7 +187,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		switch ($status->getType())
 		{
 			case SubscriptionStatus::TYPE_RECORDING:
-				$username = 'dvr';
+				$username = User::NAME_DVR;
 				break;
 		}
 
