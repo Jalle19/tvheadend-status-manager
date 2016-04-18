@@ -1,8 +1,26 @@
 engines:
   phpmd:
     enabled: true
+    checks:
+      # yeah don't care
+      Naming/LongVariable:
+        enabled: false
+      # it doesn't understand $_camelCase
+      Controversial/CamelCasePropertyName:
+        enabled: false
+        
   phpcodesniffer:
       enabled: true
+      checks:
+        # just let me use my tabs alright
+        Generic WhiteSpace DisallowTabIndent TabsUsed:
+          enabled: false
+        # complains about try/catch
+        Squiz ControlStructures ControlSignature SpaceAfterKeyword:
+          enabled: false
+        # but I want to
+        PSR2 Classes PropertyDeclaration Underscore:
+          enabled: false
       
 ratings:
   paths:
@@ -16,6 +34,7 @@ exclude_paths:
   # auto-generated database files
   - src/cli/Database/Base
   - src/cli/Database/Map
+  - migrations
   
   # compiled client files
   - src/client/app/css/bootstrap*
