@@ -1,3 +1,13 @@
+engines:
+  phpmd:
+    enabled: true
+  phpcodesniffer:
+      enabled: true
+      
+ratings:
+  paths:
+    - "**.php"
+  
 exclude_paths:
   # vendor folders
   - vendor
