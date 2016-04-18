@@ -29,20 +29,25 @@ class Factory
 	{
 		$deserialized = json_decode($json);
 
-		if (!isset($deserialized->type) || !isset($deserialized->payload))
-			throw new MalformedRequestException('Missing "type" or "payload"');
+		if (!isset($deserialized->type))
+			throw new MalformedRequestException('Missing required parameter "type"');
 
-		$type       = $deserialized->type;
-		$parameters = $deserialized->payload;
+		$type = $deserialized->type;
+
+		// Not all requests have a payload
+		if (isset($deserialized->payload))
+			$payload = $deserialized->payload;
+		else
+			$payload = null;
 
 		switch ($type)
 		{
 			case AbstractMessage::TYPE_POPULAR_CHANNELS_REQUEST:
-				return new PopularChannelsRequest($parameters);
+				return new PopularChannelsRequest($payload);
 			case AbstractMessage::TYPE_MOST_ACTIVE_WATCHERS_REQUEST:
-				return new MostActiveWatchersRequest($parameters);
+				return new MostActiveWatchersRequest($payload);
 			case AbstractMessage::TYPE_AUTHENTICATION_REQUEST:
-				return new AuthenticationRequest($parameters);
+				return new AuthenticationRequest($payload);
 			default:
 				throw new UnknownRequestException($type);
 		}
