@@ -20,7 +20,7 @@ class MostActiveWatchersRequest extends StatisticsRequest
 	/**
 	 * PopularChannelsRequest constructor.
 	 *
-	 * @param string $parameters
+	 * @param \stdClass $parameters
 	 */
 	public function __construct($parameters)
 	{

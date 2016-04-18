@@ -2,6 +2,7 @@
 
 namespace Jalle19\StatusManager\Message\Request;
 
+use Jalle19\StatusManager\Exception\MalformedRequestException;
 use Jalle19\StatusManager\Message\AbstractMessage;
 
 /**
@@ -14,21 +15,16 @@ class AuthenticationRequest extends AbstractMessage
 {
 
 	/**
-	 * @var string
-	 */
-	private $_accessToken;
-
-
-	/**
 	 * AuthenticationRequest constructor.
 	 *
 	 * @param string $accessToken
 	 */
 	public function __construct($accessToken)
 	{
-		parent::__construct(self::TYPE_AUTHENTICATION_REQUEST, $accessToken);
+		if (!is_string($accessToken))
+			throw new MalformedRequestException('Malformed access token');
 
-		$this->_accessToken = $accessToken;
+		parent::__construct(self::TYPE_AUTHENTICATION_REQUEST, $accessToken);
 	}
 
 
@@ -37,7 +33,7 @@ class AuthenticationRequest extends AbstractMessage
 	 */
 	public function getAccessToken()
 	{
-		return $this->_accessToken;
+		return $this->getPayload();
 	}
-	
+
 }

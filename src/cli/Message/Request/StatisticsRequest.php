@@ -33,7 +33,7 @@ abstract class StatisticsRequest extends AbstractMessage
 	 * StatisticsRequest constructor.
 	 *
 	 * @param string $type
-	 * @param mixed  $parameters
+	 * @param \stdClass  $parameters
 	 * 
 	 * @throws MalformedRequestException
 	 */
