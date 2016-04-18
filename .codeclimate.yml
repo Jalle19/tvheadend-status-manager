@@ -1,0 +1,12 @@
+exclude_paths:
+  # vendor folders
+  - vendor
+  - src/client/node_modules
+  
+  # auto-generated database files
+  - src/cli/Database/Base
+  - src/cli/Database/Map
+  
+  # compiled client files
+  - src/client/app/css/bootstrap*
+  - src/client/app/js/vendor/vendor.js
