@@ -56,7 +56,7 @@ class StateChangeParser
 			// Check the state
 			if (strpos($message, 'subscribing on channel') !== false)
 				$stateChange->setState(StateChange::STATE_SUBSCRIPTION_STARTED);
-			else if (strpos($message, 'unsubscribing from'))
+			elseif (strpos($message, 'unsubscribing from'))
 				$stateChange->setState(StateChange::STATE_SUBSCRIPTION_STOPPED);
 
 			return $stateChange;

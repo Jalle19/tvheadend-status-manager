@@ -93,7 +93,7 @@ class Parser
 		// Check that the database exists and is writable
 		if (!file_exists($databasePath))
 			throw new InvalidConfigurationException('The specified database path does not exist');
-		else if (!is_writable($databasePath))
+		elseif (!is_writable($databasePath))
 			throw new InvalidConfigurationException('The specified database path is not writable');
 
 		// Check that the directory of the log file path is writable
