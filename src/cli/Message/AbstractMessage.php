@@ -19,6 +19,10 @@ abstract class AbstractMessage implements \JsonSerializable
 	const TYPE_POPULAR_CHANNELS_RESPONSE     = 'popularChannelsResponse';
 	const TYPE_MOST_ACTIVE_WATCHERS_REQUEST  = 'mostActiveWatchersRequest';
 	const TYPE_MOST_ACTIVE_WATCHERS_RESPONSE = 'mostActiveWatchersResponse';
+	const TYPE_INSTANCES_REQUEST             = 'instancesRequest';
+	const TYPE_INSTANCES_RESPONSE            = 'instancesResponse';
+	const TYPE_USERS_REQUEST                 = 'usersRequest';
+	const TYPE_USERS_RESPONSE                = 'usersResponse';
 
 	/**
 	 * @var string

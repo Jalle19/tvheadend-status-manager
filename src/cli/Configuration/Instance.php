@@ -10,7 +10,7 @@ use Jalle19\tvheadend\Tvheadend;
  * @copyright Copyright &copy; Sam Stenvall 2015-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class Instance
+class Instance implements \JsonSerializable
 {
 
 	/**
@@ -90,6 +90,17 @@ class Instance
 	public function getInstance()
 	{
 		return $this->_instance;
+	}
+
+
+	/**
+	 * @inheritdoc
+	 */
+	public function jsonSerialize()
+	{
+		return [
+			'name' => $this->getName(),
+		];
 	}
 
 }

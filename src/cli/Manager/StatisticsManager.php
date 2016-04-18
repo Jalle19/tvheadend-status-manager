@@ -4,14 +4,19 @@ namespace Jalle19\StatusManager\Manager;
 
 use Jalle19\StatusManager\Database\InstanceQuery;
 use Jalle19\StatusManager\Database\SubscriptionQuery;
+use Jalle19\StatusManager\Database\User;
 use Jalle19\StatusManager\Database\UserQuery;
 use Jalle19\StatusManager\Message\AbstractMessage;
 use Jalle19\StatusManager\Message\Handler\HandlerInterface;
+use Jalle19\StatusManager\Message\Request\InstancesRequest;
 use Jalle19\StatusManager\Message\Request\MostActiveWatchersRequest;
 use Jalle19\StatusManager\Message\Request\PopularChannelsRequest;
 use Jalle19\StatusManager\Message\Request\StatisticsRequest;
+use Jalle19\StatusManager\Message\Request\UsersRequest;
+use Jalle19\StatusManager\Message\Response\InstancesResponse;
 use Jalle19\StatusManager\Message\Response\MostActiveWatchersResponse;
 use Jalle19\StatusManager\Message\Response\PopularChannelsResponse;
+use Jalle19\StatusManager\Message\Response\UsersResponse;
 use Jalle19\tvheadend\exception\RequestFailedException;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Exception\PropelException;
@@ -49,6 +54,12 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 						$message->getInstanceName(),
 						$message->getLimit(),
 						$message->getTimeInterval()));
+				case AbstractMessage::TYPE_INSTANCES_REQUEST:
+					/* @var InstancesRequest $message */
+					return new InstancesResponse($this->configuration->getInstances());
+				case AbstractMessage::TYPE_USERS_REQUEST:
+					/* @var UsersRequest $message */
+					return new UsersResponse($this->getUsers($message->getInstanceName()));
 			}
 		}
 		catch (PropelException $e)
@@ -74,7 +85,7 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 		$instance = InstanceQuery::create()->findOneByName($instanceName);
 		$user     = UserQuery::create()->findOneByName($userName);
 		$query    = SubscriptionQuery::create()->getPopularChannelsQuery($instance, $user);
-		
+
 		$query = $this->filterByLimit($limit, $query);
 		$query = $this->filterBySubscriptionStopped($timeInterval, $query);
 		$query = $this->filterIgnoredUsers($instanceName, $query->useUserQuery())->endUse();
@@ -100,6 +111,22 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 		$query = $this->filterIgnoredUsers($instanceName, $query);
 
 		return $query->find()->getData();
+	}
+
+
+	/**
+	 * Returns all users found so far for the specified instance name
+	 *
+	 * @param string $instanceName
+	 *
+	 * @return User[]
+	 */
+	private function getUsers($instanceName)
+	{
+		$query = UserQuery::create();
+		$query = $this->filterIgnoredUsers($instanceName, $query);
+
+		return $query->findByInstanceName($instanceName)->getArrayCopy();
 	}
 
 
