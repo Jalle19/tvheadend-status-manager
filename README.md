@@ -1,6 +1,8 @@
 # tvheadend-status-manager
 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Jalle19/tvheadend-status-manager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Jalle19/tvheadend-status-manager/?branch=master)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Jalle19/tvheadend-status-manager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Jalle19/tvheadend-status-manager/?branch=master) 
+[![Code Climate](https://codeclimate.com/github/Jalle19/tvheadend-status-manager/badges/gpa.svg)](https://codeclimate.com/github/Jalle19/tvheadend-status-manager) 
+[![Code Coverage](https://scrutinizer-ci.com/g/Jalle19/tvheadend-status-manager/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/Jalle19/tvheadend-status-manager/?branch=master)
 
 *This software is still highly experimental and comes entirely without support!*
 
