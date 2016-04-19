@@ -30,6 +30,11 @@ add `-vv` (or even `-vvv`) to the command to get more output in the console. See
 parameters
 6. Browse to `http://192.168.47.47/` to use the web interface
 
+### Running tests
+
+To run the test suite, run `./vendor/bin/phpunit` from the project root directory. To generate code statistics, run 
+`./vendor/bin/phploc --exclude=Database/Base --exclude=Database/Map src/cli`.
+
 ## Usage
 
 ```
