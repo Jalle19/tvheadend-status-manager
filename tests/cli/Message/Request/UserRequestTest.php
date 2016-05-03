@@ -23,4 +23,14 @@ class UserRequestTest extends \PHPUnit_Framework_TestCase
 		new UsersRequest(null);
 	}
 
+
+	/**
+	 * 
+	 */
+	public function testGetInstance()
+	{
+		$request = new UsersRequest('foo');
+		$this->assertEquals('foo', $request->getInstanceName());
+	}
+
 }

@@ -30,6 +30,31 @@ class YamlReaderTest extends \PHPUnit_Framework_TestCase
 
 
 	/**
+	 * @expectedException \Jalle19\StatusManager\Exception\InvalidConfigurationException
+	 * @expectedExceptionMessageRegExp *The configuration file does not*
+	 */
+	public function testMissingFile()
+	{
+		$reader = new YamlReader('/tmp/does/not/exist');
+		$reader->readConfiguration();
+	}
+
+
+	/**
+	 * @expectedException \Jalle19\StatusManager\Exception\InvalidConfigurationException
+	 * @expectedExceptionMessageRegExp *Failed to parse*
+	 */
+	public function testUnparsableConfiguration()
+	{
+		$tmpFile = $this->getTemporaryFilePath();
+		file_put_contents($tmpFile, "\t\tfail");
+
+		$reader = new YamlReader($tmpFile);
+		$reader->readConfiguration();
+	}
+
+
+	/**
 	 * @return string
 	 */
 	private function getTemporaryFilePath()

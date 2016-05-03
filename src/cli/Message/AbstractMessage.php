@@ -70,8 +70,8 @@ abstract class AbstractMessage implements \JsonSerializable
 	public function jsonSerialize()
 	{
 		return [
-			'type'    => $this->_type,
-			'payload' => $this->_payload,
+			'type'    => $this->getType(),
+			'payload' => $this->getPayload(),
 		];
 	}
 

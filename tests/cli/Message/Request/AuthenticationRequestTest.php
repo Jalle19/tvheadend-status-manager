@@ -23,4 +23,14 @@ class AuthenticationRequestTest extends \PHPUnit_Framework_TestCase
 		new AuthenticationRequest(['very invalid']);
 	}
 
+
+	/**
+	 *
+	 */
+	public function testPayload()
+	{
+		$request = new AuthenticationRequest('token');
+		$this->assertEquals('token', $request->getAccessToken());
+	}
+
 }
