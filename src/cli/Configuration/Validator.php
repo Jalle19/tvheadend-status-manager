@@ -56,8 +56,8 @@ class Validator
 		if (!is_readable($this->_configuration['database_path']))
 			throw new InvalidConfigurationException('The database path does not exist or is not writable');
 
-		// Attempt to create the log path if it doesn't exist, fail if it is not writable
-		if (!file_exists($this->_configuration['log_path']))
+		// Attempt to create the log path if it doesn't exist
+		if (!file_exists($this->_configuration['log_path']) && is_writable(dirname($this->_configuration['log_path'])))
 			touch($this->_configuration['log_path']);
 
 		if (!is_writable($this->_configuration['log_path']))
