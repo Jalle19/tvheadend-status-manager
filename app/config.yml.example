@@ -1,3 +1,34 @@
+#
+# The address to listen on
+#
+listen_address: 0.0.0.0
+
+#
+# The port to listen on
+#
+listen_port: 9333
+
+#
+# The path to the database file, either absolute or relative to the 
+# location of the application itself
+#
+database_path: ./app/database.sqlite
+
+#
+# The path to the log file, either absolute or relative to the 
+# location of the application itself
+#
+log_path: ./app/tvheadend-status-manager.log
+
+#
+# The polling frequency (in seconds).
+#
+update_interval: 1
+
+#
+# The instances to monitor. The key is the name of the instance while 
+# the value is a dictionary of options for the instance.
+#
 instances:
   "first":
     address: example.com
@@ -13,4 +44,7 @@ instances:
     username: admin
     password: "???"
 
+#
+# The access token required by clients connecting to the server
+#
 access_token: longrandomstring

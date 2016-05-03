@@ -8,3 +8,4 @@ composer.phar
 
 app/config.yml
 app/database.sqlite
+app/tvheadend-status-manager.log

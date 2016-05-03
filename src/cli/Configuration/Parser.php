@@ -2,10 +2,8 @@
 
 namespace Jalle19\StatusManager\Configuration;
 
+use Jalle19\StatusManager\Configuration\Reader\ReaderInterface;
 use Jalle19\StatusManager\Exception\InvalidConfigurationException;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Yaml\Exception\ParseException;
-use Symfony\Component\Yaml\Yaml;
 
 /**
  * Class Parser
@@ -19,86 +17,46 @@ class Parser
 	/**
 	 * Parses the application configuration
 	 *
-	 * @param InputInterface $input
+	 * @param ReaderInterface $reader
 	 *
 	 * @return Configuration the parsed configuration
-	 * @throws InvalidConfigurationException if the configuration contains unrecoverable errors
+	 * @throws InvalidConfigurationException if the configuration couldn't be parsed and validated
 	 */
-	public static function parseConfiguration(InputInterface $input)
+	public static function parseConfiguration(ReaderInterface $reader)
 	{
-		self::validateArguments($input);
-
-		$configFile   = $input->getArgument('configFile');
-		$databaseFile = $input->getArgument('databaseFile');
-		$logFile      = $input->getArgument('logFile');
-
-		// Parse the configuration file
-		try
-		{
-			$configuration = Yaml::parse(file_get_contents($configFile));
-		}
-		catch (ParseException $e)
-		{
-			throw new InvalidConfigurationException('Failed to parse the specified configuration file: ' . $e->getMessage());
-		}
+		$configuration = $reader->readConfiguration();
 
 		// Validate the configuration
-		if (!isset($configuration['instances']) || empty($configuration['instances']))
-			throw new InvalidConfigurationException('No instances defined, you need to specify at least one instance');
-
-		if (!isset($configuration['access_token']) || empty($configuration['access_token']))
-			throw new InvalidConfigurationException('No access token defined');
-
-		$instances   = [];
-		$accessToken = $configuration['access_token'];
-
-		// Parse instances
-		foreach ($configuration['instances'] as $name => $options)
-			$instances[] = self::parseInstance($name, $options);
+		$validator = new Validator($configuration);
+		$validator->validate();
 
 		// Create the configuration object
-		$config = new Configuration($databaseFile, $instances, $accessToken);
-
-		// Parse options
-		$updateInterval = floatval($input->getOption(Configuration::OPTION_UPDATE_INTERVAL));
-		$config->setUpdateInterval($updateInterval);
-
-		$listenAddress = $input->getOption(Configuration::OPTION_LISTEN_ADDRESS);
-		$config->setListenAddress($listenAddress);
-
-		$listenPort = $input->getOption(Configuration::OPTION_LISTEN_PORT);
-		$config->setListenPort($listenPort);
-
-		$config->setLogPath($logFile);
+		$config = new Configuration();
+		$config->setDatabasePath($configuration['database_path'])
+		       ->setLogPath($configuration['log_path'])
+		       ->setInstances(self::parseInstances($configuration))
+		       ->setAccessToken($configuration['access_token'])
+		       ->setUpdateInterval($configuration['update_interval'])
+		       ->setListenAddress($configuration['listen_address'])
+		       ->setListenPort($configuration['listen_port']);
 
 		return $config;
 	}
 
 
 	/**
-	 * @param InputInterface $input
+	 * @param array $configuration
 	 *
-	 * @throws InvalidConfigurationException if the arguments are invalid
+	 * @return Instance[] the instances
 	 */
-	private static function validateArguments(InputInterface $input)
+	private static function parseInstances($configuration)
 	{
-		$configFile   = $input->getArgument('configFile');
-		$databasePath = $input->getArgument('databaseFile');
-		$logFile      = $input->getArgument('logFile');
+		$instances = [];
 
-		// Check that the configuration file exists
-		if (!file_exists($configFile))
-			throw new InvalidConfigurationException('The specified configuration file does not exist');
+		foreach ($configuration['instances'] as $name => $options)
+			$instances[] = self::parseInstance($name, $options);
 
-		// Check that the database exists and is writable
-		if (!file_exists($databasePath))
-			throw new InvalidConfigurationException('The specified database path does not exist');
-		elseif (!is_writable($databasePath))
-			throw new InvalidConfigurationException('The specified database path is not writable');
-
-		// Check that the directory of the log file path is writable
-		if ($logFile !== null && !is_writable(dirname($logFile)))
-			throw new InvalidConfigurationException('The specified log file path is not writable');
+		return $instances;
 	}
 
 

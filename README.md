@@ -24,8 +24,9 @@ broadcasts these updates to potential clients over a Websocket
 2. Run `vagrant up`
 3. Run `vagrant ssh`
 4. Run `./vendor/bin/propel sql:insert && ./vendor/bin/propel migration:migrate` to create the initial database
-4. Copy `app/config.yml.example` to `app/config.yml` and configure your instances
-5. Start the CLI application with `./app/tvheadend-status-manager app/config.yml app/database.sqlite`. You may want to 
+4. Copy `app/config.yml.example` to `app/config.yml` and configure it according to your environment. Most of the 
+default values are sensible, but you'll need to configure your instances at least.
+5. Start the CLI application with `./app/tvheadend-status-manager app/config.yml`. You may want to 
 add `-vv` (or even `-vvv`) to the command to get more output in the console. See the Usage section below for additional 
 parameters
 6. Browse to `http://192.168.47.47/` to use the web interface
@@ -40,24 +41,22 @@ To run the test suite, run `./vendor/bin/phpunit` from the project root director
 ```
 ./app/tvheadend-status-manager --help
 Usage:
-  tvheadend-status-manager [options] [--] <configFile> <databaseFile> [<logFile>]
+  tvheadend-status-manager <configFile>
 
 Arguments:
-  configFile                           The path to the configuration file
-  databaseFile                         The path to the database
-  logFile                              The path to the log file
+  configFile            The path to the configuration file
 
 Options:
-  -i, --updateInterval=UPDATEINTERVAL  The status update interval (in seconds) [default: 1]
-  -l, --listenAddress=LISTENADDRESS    The address the Websocket server should be listening on [default: "0.0.0.0"]
-  -p, --listenPort=LISTENPORT          The port the Websocket server should be listening on [default: 9333]
-  -h, --help                           Display this help message
-  -q, --quiet                          Do not output any message
-  -V, --version                        Display this application version
-      --ansi                           Force ANSI output
-      --no-ansi                        Disable ANSI output
-  -n, --no-interaction                 Do not ask any interactive question
-  -v|vv|vvv, --verbose                 Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+  -h, --help            Display this help message
+  -q, --quiet           Do not output any message
+  -V, --version         Display this application version
+      --ansi            Force ANSI output
+      --no-ansi         Disable ANSI output
+  -n, --no-interaction  Do not ask any interactive question
+  -v|vv|vvv, --verbose  Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+
+Help:
+ Aggregating status manager for tvheadend instances
 ```
 
 ## License

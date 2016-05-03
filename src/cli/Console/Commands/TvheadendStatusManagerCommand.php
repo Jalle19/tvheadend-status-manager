@@ -6,6 +6,7 @@ use Auryn\Injector;
 use Bramus\Monolog\Formatter\ColoredLineFormatter;
 use Jalle19\StatusManager\Configuration\Configuration;
 use Jalle19\StatusManager\Configuration\Parser as ConfigurationParser;
+use Jalle19\StatusManager\Configuration\Reader\YamlReader;
 use Jalle19\StatusManager\Event\Events;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -19,7 +20,6 @@ use Symfony\Bridge\Monolog\Handler\ConsoleHandler;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
@@ -45,19 +45,6 @@ class TvheadendStatusManagerCommand extends Command
 
 		// Add arguments
 		$this->addArgument('configFile', InputArgument::REQUIRED, 'The path to the configuration file');
-		$this->addArgument('databaseFile', InputArgument::REQUIRED, 'The path to the database');
-		$this->addArgument('logFile', InputArgument::OPTIONAL, 'The path to the log file');
-
-		// Add options
-		$this->addOption('updateInterval', 'i', InputOption::VALUE_REQUIRED, 'The status update interval (in seconds)',
-			Configuration::DEFAULT_UPDATE_INTERVAL);
-
-		$this->addOption('listenAddress', 'l', InputOption::VALUE_REQUIRED,
-			'The address the Websocket server should be listening on',
-			Configuration::DEFAULT_LISTEN_ADDRESS);
-
-		$this->addOption('listenPort', 'p', InputOption::VALUE_REQUIRED,
-			'The port the Websocket server should be listening on', Configuration::DEFAULT_LISTEN_PORT);
 	}
 
 
@@ -66,9 +53,12 @@ class TvheadendStatusManagerCommand extends Command
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
+		// Parse the configuration
+		$configFile    = $input->getArgument('configFile');
+		$configuration = ConfigurationParser::parseConfiguration(new YamlReader($configFile));
+
 		// Configure Propel and the logger
-		$configuration = ConfigurationParser::parseConfiguration($input);
-		$logger        = $this->configureLogger($output, $configuration);
+		$logger = $this->configureLogger($output, $configuration);
 		$this->configurePropel($configuration, $logger);
 
 		$injector = new Injector();

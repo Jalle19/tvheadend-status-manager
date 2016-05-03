@@ -4,6 +4,9 @@ namespace Jalle19\StatusManager\Test\Manager;
 
 use Jalle19\StatusManager\Configuration\Configuration;
 use Jalle19\StatusManager\Configuration\Instance;
+use Jalle19\StatusManager\Configuration\Parser as ConfigurationParser;
+use Jalle19\StatusManager\Configuration\Reader\ArrayReader;
+use Jalle19\StatusManager\Test\Configuration\BasicConfigurationTrait;
 use Monolog\Handler\NullHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -17,6 +20,8 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  */
 abstract class AbstractManagerTest extends \PHPUnit_Framework_TestCase
 {
+
+	use BasicConfigurationTrait;
 
 	/**
 	 * @var Configuration
@@ -48,9 +53,7 @@ abstract class AbstractManagerTest extends \PHPUnit_Framework_TestCase
 		$this->logger->setHandlers([new NullHandler()]);
 
 		// Configure a single test instance
-		$this->configuration = new Configuration('/tmp', [
-			new Instance('testInstance', 'example.com', 9981),
-		], 'accessToken');
+		$this->configuration = ConfigurationParser::parseConfiguration(new ArrayReader($this->getBaseConfiguration()));
 	}
 
 

@@ -11,16 +11,6 @@ namespace Jalle19\StatusManager\Configuration;
 class Configuration
 {
 
-	const SECTION_TYPE_INSTANCE = 'instance';
-
-	const OPTION_UPDATE_INTERVAL = 'updateInterval';
-	const OPTION_LISTEN_ADDRESS  = 'listenAddress';
-	const OPTION_LISTEN_PORT     = 'listenPort';
-
-	const DEFAULT_UPDATE_INTERVAL = 2;
-	const DEFAULT_LISTEN_ADDRESS  = '0.0.0.0';
-	const DEFAULT_LISTEN_PORT     = 9333;
-
 	/**
 	 * @var string the database path
 	 */
@@ -44,30 +34,17 @@ class Configuration
 	/**
 	 * @var float the status update interval (in seconds)
 	 */
-	private $_updateInterval = self::DEFAULT_UPDATE_INTERVAL;
+	private $_updateInterval;
 
 	/**
 	 * @var string the address to listen on
 	 */
-	private $_listenAddress = self::DEFAULT_LISTEN_ADDRESS;
+	private $_listenAddress;
 
 	/**
 	 * @var int the port to listen on
 	 */
-	private $_listenPort = self::DEFAULT_LISTEN_PORT;
-
-
-	/**
-	 * @param string     $databasePath
-	 * @param Instance[] $_instances
-	 * @param string     $accessToken
-	 */
-	public function __construct($databasePath, array $_instances, $accessToken)
-	{
-		$this->_databasePath = $databasePath;
-		$this->_instances    = $_instances;
-		$this->_accessToken  = $accessToken;
-	}
+	private $_listenPort;
 
 
 	/**
@@ -76,6 +53,17 @@ class Configuration
 	public function getDatabasePath()
 	{
 		return $this->_databasePath;
+	}
+
+
+	/**
+	 * @param string $databasePath
+	 */
+	public function setDatabasePath($databasePath)
+	{
+		$this->_databasePath = $databasePath;
+
+		return $this;
 	}
 
 
@@ -94,6 +82,8 @@ class Configuration
 	public function setLogPath($logPath)
 	{
 		$this->_logPath = $logPath;
+
+		return $this;
 	}
 
 
@@ -107,11 +97,33 @@ class Configuration
 
 
 	/**
+	 * @param Instance[] $instances
+	 */
+	public function setInstances(array $instances)
+	{
+		$this->_instances = $instances;
+
+		return $this;
+	}
+
+
+	/**
 	 * @return string
 	 */
 	public function getAccessToken()
 	{
 		return $this->_accessToken;
+	}
+
+
+	/**
+	 * @param string $accessToken
+	 */
+	public function setAccessToken($accessToken)
+	{
+		$this->_accessToken = $accessToken;
+
+		return $this;
 	}
 
 
@@ -146,10 +158,9 @@ class Configuration
 	 */
 	public function setUpdateInterval($updateInterval)
 	{
-		if ($updateInterval <= 0)
-			throw new \RuntimeException('Invalid update interval specified');
-
 		$this->_updateInterval = $updateInterval;
+
+		return $this;
 	}
 
 
@@ -168,6 +179,8 @@ class Configuration
 	public function setListenAddress($listenAddress)
 	{
 		$this->_listenAddress = $listenAddress;
+
+		return $this;
 	}
 
 
@@ -187,10 +200,9 @@ class Configuration
 	 */
 	public function setListenPort($listenPort)
 	{
-		if ($listenPort < 1 || $listenPort > 65535)
-			throw new \RuntimeException('Invalid port specified');
-
 		$this->_listenPort = $listenPort;
+
+		return $this;
 	}
 
 }
