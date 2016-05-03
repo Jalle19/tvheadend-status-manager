@@ -6,7 +6,11 @@
     </testsuites>
     <filter>
         <whitelist>
-            <directory suffix=".php">src</directory>
+            <directory suffix=".php">src/cli</directory>
+            <exclude>
+                <directory suffix=".php">src/cli/Database/Base</directory>
+                <directory suffix=".php">src/cli/Database/Map</directory>
+            </exclude>
         </whitelist>
     </filter>
     <logging>
