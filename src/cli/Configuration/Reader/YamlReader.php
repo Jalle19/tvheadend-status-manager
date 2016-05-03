@@ -44,7 +44,7 @@ class YamlReader implements ReaderInterface
 		// Parse the configuration file
 		try
 		{
-			return Yaml::parse(file_get_contents($this->_file));
+			return (array)Yaml::parse(file_get_contents($this->_file));
 		}
 		catch (ParseException $e)
 		{

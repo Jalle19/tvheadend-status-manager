@@ -51,7 +51,7 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	public function testLogPath()
 	{
 		$configuration             = $this->getBaseConfiguration();
-		$configuration['log_path'] = '/tmp/does/not/exist';
+		$configuration['log_path'] = '/some/other/path';
 
 		$validator = new Validator($configuration);
 		$validator->validate();
