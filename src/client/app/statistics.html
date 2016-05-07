@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Tvheadend Status Manager</title>
+
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <link rel="stylesheet" href="css/chartist.css">
+  <link rel="stylesheet" href="css/styles.css">
+
+</head>
+<body>
+
+<div class="container-fluid">
+
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+
+      <div class="navbar-header">
+        <a class="navbar-brand" href="index.html">Tvheadend Status Manager</a>
+      </div>
+
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li><a href="status.html">Streaming status</a></li>
+          <li class="active"><a href="statistics.html">Statistics</a></li>
+        </ul>
+
+        <div id="connection-status" class="nav navbar-right navbar-text connection-status">
+          <p class="bg-success connected" data-bind="visible: connected()">
+            Connected
+            <span data-bind="visible: numInstances() > 0">, managing <span
+                data-bind="text: numInstances()"></span> instance(s)</span>
+          </p>
+
+          <p class="bg-danger disconnected" data-bind="visible: !connected()">
+            Disconnected
+          </p>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <h1>Statistics</h1>
+
+  <div id="statistics">
+    <div class="row">
+
+      <div id="most-popular-channels" class="col-sm-6">
+        <h2>Most popular channels</h2>
+
+        <form class="statistics-options form-inline">
+          <div class="form-group">
+            <label for="instanceName">Instance:</label>
+            <select id="instanceName" data-bind="options: instances,
+                                                 optionsText: 'name',
+                                                 optionsValue: 'name',
+                                                 value: instance,
+                                                 event: { change: refreshStatistics }"></select>
+          </div>
+          <div class="form-group">
+            <label for="userName">User:</label>
+            <select name="userName" id="userName" data-bind="options: users, 
+                                                             optionsText: 'name',
+                                                             optionsValue: 'name',
+                                                             value: user,
+                                                             event: { change: refreshStatistics }"></select>
+          </div>
+          <div class="form-group">
+            <label for="limit">Limit:</label>
+            <input type="number" class="form-control" id="limit" data-bind="value: limit, event: { change: refreshStatistics }">
+          </div>
+          <div class="form-group">
+            <label for="timeFrame">Time frame:</label>
+            <select name="timeFrame" id="timeFrame" data-bind="options: timeFrames,
+                                                               value: timeFrame,
+                                                               event: { change: refreshStatistics }"></select>
+          </div>
+        </form>
+
+        <div class="ct-chart ct-square" id="most-popular-channels-chart">
+
+        </div>
+      </div>
+
+      <!--<div id="most-active-watchers" class="col-sm-6">-->
+        <!--<h2>Most active watchers</h2>-->
+        <!--<div class="ct-chart ct-square" id="most-active-watchers-chart">-->
+
+        <!--</div>-->
+      <!--</div>-->
+
+    </div>
+  </div>
+
+</div>
+
+<script type="text/javascript" src="js/vendor/vendor.js"></script>
+<script type="text/javascript" src="js/websocket.js"></script>
+<script type="text/javascript" src="js/connection.js"></script>
+<script type="text/javascript" src="js/utility.js"></script>
+<script type="text/javascript" src="js/message.js"></script>
+<script type="text/javascript" src="js/timeframe.js"></script>
+<script type="text/javascript" src="js/statistics.js"></script>
+
+</body>
+</html>

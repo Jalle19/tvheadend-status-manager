@@ -21,7 +21,8 @@ module.exports = function(grunt) {
           'node_modules/reconnectingwebsocket/reconnecting-websocket.js',
           'node_modules/knockout/build/output/knockout-latest.debug.js',
           'node_modules/moment/moment.js',
-          'node_modules/jquery/dist/jquery.js'
+          'node_modules/jquery/dist/jquery.js',
+          'node_modules/chartist/dist/chartist.js'
         ],
         dest: 'app/js/vendor/vendor.js'
       }

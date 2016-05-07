@@ -19,3 +19,7 @@ Message.TYPE_POPULAR_CHANNELS_REQUEST = 'popularChannelsRequest';
 Message.TYPE_POPULAR_CHANNELS_RESPONSE = 'popularChannelsResponse';
 Message.TYPE_MOST_ACTIVE_WATCHERS_REQUEST = 'mostActiveWatchersRequest';
 Message.TYPE_MOST_ACTIVE_WATCHERS_RESPONSE = 'mostActiveWatchersResponse';
+Message.TYPE_INSTANCES_REQUEST = 'instancesRequest';
+Message.TYPE_INSTANCES_RESPONSE = 'instancesResponse';
+Message.TYPE_USERS_REQUEST = 'usersRequest';
+Message.TYPE_USERS_RESPONSE = 'usersResponse';
