@@ -13,6 +13,7 @@ Message.prototype = {
   }
 };
 
+Message.TYPE_AUTHENTICATION_REQUEST = 'authenticationRequest';
 Message.TYPE_STATUS_UPDATES = 'statusUpdates';
 Message.TYPE_POPULAR_CHANNELS_REQUEST = 'popularChannelsRequest';
 Message.TYPE_POPULAR_CHANNELS_RESPONSE = 'popularChannelsResponse';
