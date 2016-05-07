@@ -198,6 +198,13 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 		{
 			case StatisticsRequest::TIME_FRAME_LAST_MONTH:
 				$dateTime = $dateTime->modify('-1 month');
+				break;
+			case StatisticsRequest::TIME_FRAME_LAST_WEEK:
+				$dateTime = $dateTime->modify('-1 week');
+				break;
+			case StatisticsRequest::TIME_FRAME_LAST_DAY:
+				$dateTime = $dateTime->modify('-1 day');
+				break;
 		}
 
 		return $dateTime->getTimestamp();
