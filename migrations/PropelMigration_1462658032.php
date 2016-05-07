@@ -2,10 +2,10 @@
 
 /**
  * Data object containing the SQL and PHP code to migrate the database
- * up to version 1459669466.
- * Generated on 2016-04-03 07:44:26 by vagrant
+ * up to version 1462658032.
+ * Generated on 2016-05-07 21:53:52 by vagrant
  */
-class PropelMigration_1459669466
+class PropelMigration_1462658032
 {
     public $comment = '';
 
@@ -41,9 +41,6 @@ class PropelMigration_1459669466
   'tvheadend_status_manager' => '
 PRAGMA foreign_keys = OFF;
 
-CREATE TEMPORARY TABLE [input_error__temp__5700c9da727b5] AS SELECT [id],[input_uuid],[timestamp],[ber_average],[unc_average],[cumulative_te],[cumulative_cc] FROM [input_error];
-DROP TABLE [input_error];
-
 CREATE TABLE [input_error]
 (
     [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -57,9 +54,6 @@ CREATE TABLE [input_error]
     UNIQUE ([id]),
     FOREIGN KEY ([input_uuid]) REFERENCES [input] ([uuid])
 );
-
-INSERT INTO [input_error] (id, input_uuid, ber_average, unc_average, cumulative_te, cumulative_cc) SELECT id, input_uuid, ber_average, unc_average, cumulative_te, cumulative_cc FROM [input_error__temp__5700c9da727b5];
-DROP TABLE [input_error__temp__5700c9da727b5];
 
 PRAGMA foreign_keys = ON;
 ',
@@ -78,24 +72,7 @@ PRAGMA foreign_keys = ON;
   'tvheadend_status_manager' => '
 PRAGMA foreign_keys = OFF;
 
-CREATE TEMPORARY TABLE [input_error__temp__5700c9da72a0c] AS SELECT [id],[input_uuid],[ber_average],[unc_average],[cumulative_te],[cumulative_cc],[created],[modified] FROM [input_error];
-DROP TABLE [input_error];
-
-CREATE TABLE [input_error]
-(
-    [id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    [input_uuid] VARCHAR(255) NOT NULL,
-    [timestamp] TIMESTAMP NOT NULL,
-    [ber_average] DOUBLE NOT NULL,
-    [unc_average] DOUBLE NOT NULL,
-    [cumulative_te] INTEGER NOT NULL,
-    [cumulative_cc] INTEGER NOT NULL,
-    UNIQUE ([id]),
-    FOREIGN KEY ([input_uuid]) REFERENCES [input] ([uuid])
-);
-
-INSERT INTO [input_error] (id, input_uuid, ber_average, unc_average, cumulative_te, cumulative_cc) SELECT id, input_uuid, ber_average, unc_average, cumulative_te, cumulative_cc FROM [input_error__temp__5700c9da72a0c];
-DROP TABLE [input_error__temp__5700c9da72a0c];
+DROP TABLE IF EXISTS [input_error];
 
 PRAGMA foreign_keys = ON;
 ',
