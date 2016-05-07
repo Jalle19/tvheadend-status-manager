@@ -47,13 +47,13 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 						$message->getInstanceName(),
 						$message->getUserName(),
 						$message->getLimit(),
-						$message->getTimeInterval()));
+						$message->getTimeFrame()));
 				case AbstractMessage::TYPE_MOST_ACTIVE_WATCHERS_REQUEST:
 					/* @var MostActiveWatchersRequest $message */
 					return new MostActiveWatchersResponse($message, $this->getMostActiveWatchers(
 						$message->getInstanceName(),
 						$message->getLimit(),
-						$message->getTimeInterval()));
+						$message->getTimeFrame()));
 				case AbstractMessage::TYPE_INSTANCES_REQUEST:
 					/* @var InstancesRequest $message */
 					return new InstancesResponse($this->configuration->getInstances());
@@ -75,11 +75,11 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 	 * @param string      $instanceName
 	 * @param string|null $userName
 	 * @param int|null    $limit
-	 * @param string      $timeInterval
+	 * @param string      $timeFrame
 	 *
 	 * @return array the popular channels
 	 */
-	private function getPopularChannels($instanceName, $userName, $limit, $timeInterval)
+	private function getPopularChannels($instanceName, $userName, $limit, $timeFrame)
 	{
 		// Find the instance and the user
 		$instance = InstanceQuery::create()->findOneByName($instanceName);
@@ -87,7 +87,7 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 		$query    = SubscriptionQuery::create()->getPopularChannelsQuery($instance, $user);
 
 		$query = $this->filterByLimit($limit, $query);
-		$query = $this->filterBySubscriptionStopped($timeInterval, $query);
+		$query = $this->filterBySubscriptionStopped($timeFrame, $query);
 		$query = $this->filterIgnoredUsers($instanceName, $query->useUserQuery())->endUse();
 
 		return $query->find()->getData();
@@ -97,17 +97,17 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 	/**
 	 * @param string $instanceName
 	 * @param int    $limit
-	 * @param string $timeInterval
+	 * @param string $timeFrame
 	 *
 	 * @return array
 	 */
-	private function getMostActiveWatchers($instanceName, $limit, $timeInterval)
+	private function getMostActiveWatchers($instanceName, $limit, $timeFrame)
 	{
 		$instance = InstanceQuery::create()->findOneByName($instanceName);
 		$query    = UserQuery::create()->getMostActiveWatchersQuery($instance);
 
 		$query = $this->filterByLimit($limit, $query);
-		$query = $this->filterBySubscriptionStopped($timeInterval, $query->useSubscriptionQuery())->endUse();
+		$query = $this->filterBySubscriptionStopped($timeFrame, $query->useSubscriptionQuery())->endUse();
 		$query = $this->filterIgnoredUsers($instanceName, $query);
 
 		return $query->find()->getData();
@@ -146,17 +146,17 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 
 
 	/**
-	 * @param string            $timeInterval
+	 * @param string            $timeFrame
 	 * @param SubscriptionQuery $query
 	 *
 	 * @return SubscriptionQuery
 	 */
-	private function filterBySubscriptionStopped($timeInterval, SubscriptionQuery $query)
+	private function filterBySubscriptionStopped($timeFrame, SubscriptionQuery $query)
 	{
-		if ($timeInterval !== StatisticsRequest::TIME_INTERVAL_ALL_TIME)
+		if ($timeFrame !== StatisticsRequest::TIME_FRAME_ALL_TIME)
 		{
 			$query = $query->filterByStopped([
-				'min' => $this->getTimeIntervalTimestamp($timeInterval),
+				'min' => $this->getTimeFrameTimestamp($timeFrame),
 			]);
 		}
 
@@ -186,17 +186,17 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 
 
 	/**
-	 * @param string $timeInterval
+	 * @param string $timeFrame
 	 *
 	 * @return int
 	 */
-	private function getTimeIntervalTimestamp($timeInterval)
+	private function getTimeFrameTimestamp($timeFrame)
 	{
 		$dateTime = new \DateTime();
 
-		switch ($timeInterval)
+		switch ($timeFrame)
 		{
-			case StatisticsRequest::TIME_INTERVAL_LAST_MONTH:
+			case StatisticsRequest::TIME_FRAME_LAST_MONTH:
 				$dateTime = $dateTime->modify('-1 month');
 		}
 

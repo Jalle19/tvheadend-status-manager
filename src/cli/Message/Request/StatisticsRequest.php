@@ -15,8 +15,10 @@ use Jalle19\StatusManager\Message\AbstractMessage;
 abstract class StatisticsRequest extends AbstractMessage
 {
 
-	const TIME_INTERVAL_ALL_TIME   = 'allTime';
-	const TIME_INTERVAL_LAST_MONTH = 'lastMonth';
+	const TIME_FRAME_ALL_TIME   = 'allTime';
+	const TIME_FRAME_LAST_MONTH = 'lastMonth';
+	const TIME_FRAME_LAST_WEEK  = 'lastWeek';
+	const TIME_FRAME_LAST_DAY   = 'lastDay';
 
 	/**
 	 * @var string
@@ -26,15 +28,15 @@ abstract class StatisticsRequest extends AbstractMessage
 	/**
 	 * @var string
 	 */
-	private $_timeInterval;
+	private $_timeFrame;
 
 
 	/**
 	 * StatisticsRequest constructor.
 	 *
-	 * @param string $type
-	 * @param \stdClass  $parameters
-	 * 
+	 * @param string    $type
+	 * @param \stdClass $parameters
+	 *
 	 * @throws MalformedRequestException
 	 */
 	public function __construct($type, $parameters)
@@ -47,10 +49,10 @@ abstract class StatisticsRequest extends AbstractMessage
 
 		$this->_instanceName = $parameters->instanceName;
 
-		if (isset($parameters->timeInterval))
-			$this->_timeInterval = $parameters->timeInterval;
+		if (isset($parameters->timeFrame))
+			$this->_timeFrame = $parameters->timeFrame;
 		else
-			$this->_timeInterval = self::TIME_INTERVAL_ALL_TIME;
+			$this->_timeFrame = self::TIME_FRAME_ALL_TIME;
 	}
 
 
@@ -66,9 +68,9 @@ abstract class StatisticsRequest extends AbstractMessage
 	/**
 	 * @return string
 	 */
-	public function getTimeInterval()
+	public function getTimeFrame()
 	{
-		return $this->_timeInterval;
+		return $this->_timeFrame;
 	}
 
 }
