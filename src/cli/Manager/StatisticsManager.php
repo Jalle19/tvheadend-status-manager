@@ -11,12 +11,12 @@ use Jalle19\StatusManager\Message\Handler\HandlerInterface;
 use Jalle19\StatusManager\Message\Request\InstancesRequest;
 use Jalle19\StatusManager\Message\Request\MostActiveWatchersRequest;
 use Jalle19\StatusManager\Message\Request\PopularChannelsRequest;
-use Jalle19\StatusManager\Message\Request\StatisticsRequest;
 use Jalle19\StatusManager\Message\Request\UsersRequest;
 use Jalle19\StatusManager\Message\Response\InstancesResponse;
 use Jalle19\StatusManager\Message\Response\MostActiveWatchersResponse;
 use Jalle19\StatusManager\Message\Response\PopularChannelsResponse;
 use Jalle19\StatusManager\Message\Response\UsersResponse;
+use Jalle19\StatusManager\TimeFrame;
 use Jalle19\tvheadend\exception\RequestFailedException;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Exception\PropelException;
@@ -75,7 +75,7 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 	 * @param string      $instanceName
 	 * @param string|null $userName
 	 * @param int|null    $limit
-	 * @param string      $timeFrame
+	 * @param TimeFrame   $timeFrame
 	 *
 	 * @return array the popular channels
 	 */
@@ -95,9 +95,9 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 
 
 	/**
-	 * @param string $instanceName
-	 * @param int    $limit
-	 * @param string $timeFrame
+	 * @param string    $instanceName
+	 * @param int       $limit
+	 * @param TimeFrame $timeFrame
 	 *
 	 * @return array
 	 */
@@ -146,17 +146,17 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 
 
 	/**
-	 * @param string            $timeFrame
+	 * @param TimeFrame         $timeFrame
 	 * @param SubscriptionQuery $query
 	 *
 	 * @return SubscriptionQuery
 	 */
 	private function filterBySubscriptionStopped($timeFrame, SubscriptionQuery $query)
 	{
-		if ($timeFrame !== StatisticsRequest::TIME_FRAME_ALL_TIME)
+		if ($timeFrame->getType() !== TimeFrame::TIME_FRAME_ALL_TIME)
 		{
 			$query = $query->filterByStopped([
-				'min' => $this->getTimeFrameTimestamp($timeFrame),
+				'min' => $timeFrame->getTimestamp(),
 			]);
 		}
 
@@ -182,32 +182,6 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 			$query = $query->filterByName($ignoredUser, Criteria::NOT_EQUAL);
 
 		return $query;
-	}
-
-
-	/**
-	 * @param string $timeFrame
-	 *
-	 * @return int
-	 */
-	private function getTimeFrameTimestamp($timeFrame)
-	{
-		$dateTime = new \DateTime();
-
-		switch ($timeFrame)
-		{
-			case StatisticsRequest::TIME_FRAME_LAST_MONTH:
-				$dateTime = $dateTime->modify('-1 month');
-				break;
-			case StatisticsRequest::TIME_FRAME_LAST_WEEK:
-				$dateTime = $dateTime->modify('-1 week');
-				break;
-			case StatisticsRequest::TIME_FRAME_LAST_DAY:
-				$dateTime = $dateTime->modify('-1 day');
-				break;
-		}
-
-		return $dateTime->getTimestamp();
 	}
 
 }

@@ -3,6 +3,7 @@
 namespace Jalle19\StatusManager\Test\Message\Request;
 
 use Jalle19\StatusManager\Message\Request\PopularChannelsRequest;
+use Jalle19\StatusManager\TimeFrame;
 
 /**
  * Class StatisticsRequestTest
@@ -14,15 +15,32 @@ class StatisticsRequestTest extends \PHPUnit_Framework_TestCase
 {
 
 	/**
-	 * Tests that the constructor validation is working
+	 * Tests that the constructor validation is working (instance name must be defined)
 	 *
 	 * @expectedException \Jalle19\StatusManager\Exception\MalformedRequestException
 	 * @expectedExceptionMessageRegExp *instanceName*
 	 */
 	public function testConstructor()
 	{
-		$parameters = new \stdClass();
+		$parameters            = new \stdClass();
+		$parameters->timeFrame = TimeFrame::TIME_FRAME_ALL_TIME;
+
 		new PopularChannelsRequest($parameters);
+	}
+
+
+	/**
+	 *
+	 */
+	public function testTimeFrame()
+	{
+		$parameters               = new \stdClass();
+		$parameters->instanceName = 'foo';
+		$parameters->timeFrame    = TimeFrame::TIME_FRAME_ALL_TIME;
+
+		$request = new PopularChannelsRequest($parameters);
+
+		$this->assertEquals(TimeFrame::TIME_FRAME_ALL_TIME, $request->getTimeFrame()->getType());
 	}
 
 }

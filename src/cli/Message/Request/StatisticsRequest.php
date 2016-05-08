@@ -4,6 +4,7 @@ namespace Jalle19\StatusManager\Message\Request;
 
 use Jalle19\StatusManager\Exception\MalformedRequestException;
 use Jalle19\StatusManager\Message\AbstractMessage;
+use Jalle19\StatusManager\TimeFrame;
 
 /**
  * Base class for all requests for statistics
@@ -15,18 +16,13 @@ use Jalle19\StatusManager\Message\AbstractMessage;
 abstract class StatisticsRequest extends AbstractMessage
 {
 
-	const TIME_FRAME_ALL_TIME   = 'allTime';
-	const TIME_FRAME_LAST_MONTH = 'lastMonth';
-	const TIME_FRAME_LAST_WEEK  = 'lastWeek';
-	const TIME_FRAME_LAST_DAY   = 'lastDay';
-
 	/**
 	 * @var string
 	 */
 	private $_instanceName;
 
 	/**
-	 * @var string
+	 * @var TimeFrame
 	 */
 	private $_timeFrame;
 
@@ -50,9 +46,9 @@ abstract class StatisticsRequest extends AbstractMessage
 		$this->_instanceName = $parameters->instanceName;
 
 		if (isset($parameters->timeFrame))
-			$this->_timeFrame = $parameters->timeFrame;
+			$this->_timeFrame = new TimeFrame($parameters->timeFrame);
 		else
-			$this->_timeFrame = self::TIME_FRAME_ALL_TIME;
+			$this->_timeFrame = new TimeFrame(TimeFrame::TIME_FRAME_ALL_TIME);
 	}
 
 
@@ -66,7 +62,7 @@ abstract class StatisticsRequest extends AbstractMessage
 
 
 	/**
-	 * @return string
+	 * @return TimeFrame
 	 */
 	public function getTimeFrame()
 	{
