@@ -147,6 +147,7 @@ class TvheadendStatusManagerCommand extends Command
 		$manager = new ConnectionManagerSingle();
 		$manager->setConfiguration([
 			'classname'  => 'Propel\\Runtime\\Connection\\ConnectionWrapper',
+			//'classname'  => 'Propel\\Runtime\\Connection\\DebugPDO',
 			'dsn'        => 'sqlite:' . $configuration->getDatabasePath(),
 			'user'       => null,
 			'password'   => '',
