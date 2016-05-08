@@ -138,10 +138,12 @@ class TvheadendStatusManagerCommand extends Command
 	 */
 	private function configurePropel(Configuration $configuration, LoggerInterface $logger)
 	{
+		$connectionName = 'tvheadend_status_manager';
+		
 		/* @var StandardServiceContainer $serviceContainer */
 		$serviceContainer = Propel::getServiceContainer();
 		$serviceContainer->checkVersion('2.0.0-dev');
-		$serviceContainer->setAdapterClass('tvheadend_status_manager', 'sqlite');
+		$serviceContainer->setAdapterClass($connectionName, 'sqlite');
 		$manager = new ConnectionManagerSingle();
 		$manager->setConfiguration([
 			'classname'  => 'Propel\\Runtime\\Connection\\ConnectionWrapper',
@@ -156,11 +158,11 @@ class TvheadendStatusManagerCommand extends Command
 				'queries' => [],
 			],
 		]);
-		$manager->setName('tvheadend_status_manager');
-		$serviceContainer->setConnectionManager('tvheadend_status_manager', $manager);
-		$serviceContainer->setDefaultDatasource('tvheadend_status_manager');
+		$manager->setName($connectionName);
+		$serviceContainer->setConnectionManager($connectionName, $manager);
+		$serviceContainer->setDefaultDatasource($connectionName);
 
-		$serviceContainer->setLogger(self::COMMAND_NAME, $logger);
+		$serviceContainer->setLogger($connectionName, $logger);
 	}
 
 }
