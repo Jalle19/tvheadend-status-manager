@@ -13,6 +13,11 @@
         <foreign-key foreignTable="instance" phpName="Instance" refPhpName="User">
             <reference local="instance_name" foreign="name"/>
         </foreign-key>
+
+        <index name="user_instance_name_name">
+            <index-column name="instance_name"/>
+            <index-column name="name"/>
+        </index>
     </table>
 
     <table name="connection" phpName="Connection">
@@ -31,6 +36,12 @@
         <foreign-key foreignTable="user" phpName="User" refPhpName="Connection">
             <reference local="user_id" foreign="id"/>
         </foreign-key>
+
+        <index name="connection_instance_name_peer_started">
+            <index-column name="instance_name"/>
+            <index-column name="peer"/>
+            <index-column name="started"/>
+        </index>
     </table>
 
     <table name="input" phpName="Input">
@@ -73,6 +84,11 @@
         <foreign-key foreignTable="instance" phpName="Instance" refPhpName="Channel">
             <reference local="instance_name" foreign="name"/>
         </foreign-key>
+
+        <index name="channel_instance_name_name">
+            <index-column name="instance_name"/>
+            <index-column name="name"/>
+        </index>
     </table>
 
     <table name="subscription" phpName="Subscription">
@@ -104,5 +120,13 @@
         <foreign-key foreignTable="channel" phpName="Channel" refPhpName="Subscription">
             <reference local="channel_id" foreign="id"/>
         </foreign-key>
+
+        <index name="subscription_instance_name_user_id_channel_id_subscription_id_started">
+            <index-column name="instance_name"/>
+            <index-column name="user_id"/>
+            <index-column name="channel_id"/>
+            <index-column name="subscription_id"/>
+            <index-column name="started"/>
+        </index>
     </table>
 </database>
