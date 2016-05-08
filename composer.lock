@@ -429,16 +429,16 @@
         },
         {
             "name": "jalle19/php-tvheadend",
-            "version": "0.1.4",
+            "version": "0.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Jalle19/php-tvheadend.git",
-                "reference": "a75b7b63bf79aada55dce97332b64c7dc780f71f"
+                "reference": "d4c2c42afff7484dc8cf80d991da92787928376d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/a75b7b63bf79aada55dce97332b64c7dc780f71f",
-                "reference": "a75b7b63bf79aada55dce97332b64c7dc780f71f",
+                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/d4c2c42afff7484dc8cf80d991da92787928376d",
+                "reference": "d4c2c42afff7484dc8cf80d991da92787928376d",
                 "shasum": ""
             },
             "require": {
@@ -463,7 +463,7 @@
                 }
             ],
             "description": "Library for communicating with tvheadend",
-            "time": "2016-03-18 06:43:51"
+            "time": "2016-05-08 20:08:37"
         },
         {
             "name": "jalle19/single-command-application",
@@ -681,7 +681,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/propelorm/Propel2/zipball/c0a0d21a0bbbfcf52b4e5f601494182ea22d8894",
+                "url": "https://api.github.com/repos/propelorm/Propel2/zipball/b511db089c7ff4f3353e75db49fb6870b3a656b1",
                 "reference": "4157132edc2149d06fc46173845ca29352dc86ff",
                 "shasum": ""
             },
