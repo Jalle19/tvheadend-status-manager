@@ -133,7 +133,7 @@ class WebSocketManager extends AbstractManager implements
 	 */
 	public function onOpen(ConnectionInterface $conn)
 	{
-		$this->logger->debug('Got client connection');
+		$this->logger->info('Got client connection');
 		$this->_connectedClients->attach($conn);
 	}
 
