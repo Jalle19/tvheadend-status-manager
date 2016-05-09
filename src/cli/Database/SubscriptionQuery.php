@@ -3,6 +3,7 @@
 namespace Jalle19\StatusManager\Database;
 
 use Jalle19\StatusManager\Database\Base\SubscriptionQuery as BaseSubscriptionQuery;
+use Jalle19\StatusManager\TimeFrame;
 use Jalle19\tvheadend\model\SubscriptionStatus;
 use Propel\Runtime\ActiveQuery\Criteria;
 
@@ -13,8 +14,9 @@ use Propel\Runtime\ActiveQuery\Criteria;
  */
 class SubscriptionQuery extends BaseSubscriptionQuery
 {
-	
+
 	use LimitTrait;
+
 
 	/**
 	 * @param Instance           $instance
@@ -38,6 +40,24 @@ class SubscriptionQuery extends BaseSubscriptionQuery
 		            ->filterByChannel($channel)
 		            ->filterBySubscriptionId($subscription->id)->filterByStarted($subscription->start)
 		            ->findOne() !== null;
+	}
+
+
+	/**
+	 * @param TimeFrame $timeFrame
+	 *
+	 * @return SubscriptionQuery
+	 */
+	public function filterByTimeFrame($timeFrame)
+	{
+		if ($timeFrame->getType() !== TimeFrame::TIME_FRAME_ALL_TIME)
+		{
+			$this->filterByStopped([
+				'min' => $timeFrame->getTimestamp(),
+			]);
+		}
+
+		return $this;
 	}
 
 

@@ -87,7 +87,7 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 		$query    = SubscriptionQuery::create()->getPopularChannelsQuery($instance, $user);
 
 		$query = $query->filterByLimit($limit);
-		$query = $this->filterBySubscriptionStopped($timeFrame, $query);
+		$query = $query->filterByTimeFrame($timeFrame);
 		$query = $this->filterIgnoredUsers($instanceName, $query->useUserQuery())->endUse();
 
 		return $query->find()->getData();
@@ -107,7 +107,7 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 		$query    = UserQuery::create()->getMostActiveWatchersQuery($instance);
 
 		$query = $query->filterByLimit($limit);
-		$query = $this->filterBySubscriptionStopped($timeFrame, $query->useSubscriptionQuery())->endUse();
+		$query = $query->useSubscriptionQuery()->filterByTimeFrame($timeFrame)->endUse();
 		$query = $this->filterIgnoredUsers($instanceName, $query);
 
 		return $query->find()->getData();
@@ -127,25 +127,6 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 		$query = $this->filterIgnoredUsers($instanceName, $query);
 
 		return $query->findByInstanceName($instanceName)->getArrayCopy();
-	}
-
-
-	/**
-	 * @param TimeFrame         $timeFrame
-	 * @param SubscriptionQuery $query
-	 *
-	 * @return SubscriptionQuery
-	 */
-	private function filterBySubscriptionStopped($timeFrame, SubscriptionQuery $query)
-	{
-		if ($timeFrame->getType() !== TimeFrame::TIME_FRAME_ALL_TIME)
-		{
-			$query = $query->filterByStopped([
-				'min' => $timeFrame->getTimestamp(),
-			]);
-		}
-
-		return $query;
 	}
 
 

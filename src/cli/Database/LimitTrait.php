@@ -14,7 +14,7 @@ trait LimitTrait
 	/**
 	 * @param int|null $limit
 	 *
-	 * @return mixed
+	 * @return $this
 	 */
 	public function filterByLimit($limit)
 	{
