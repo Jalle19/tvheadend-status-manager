@@ -12,6 +12,8 @@ use Propel\Runtime\ActiveQuery\Criteria;
  */
 class UserQuery extends BaseUserQuery
 {
+	
+	use LimitTrait;
 
 	/**
 	 * @param string $instanceName

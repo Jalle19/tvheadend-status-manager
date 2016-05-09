@@ -3,7 +3,6 @@
 namespace Jalle19\StatusManager\Database;
 
 use Jalle19\StatusManager\Database\Base\SubscriptionQuery as BaseSubscriptionQuery;
-use Jalle19\StatusManager\Subscription\StateChange;
 use Jalle19\tvheadend\model\SubscriptionStatus;
 use Propel\Runtime\ActiveQuery\Criteria;
 
@@ -14,6 +13,8 @@ use Propel\Runtime\ActiveQuery\Criteria;
  */
 class SubscriptionQuery extends BaseSubscriptionQuery
 {
+	
+	use LimitTrait;
 
 	/**
 	 * @param Instance           $instance
