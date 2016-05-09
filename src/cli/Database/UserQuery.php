@@ -12,8 +12,9 @@ use Propel\Runtime\ActiveQuery\Criteria;
  */
 class UserQuery extends BaseUserQuery
 {
-	
+
 	use LimitTrait;
+
 
 	/**
 	 * @param string $instanceName
@@ -24,6 +25,23 @@ class UserQuery extends BaseUserQuery
 	public function hasUser($instanceName, $userName)
 	{
 		return $this->filterByInstanceName($instanceName)->filterByName($userName)->findOne() !== null;
+	}
+
+
+	/**
+	 * @param array $ignoredUsers
+	 *
+	 * @return UserQuery
+	 */
+	public function filterIgnoredUsers(array $ignoredUsers)
+	{
+		// Always ignore system users
+		$ignoredUsers[] = User::NAME_DVR;
+
+		foreach ($ignoredUsers as $ignoredUser)
+			$this->filterByName($ignoredUser, Criteria::NOT_EQUAL);
+
+		return $this;
 	}
 
 

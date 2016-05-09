@@ -18,7 +18,6 @@ use Jalle19\StatusManager\Message\Response\PopularChannelsResponse;
 use Jalle19\StatusManager\Message\Response\UsersResponse;
 use Jalle19\StatusManager\TimeFrame;
 use Jalle19\tvheadend\exception\RequestFailedException;
-use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\Exception\PropelException;
 use Ratchet\ConnectionInterface;
 
@@ -82,13 +81,14 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 	private function getPopularChannels($instanceName, $userName, $limit, $timeFrame)
 	{
 		// Find the instance and the user
-		$instance = InstanceQuery::create()->findOneByName($instanceName);
-		$user     = UserQuery::create()->findOneByName($userName);
-		$query    = SubscriptionQuery::create()->getPopularChannelsQuery($instance, $user);
+		$instance     = InstanceQuery::create()->findOneByName($instanceName);
+		$user         = UserQuery::create()->findOneByName($userName);
+		$query        = SubscriptionQuery::create()->getPopularChannelsQuery($instance, $user);
+		$ignoredUsers = $this->configuration->getInstanceByName($instanceName)->getIgnoredUsers();
 
 		$query = $query->filterByLimit($limit);
 		$query = $query->filterByTimeFrame($timeFrame);
-		$query = $this->filterIgnoredUsers($instanceName, $query->useUserQuery())->endUse();
+		$query = $query->useUserQuery()->filterIgnoredUsers($ignoredUsers)->endUse();
 
 		return $query->find()->getData();
 	}
@@ -103,12 +103,13 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 	 */
 	private function getMostActiveWatchers($instanceName, $limit, $timeFrame)
 	{
-		$instance = InstanceQuery::create()->findOneByName($instanceName);
-		$query    = UserQuery::create()->getMostActiveWatchersQuery($instance);
+		$instance     = InstanceQuery::create()->findOneByName($instanceName);
+		$query        = UserQuery::create()->getMostActiveWatchersQuery($instance);
+		$ignoredUsers = $this->configuration->getInstanceByName($instanceName)->getIgnoredUsers();
 
 		$query = $query->filterByLimit($limit);
 		$query = $query->useSubscriptionQuery()->filterByTimeFrame($timeFrame)->endUse();
-		$query = $this->filterIgnoredUsers($instanceName, $query);
+		$query = $query->filterIgnoredUsers($ignoredUsers);
 
 		return $query->find()->getData();
 	}
@@ -123,31 +124,11 @@ class StatisticsManager extends AbstractManager implements HandlerInterface
 	 */
 	private function getUsers($instanceName)
 	{
-		$query = UserQuery::create();
-		$query = $this->filterIgnoredUsers($instanceName, $query);
+		$ignoredUsers = $this->configuration->getInstanceByName($instanceName)->getIgnoredUsers();
 
-		return $query->findByInstanceName($instanceName)->getArrayCopy();
-	}
-
-
-	/**
-	 * @param string    $instanceName
-	 * @param UserQuery $query
-	 *
-	 * @return UserQuery
-	 */
-	private function filterIgnoredUsers($instanceName, UserQuery $query)
-	{
-		$instance     = $this->configuration->getInstanceByName($instanceName);
-		$ignoredUsers = $instance->getIgnoredUsers();
-
-		// Always ignore system users
-		$ignoredUsers[] = User::NAME_DVR;
-
-		foreach ($ignoredUsers as $ignoredUser)
-			$query = $query->filterByName($ignoredUser, Criteria::NOT_EQUAL);
-
-		return $query;
+		return UserQuery::create()
+		                ->filterIgnoredUsers($ignoredUsers)
+		                ->findByInstanceName($instanceName)->getArrayCopy();
 	}
 
 }
