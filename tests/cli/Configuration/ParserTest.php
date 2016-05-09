@@ -44,6 +44,7 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals($rawConfiguration['update_interval'], $configuration->getUpdateInterval());
 		$this->assertEquals($rawConfiguration['listen_address'], $configuration->getListenAddress());
 		$this->assertEquals($rawConfiguration['listen_port'], $configuration->getListenPort());
+		$this->assertEquals([], $configuration->getInstanceByName('example.com')->getIgnoredUsers());
 	}
 
 }

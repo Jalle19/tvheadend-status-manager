@@ -14,16 +14,11 @@ class UserQueryTest extends \PHPUnit_Framework_TestCase
 {
 
 	/**
-	 *
+	 * There should be four filter calls for three passed names, since the DVR user is added transparently
 	 */
 	public function testFilterIgnoredUsers()
 	{
-		/* @var \PHPUnit_Framework_MockObject_MockObject|UserQuery $mock */
-		$mock = $this->getMockBuilder(UserQuery::class)
-		             ->setMethods(['filterByName'])
-		             ->getMock();
-
-		// There should be four filter calls for three passed names, since the DVR user is added transparently
+		$mock = $this->getMockedUserQuery();
 		$mock->expects($this->exactly(4))
 		     ->method('filterByName');
 
@@ -34,6 +29,30 @@ class UserQueryTest extends \PHPUnit_Framework_TestCase
 		];
 
 		$mock->filterIgnoredUsers($ignoredUsers);
+	}
+
+
+	/**
+	 * When no ignored users are specified, only the DVR user should be added
+	 */
+	public function testFilterIgnoredUsersNone()
+	{
+		$mock = $this->getMockedUserQuery();
+		$mock->expects($this->once())
+		     ->method('filterByName');
+
+		$mock->filterIgnoredUsers([]);
+	}
+
+
+	/**
+	 * @return \PHPUnit_Framework_MockObject_MockObject|UserQuery
+	 */
+	private function getMockedUserQuery()
+	{
+		return $this->getMockBuilder(UserQuery::class)
+		            ->setMethods(['filterByName'])
+		            ->getMock();
 	}
 
 }

@@ -38,7 +38,8 @@ class Instance implements \JsonSerializable
 	 */
 	public function __construct($name, $address, $port)
 	{
-		$this->_name = $name;
+		$this->_name         = $name;
+		$this->_ignoredUsers = [];
 
 		// Create the actual instance
 		$this->_instance = new Tvheadend($address, $port);
