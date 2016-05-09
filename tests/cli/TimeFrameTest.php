@@ -35,6 +35,13 @@ class TimeFrameTest extends \PHPUnit_Framework_TestCase
 	}
 
 
+	public function testJsonSerialize()
+	{
+		$timeFrame = new TimeFrame(TimeFrame::TIME_FRAME_ALL_TIME);
+		$this->assertEquals(TimeFrame::TIME_FRAME_ALL_TIME, $timeFrame->jsonSerialize());
+	}
+
+
 	/**
 	 * @return array
 	 */
