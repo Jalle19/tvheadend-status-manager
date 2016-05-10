@@ -58,26 +58,23 @@
             <select id="instanceName" data-bind="options: instances,
                                                  optionsText: 'name',
                                                  optionsValue: 'name',
-                                                 value: instance,
-                                                 event: { change: refreshStatistics }"></select>
+                                                 value: instance"></select>
           </div>
           <div class="form-group">
             <label for="userName">User:</label>
             <select name="userName" id="userName" data-bind="options: users, 
                                                              optionsText: 'name',
                                                              optionsValue: 'name',
-                                                             value: user,
-                                                             event: { change: refreshStatistics }"></select>
+                                                             value: user"></select>
           </div>
           <div class="form-group">
             <label for="limit">Limit:</label>
-            <input type="number" class="form-control" id="limit" data-bind="value: limit, event: { change: refreshStatistics }">
+            <input type="number" class="form-control" id="limit" data-bind="value: limit">
           </div>
           <div class="form-group">
             <label for="timeFrame">Time frame:</label>
             <select name="timeFrame" id="timeFrame" data-bind="options: timeFrames,
-                                                               value: timeFrame,
-                                                               event: { change: refreshStatistics }"></select>
+                                                               value: timeFrame"></select>
           </div>
         </form>
 

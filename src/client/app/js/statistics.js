@@ -10,6 +10,17 @@ function MostPopularChannelsViewModel(websocket) {
   this.instance = ko.observable();
   this.user = ko.observable();
   this.timeFrame = ko.observable();
+  
+  // Refresh the statistics when changes occur
+  this.instance.subscribe(this.refreshStatistics, this);
+  this.user.subscribe(this.refreshStatistics, this);
+  this.limit.subscribe(this.refreshStatistics, this);
+  this.timeFrame.subscribe(this.refreshStatistics, this);
+  
+  // Refresh the list of users when the selected instance changes
+  this.instance.subscribe(function(instanceName) {
+    this.websocket.send(JSON.stringify(new Message(Message.TYPE_USERS_REQUEST, instanceName)));
+  }, this);
 
   // Request a list of all instances
   websocket.send(JSON.stringify(new Message(Message.TYPE_INSTANCES_REQUEST)));
@@ -22,11 +33,6 @@ MostPopularChannelsViewModel.prototype = {
     var user = this.user();
     var limit = this.limit();
     var timeFrame = this.timeFrame();
-
-    // Refresh the list of users
-    if (instance !== undefined) {
-      this.websocket.send(JSON.stringify(new Message(Message.TYPE_USERS_REQUEST, instance)));
-    }
 
     // Ignore early updates
     if (instance === undefined || user === undefined || timeFrame === undefined) {
