@@ -18,7 +18,7 @@ trait DelegatesMessagesTrait
 	/**
 	 * @var HandlerInterface[]
 	 */
-	private $_handlers;
+	private $_handlers = [];
 
 
 	/**
