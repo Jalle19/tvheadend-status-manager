@@ -8,7 +8,6 @@ use Jalle19\StatusManager\Instance\InstanceStatusCollection;
 use Jalle19\StatusManager\Message\Request\AuthenticationRequest;
 use Jalle19\StatusManager\Message\Response\AuthenticationResponse;
 use Ratchet\ConnectionInterface;
-use React\EventLoop\Factory as EventLoopFactory;
 
 /**
  * Class ClientManagerTest
@@ -40,8 +39,7 @@ class ClientManagerTest extends AbstractManagerTest
 	 */
 	protected function setUp()
 	{
-		$this->_manager = new DummyClientManager($this->configuration, $this->logger, $this->eventDispatcher,
-			EventLoopFactory::create());
+		$this->_manager = new DummyClientManager($this->configuration, $this->logger, $this->eventDispatcher);
 
 		// Create two clients and connect them
 		$this->_clientMock = $this->getMockBuilder(ConnectionInterface::class)
