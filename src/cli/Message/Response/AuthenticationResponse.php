@@ -27,4 +27,13 @@ class AuthenticationResponse extends AbstractMessage
 		parent::__construct(AbstractMessage::TYPE_AUTHENTICATION_RESPONSE, $status);
 	}
 
+
+	/**
+	 * @return string
+	 */
+	public function getStatus()
+	{
+		return $this->getPayload();
+	}
+
 }
