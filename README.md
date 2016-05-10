@@ -8,15 +8,16 @@
 *This software is still highly experimental and comes entirely without support!*
 
 This project aims to provide a complete status and statistics manager for multiple tvheadend instances. It stores 
-subscription status in a database in order to gather statistics about TV watching habits (such as the most popular 
-channels, which users watch the most etc.). It also provides a realtime web interface which aggregates the streaming 
-status from all configurd instances on a single web page.
+subscription statuses in a database in order to gather statistics about TV watching habits (such as the most popular 
+channels, which users watch the most etc.). It also provides a real-time web interface which aggregates the streaming 
+status from all configured instances on a single web page.
 
 The project consists of two separate pieces of software:
  
-* a CLI application which polls each configured instance for status updates, then stores them in a database and 
-broadcasts these updates to potential clients over a Websocket
-* a web interface which connects to the Websocket and provides real-time status updates from all configured instances
+* a daemon which polls each configured instance for status updates, then stores them in a database. The daemon can be 
+interacted with using a WebSocket
+* a web interface which connects to the daemon and provides real-time status updates and statistics from all configured 
+instances
 
 ## Setting up a development environment
 
