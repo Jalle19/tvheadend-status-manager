@@ -58,6 +58,8 @@ class Configuration
 
 	/**
 	 * @param string $databasePath
+	 *
+	 * @return Configuration
 	 */
 	public function setDatabasePath($databasePath)
 	{
@@ -78,6 +80,8 @@ class Configuration
 
 	/**
 	 * @param string $logPath
+	 *
+	 * @return Configuration
 	 */
 	public function setLogPath($logPath)
 	{
@@ -98,6 +102,8 @@ class Configuration
 
 	/**
 	 * @param Instance[] $instances
+	 *
+	 * @return Configuration
 	 */
 	public function setInstances(array $instances)
 	{
@@ -118,6 +124,8 @@ class Configuration
 
 	/**
 	 * @param string $accessToken
+	 *
+	 * @return Configuration
 	 */
 	public function setAccessToken($accessToken)
 	{
@@ -154,7 +162,7 @@ class Configuration
 	/**
 	 * @param $updateInterval
 	 *
-	 * @throws \RuntimeException
+	 * @return Configuration
 	 */
 	public function setUpdateInterval($updateInterval)
 	{
@@ -175,6 +183,8 @@ class Configuration
 
 	/**
 	 * @param string $listenAddress
+	 *
+	 * @return Configuration
 	 */
 	public function setListenAddress($listenAddress)
 	{
@@ -196,7 +206,7 @@ class Configuration
 	/**
 	 * @param int $listenPort
 	 *
-	 * @throws \RuntimeException
+	 * @return Configuration
 	 */
 	public function setListenPort($listenPort)
 	{
