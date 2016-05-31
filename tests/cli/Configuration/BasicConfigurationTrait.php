@@ -17,18 +17,21 @@ trait BasicConfigurationTrait
 	private function getBaseConfiguration()
 	{
 		return [
-			'database_path'   => '/tmp',
-			'log_path'        => '/tmp',
-			'access_token'    => 'access',
-			'instances'       => [
+			'database_path'    => '/tmp',
+			'log_path'         => '/tmp',
+			'access_token'     => 'access',
+			'instances'        => [
 				[
 					'address' => 'address',
 					'port'    => 9981,
 				],
 			],
-			'update_interval' => 1,
-			'listen_address'  => '0.0.0.0',
-			'listen_port'     => 9333,
+			'update_interval'  => 1,
+			'listen_address'   => '0.0.0.0',
+			'listen_port'      => 9333,
+			'http_listen_port' => 8080,
+			'http_username'    => 'admin',
+			'http_password'    => 'admin',
 		];
 	}
 

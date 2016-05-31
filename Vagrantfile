@@ -17,9 +17,6 @@ Vagrant.configure(2) do |config|
     name: "01 - Install and update system packages"
   config.vm.provision "shell", path: "provisioning/02-install-dependencies.sh",
     name: "02 - Install dependencies", privileged: false
-  config.vm.provision "shell", path: "provisioning/03-configure-nginx.sh",
-    name: "03 - Configure nginx"
-
   config.vm.provision "shell", path: "provisioning/99-enable-swap.sh",
     name: "99 - Enable swap",
     run: "always"

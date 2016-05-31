@@ -42,9 +42,24 @@ class Configuration
 	private $_listenAddress;
 
 	/**
-	 * @var int the port to listen on
+	 * @var int the port for the WebSocket server to listen on
 	 */
 	private $_listenPort;
+
+	/**
+	 * @var int the port for the HTTP server to listen on
+	 */
+	private $_httpListenPort;
+
+	/**
+	 * @var string
+	 */
+	private $_httpUsername;
+
+	/**
+	 * @var string
+	 */
+	private $_httpPassword;
 
 
 	/**
@@ -211,6 +226,72 @@ class Configuration
 	public function setListenPort($listenPort)
 	{
 		$this->_listenPort = $listenPort;
+
+		return $this;
+	}
+
+
+	/**
+	 * @return int
+	 */
+	public function getHttpListenPort()
+	{
+		return $this->_httpListenPort;
+	}
+
+
+	/**
+	 * @param int $httpListenPort
+	 *
+	 * @return Configuration
+	 */
+	public function setHttpListenPort($httpListenPort)
+	{
+		$this->_httpListenPort = $httpListenPort;
+
+		return $this;
+	}
+
+
+	/**
+	 * @return string
+	 */
+	public function getHttpUsername()
+	{
+		return $this->_httpUsername;
+	}
+
+
+	/**
+	 * @param string $httpUsername
+	 *
+	 * @return Configuration
+	 */
+	public function setHttpUsername($httpUsername)
+	{
+		$this->_httpUsername = $httpUsername;
+
+		return $this;
+	}
+
+
+	/**
+	 * @return string
+	 */
+	public function getHttpPassword()
+	{
+		return $this->_httpPassword;
+	}
+
+
+	/**
+	 * @param string $httpPassword
+	 *
+	 * @return Configuration
+	 */
+	public function setHttpPassword($httpPassword)
+	{
+		$this->_httpPassword = $httpPassword;
 
 		return $this;
 	}

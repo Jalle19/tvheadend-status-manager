@@ -12,8 +12,9 @@ use Jalle19\StatusManager\Configuration\Validator;
  */
 class ValidatorTest extends \PHPUnit_Framework_TestCase
 {
-	
+
 	use BasicConfigurationTrait;
+
 
 	/**
 	 * @expectedException \Jalle19\StatusManager\Exception\InvalidConfigurationException
@@ -70,6 +71,20 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	{
 		$configuration                    = $this->getBaseConfiguration();
 		$configuration['update_interval'] = $updateInterval;
+
+		$validator = new Validator($configuration);
+		$validator->validate();
+	}
+
+
+	/**
+	 * @expectedException \Jalle19\StatusManager\Exception\InvalidConfigurationException
+	 * @expectedExceptionMessage listen_port and http_listen_port cannot be equal
+	 */
+	public function testListenPorts()
+	{
+		$configuration                     = $this->getBaseConfiguration();
+		$configuration['http_listen_port'] = $configuration['listen_port'];
 
 		$validator = new Validator($configuration);
 		$validator->validate();

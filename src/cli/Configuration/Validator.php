@@ -29,6 +29,9 @@ class Validator
 		'update_interval',
 		'listen_address',
 		'listen_port',
+		'http_listen_port',
+		'http_username',
+		'http_password',
 	];
 
 
@@ -66,8 +69,26 @@ class Validator
 		if (intval($this->_configuration['update_interval']) < 1)
 			throw new InvalidConfigurationException('Update interval cannot be lower than 1 second');
 
-		$listenPort = intval($this->_configuration['listen_port']);
-		if ($listenPort < 1 || $listenPort > 65535)
+		$listenPort     = intval($this->_configuration['listen_port']);
+		$httpListenPort = intval($this->_configuration['http_listen_port']);
+
+		$this->validatePort($listenPort);
+		$this->validatePort($httpListenPort);
+
+		// Check that the listen ports aren't equal
+		if ($listenPort === $httpListenPort)
+			throw new InvalidConfigurationException('listen_port and http_listen_port cannot be equal');
+	}
+
+
+	/**
+	 * @param int $port
+	 *
+	 * @throws InvalidConfigurationException
+	 */
+	private function validatePort($port)
+	{
+		if ($port < 1 || $port > 65535)
 			throw new InvalidConfigurationException('Listen port must be between 1 and 65535');
 	}
 

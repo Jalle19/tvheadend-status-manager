@@ -38,7 +38,10 @@ class Parser
 		       ->setAccessToken($configuration['access_token'])
 		       ->setUpdateInterval($configuration['update_interval'])
 		       ->setListenAddress($configuration['listen_address'])
-		       ->setListenPort($configuration['listen_port']);
+		       ->setListenPort($configuration['listen_port'])
+		       ->setHttpListenPort($configuration['http_listen_port'])
+		       ->setHttpUsername($configuration['http_username'])
+		       ->setHttpPassword($configuration['http_password']);
 
 		return $config;
 	}

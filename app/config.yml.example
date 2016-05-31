@@ -4,9 +4,24 @@
 listen_address: 0.0.0.0
 
 #
-# The port to listen on
+# The port the WebSocket server should listen on
 #
 listen_port: 9333
+
+#
+# The port the HTTP server should listen on
+#
+http_listen_port: 8080
+
+#
+# The username required to use the web interface
+#
+http_username: admin
+
+#
+# The password required to use the web interface
+#
+http_password: admin
 
 #
 # The path to the database file, either absolute or relative to the 

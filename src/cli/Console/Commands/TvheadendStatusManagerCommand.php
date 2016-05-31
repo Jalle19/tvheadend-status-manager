@@ -80,6 +80,7 @@ class TvheadendStatusManagerCommand extends Command
 		$persistenceManager   = $injector->make('Jalle19\StatusManager\Manager\PersistenceManager', $aliases);
 		$statisticsManager    = $injector->make('Jalle19\StatusManager\Manager\StatisticsManager', $aliases);
 		$inputErrorManager    = $injector->make('Jalle19\StatusManager\Manager\InputErrorManager', $aliases);
+		$httpRequestManager   = $injector->make('Jalle19\StatusManager\Manager\HttpRequestManager', $aliases);
 
 		// Wire the event dispatcher
 		$webSocketManager->registerMessageHandler($statisticsManager);
@@ -90,6 +91,7 @@ class TvheadendStatusManagerCommand extends Command
 		$eventDispatcher->addSubscriber($webSocketManager);
 		$eventDispatcher->addSubscriber($persistenceManager);
 		$eventDispatcher->addSubscriber($inputErrorManager);
+		$eventDispatcher->addSubscriber($httpRequestManager);
 
 		// Configure the event loop and start the application
 		$eventLoop->addPeriodicTimer($configuration->getUpdateInterval(), function () use ($eventDispatcher)
