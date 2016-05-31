@@ -19,6 +19,10 @@ interacted with using a WebSocket
 * a web interface which connects to the daemon and provides real-time status updates and statistics from all configured 
 instances
 
+## Requirements
+
+* PHP >= 5.6 with XML and SQLite3 support
+
 ## Setting up a development environment
 
 1. Clone the repository
