@@ -34,7 +34,8 @@ default values are sensible, but you'll need to configure your instances at leas
 5. Start the CLI application with `./app/tvheadend-status-manager app/config.yml`. You may want to 
 add `-vv` (or even `-vvv`) to the command to get more output in the console. See the Usage section below for additional 
 parameters
-6. Browse to `http://192.168.47.47/` to use the web interface
+6. Browse to `http://192.168.47.47:8080/` to use the web interface (change the port if you changed it in 
+your `config.yml`)
 
 ### Running tests
 
