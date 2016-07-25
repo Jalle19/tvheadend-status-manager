@@ -10,7 +10,10 @@
 	fi
 	
 	apt-get update
-	apt-get -y install php5.6-cli php5.6-xdebug php5.6-xml php5.6-sqlite3 curl nodejs nodejs-legacy npm git-core
+	apt-get -y install php7.0-cli php7.0-xdebug php7.0-xml php7.0-sqlite3 curl git-core
+	
+	# clean up from old installs which used PHP 5.6
+	apt-get -y remove --purge php5.6*
 
 	cd /vagrant
 	curl -sS https://getcomposer.org/installer | php
