@@ -14,6 +14,13 @@
 	
 	# clean up from old installs which used PHP 5.6
 	apt-get -y remove --purge php5.6*
+	
+	# clean up from older nodejs installations
+	apt-get -y remove --purge nodejs* npm
+	
+	# install nodejs from repository
+	curl -sL https://deb.nodesource.com/setup_6.x | bash -
+	apt-get install -y nodejs
 
 	cd /vagrant
 	curl -sS https://getcomposer.org/installer | php
