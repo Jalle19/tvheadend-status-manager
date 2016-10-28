@@ -15,6 +15,7 @@ use Jalle19\StatusManager\Event\SubscriptionStateChangeEvent;
 use Jalle19\StatusManager\Instance\InstanceStatus;
 use Jalle19\StatusManager\Instance\InstanceStatusCollection;
 use Jalle19\StatusManager\Subscription\StateChangeParser;
+use Jalle19\tvheadend\exception\RequestFailedException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -162,6 +163,21 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 				}
 				catch (\Exception $e)
 				{
+					if ($e instanceof RequestFailedException)
+					{
+						// Check for authentication errors
+						$statusCode = $e->getResponse()->getStatusCode();
+
+						if ($statusCode >= 400 && $statusCode < 500)
+						{
+							$this->logger->error('Authentication/authorization failed when connecting to {instanceName} (HTTP {statusCode})',
+								[
+									'instanceName' => $instanceName,
+									'statusCode'   => $e->getResponse()->getStatusCode(),
+								]);
+						}
+					}
+
 					$this->eventDispatcher->dispatch(Events::INSTANCE_STATE_UNREACHABLE,
 						new InstanceStateEvent($instance));
 				}

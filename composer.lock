@@ -542,16 +542,16 @@
         },
         {
             "name": "jalle19/php-tvheadend",
-            "version": "0.1.5",
+            "version": "0.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Jalle19/php-tvheadend.git",
-                "reference": "d4c2c42afff7484dc8cf80d991da92787928376d"
+                "reference": "8fad6570f267ba573ca78b243cff7797b6cf8bbf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/d4c2c42afff7484dc8cf80d991da92787928376d",
-                "reference": "d4c2c42afff7484dc8cf80d991da92787928376d",
+                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/8fad6570f267ba573ca78b243cff7797b6cf8bbf",
+                "reference": "8fad6570f267ba573ca78b243cff7797b6cf8bbf",
                 "shasum": ""
             },
             "require": {
@@ -576,7 +576,7 @@
                 }
             ],
             "description": "Library for communicating with tvheadend",
-            "time": "2016-05-08 20:08:37"
+            "time": "2016-10-28 20:58:14"
         },
         {
             "name": "jalle19/react-http-static",
