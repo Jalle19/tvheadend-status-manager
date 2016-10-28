@@ -23,6 +23,45 @@ instances
 
 * PHP >= 5.6 with XML and SQLite3 support
 
+## Installation
+
+*This software is still highly experimental and comes entirely without support!*
+
+These instructions have only been tested on Ubuntu 16.04. They should in general work for most Debian-based 
+distributions, but the exact package names for PHP might vary.
+
+Run the following commands, one by one, as `root`:
+
+```bash
+apt-get install -y curl git-core php7.0-cli php7.0-sqlite php7.0-xml unzip
+mkdir -p /opt/tvheadend-status-manager
+git clone https://github.com/Jalle19/tvheadend-status-manager.git /opt/tvheadend-status-manager
+cd /opt/tvheadend-status-manager
+curl -sS https://getcomposer.org/installer | php
+php composer.phar install
+php vendor/bin/propel sql:insert
+php vendor/bin/propel migration:migrate
+cp app/config.yml.example app/config.yml
+cp app/settings.js.example src/client/app/js/settings.js
+``` 
+
+### Configuration
+
+To successfully use the configuration you'll have to modify two files.
+
+First, edit `app/config.yml`. You will at the very least need to specify which instances the application should 
+monitor. It is also highly recommended to change the credentials for the web interface.
+
+Second, edit `src/client/app/js/settings.js` so that the parameters match the ones you've used in `app/config.yml`. 
+
+### Running the application
+
+Run the application using `php ./app/tvheadend-status-manager app/config.yml -vv`. See the [Usage](#usage) section for 
+more details on running it.
+
+Assuming you haven't changed the listening address and port in `app/config.yml` you can now access the web interface on 
+`http://<ip_address>:8080`.
+
 ## Setting up a development environment
 
 1. Clone the repository
