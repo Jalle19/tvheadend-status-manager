@@ -47,7 +47,7 @@ cp app/settings.js.example src/client/app/js/settings.js
 
 ### Configuration
 
-To successfully use the configuration you'll have to modify two files.
+To successfully use the application you'll have to modify two files.
 
 First, edit `app/config.yml`. You will at the very least need to specify which instances the application should 
 monitor. It is also highly recommended to change the credentials for the web interface.
