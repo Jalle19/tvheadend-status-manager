@@ -1,7 +1,7 @@
 .vagrant
-/vendor/
-/src/client/node_modules
-/build
+vendor/
+src/client/node_modules
+build
 composer.phar
 .idea/workspace.xml
 .idea/dictionaries/*
