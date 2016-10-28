@@ -1,0 +1,14 @@
+Settings.HOSTNAME = '192.168.47.47';
+Settings.PORT = 9333;
+Settings.UPDATE_INTERVAL = 1000; // milliseconds
+Settings.ACCESS_TOKEN = 'longrandomstring';
+
+/**
+ * The settings object
+ * 
+ * @constructor
+ */
+function Settings() {
+  
+}
+

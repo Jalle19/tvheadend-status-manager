@@ -81,4 +81,5 @@ var Connection = (function() {
 
 }());
 
-Connection.connect('192.168.47.47', 1000, 'Z4zxVp87pfmSptfUWNk8');
+// Initialize the connection
+Connection.connect(Settings.HOSTNAME, Settings.PORT, Settings.UPDATE_INTERVAL, Settings.ACCESS_TOKEN);

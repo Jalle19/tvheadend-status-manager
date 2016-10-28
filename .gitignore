@@ -1,6 +1,7 @@
 .vagrant
 vendor/
 src/client/node_modules
+src/client/app/js/settings.js
 build
 composer.phar
 .idea/workspace.xml

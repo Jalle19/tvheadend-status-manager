@@ -31,10 +31,12 @@ instances
 4. Run `./vendor/bin/propel sql:insert && ./vendor/bin/propel migration:migrate` to create the initial database
 4. Copy `app/config.yml.example` to `app/config.yml` and configure it according to your environment. Most of the 
 default values are sensible, but you'll need to configure your instances at least.
-5. Start the CLI application with `./app/tvheadend-status-manager app/config.yml`. You may want to 
+5. Copy `app/settings.js.example` to `src/client/app/js/settings.js` and configure it to contain the same values as 
+you used for `app/config.yml`
+6. Start the CLI application with `./app/tvheadend-status-manager app/config.yml`. You may want to 
 add `-vv` (or even `-vvv`) to the command to get more output in the console. See the Usage section below for additional 
 parameters
-6. Browse to `http://192.168.47.47:8080/` to use the web interface (change the port if you changed it in 
+7. Browse to `http://192.168.47.47:8080/` to use the web interface (change the port if you changed it in 
 your `config.yml`)
 
 ### Running tests
