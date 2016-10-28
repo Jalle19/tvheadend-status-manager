@@ -580,16 +580,16 @@
         },
         {
             "name": "jalle19/react-http-static",
-            "version": "0.1.2",
+            "version": "0.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Jalle19/react-http-static.git",
-                "reference": "cc288280d4bfab470012a44627966ba63f55c0c1"
+                "reference": "a7ddcd79a112a8bf621c9162f01ca6a662da8b8b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Jalle19/react-http-static/zipball/cc288280d4bfab470012a44627966ba63f55c0c1",
-                "reference": "cc288280d4bfab470012a44627966ba63f55c0c1",
+                "url": "https://api.github.com/repos/Jalle19/react-http-static/zipball/a7ddcd79a112a8bf621c9162f01ca6a662da8b8b",
+                "reference": "a7ddcd79a112a8bf621c9162f01ca6a662da8b8b",
                 "shasum": ""
             },
             "require": {
@@ -621,7 +621,7 @@
                 }
             ],
             "description": "A helper around react/http for creating static web servers",
-            "time": "2016-05-31 22:08:43"
+            "time": "2016-10-28 17:58:59"
         },
         {
             "name": "jalle19/single-command-application",
