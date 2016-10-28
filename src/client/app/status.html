@@ -30,9 +30,8 @@
 
         <div id="connection-status" class="nav navbar-right navbar-text connection-status">
           <p class="bg-success connected" data-bind="visible: connected()">
-            Connected
-            <span data-bind="visible: numInstances() > 0">, managing <span
-                data-bind="text: numInstances()"></span> instance(s)</span>
+            Connected<span data-bind="visible: numInstances() > 0">, managing 
+            <span data-bind="text: numInstances()"></span> instance(s)</span>
           </p>
 
           <p class="bg-danger disconnected" data-bind="visible: !connected()">
