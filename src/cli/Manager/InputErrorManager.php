@@ -86,6 +86,7 @@ class InputErrorManager extends AbstractManager implements EventSubscriberInterf
 			/* @var InputErrorCumulative $inputErrors */
 			$inputErrors = $this->_inputErrorCollection->getInfo();
 
+			/* @var Input $input */
 			if ($inputErrors->getCreated() < new \DateTime('-1 minute'))
 				$this->handleInputErrors($input, $inputErrors);
 		}
@@ -98,7 +99,10 @@ class InputErrorManager extends AbstractManager implements EventSubscriberInterf
 	public function onSubscriptionStateChange()
 	{
 		foreach ($this->_inputErrorCollection as $input)
+		{
+			/* @var Input $input */
 			$this->handleInputErrors($input, $this->_inputErrorCollection->getInfo());
+		}
 	}
 
 
