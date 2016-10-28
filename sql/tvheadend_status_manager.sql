@@ -27,7 +27,7 @@ CREATE TABLE [user]
     FOREIGN KEY ([instance_name]) REFERENCES [instance] ([name])
 );
 
-CREATE INDEX [instance_name_name] ON [user] ([instance_name],[name]);
+CREATE INDEX [user_instance_name_name] ON [user] ([instance_name],[name]);
 
 -----------------------------------------------------------------------
 -- connection
@@ -48,7 +48,7 @@ CREATE TABLE [connection]
     FOREIGN KEY ([user_id]) REFERENCES [user] ([id])
 );
 
-CREATE INDEX [instance_name_peer_started] ON [connection] ([instance_name],[peer],[started]);
+CREATE INDEX [connection_instance_name_peer_started] ON [connection] ([instance_name],[peer],[started]);
 
 -----------------------------------------------------------------------
 -- input
@@ -105,7 +105,7 @@ CREATE TABLE [channel]
     FOREIGN KEY ([instance_name]) REFERENCES [instance] ([name])
 );
 
-CREATE INDEX [instance_name_name] ON [channel] ([instance_name],[name]);
+CREATE INDEX [channel_instance_name_name] ON [channel] ([instance_name],[name]);
 
 -----------------------------------------------------------------------
 -- subscription
@@ -132,4 +132,4 @@ CREATE TABLE [subscription]
     FOREIGN KEY ([channel_id]) REFERENCES [channel] ([id])
 );
 
-CREATE INDEX [instance_name_user_id_channel_id_subscription_id_started] ON [subscription] ([instance_name],[user_id],[channel_id],[subscription_id],[started]);
+CREATE INDEX [subscription_instance_name_user_id_channel_id_subscription_id_started] ON [subscription] ([instance_name],[user_id],[channel_id],[subscription_id],[started]);
