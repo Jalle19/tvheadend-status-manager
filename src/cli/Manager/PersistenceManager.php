@@ -290,7 +290,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$inputError->setFromInputErrorCumulative($cumulativeErrors);
 		$inputError->save();
 		
-		$this->logger->info('Persisted input errors (instance: {instanceName}, input: {friendlyName})', [
+		$this->logger->debug('Persisted input errors (instance: {instanceName}, input: {friendlyName})', [
 			'instanceName' => $input->getInstanceName(),
 			'friendlyName' => $input->getFriendlyName(),
 		]);
