@@ -10,14 +10,15 @@ var Connection = (function() {
   /**
    * Creates the WebSocket connection and attaches event handlers to the socket
    * @param hostname
+   * @param port
    * @param reconnectInterval
    * @param token
    */
-  function connect(hostname, reconnectInterval, token) {
+  function connect(hostname, port, reconnectInterval, token) {
     // Store the access token
     accessToken = token;
     
-    websocket = new ReconnectingWebSocket('ws://' + hostname + ':9333', null, {
+    websocket = new ReconnectingWebSocket('ws://' + hostname + ':' + port, null, {
       reconnectInterval: reconnectInterval
     });
 
