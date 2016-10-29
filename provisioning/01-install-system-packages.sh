@@ -10,7 +10,7 @@
 	fi
 	
 	apt-get update
-	apt-get -y install php7.0-cli php7.0-xdebug php7.0-xml php7.0-sqlite3 curl git-core
+	apt-get -y install php7.0-cli php7.0-xdebug php7.0-xml php7.0-sqlite3 curl git-core unzip
 	
 	# clean up from old installs which used PHP 5.6
 	apt-get -y remove --purge php5.6*
