@@ -56,13 +56,12 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 			'instances' => count($instances),
 		]);
 
-		foreach ($instances as $configuredInstance)
+		foreach ($instances as $instance)
 		{
-			$instance = $configuredInstance->getInstance();
-
-			$this->logger->notice('  {address}:{port}', [
-				'address' => $instance->getHostname(),
-				'port'    => $instance->getPort(),
+			$this->logger->notice('  {name} ({address}:{port})', [
+				'name'=>$instance->getName(),
+				'address' => $instance->getInstance()->getHostname(),
+				'port'    => $instance->getInstance()->getPort(),
 			]);
 
 			$this->eventDispatcher->dispatch(Events::INSTANCE_SEEN, new InstanceSeenEvent($instance));

@@ -2,7 +2,7 @@
 
 namespace Jalle19\StatusManager\Event;
 
-use Jalle19\tvheadend\Tvheadend;
+use Jalle19\StatusManager\Configuration\Instance;
 use Symfony\Component\EventDispatcher\Event;
 
 /**
@@ -16,22 +16,22 @@ class InstanceSeenEvent extends Event
 {
 
 	/**
-	 * @var Tvheadend
+	 * @var Instance
 	 */
 	private $_instance;
 
 
 	/**
-	 * @param Tvheadend $instance
+	 * @param Instance $instance
 	 */
-	public function __construct(Tvheadend $instance)
+	public function __construct(Instance $instance)
 	{
 		$this->_instance = $instance;
 	}
 
 
 	/**
-	 * @return Tvheadend
+	 * @return Instance
 	 */
 	public function getInstance()
 	{

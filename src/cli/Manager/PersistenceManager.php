@@ -79,11 +79,11 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 			return;
 
 		$instanceModel = new Database\Instance();
-		$instanceModel->setPrimaryKey($instance->getHostname());
+		$instanceModel->setPrimaryKey($instance->getName());
 		$instanceModel->save();
 
 		$this->logger->info('Stored new instance {instanceName}', [
-			'instanceName' => $instance->getHostname(),
+			'instanceName' => $instance->getName(),
 		]);
 
 		// Create a special user for eventual DVR subscriptions
@@ -94,7 +94,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 
 		$this->logger
 			->info('Stored new special user (instance: {instanceName}, user: {userName})', [
-				'instanceName' => $instance->getHostname(),
+				'instanceName' => $instance->getName(),
 				'userName'     => $user->getName(),
 			]);
 	}

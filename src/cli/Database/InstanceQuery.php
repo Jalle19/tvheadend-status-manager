@@ -2,8 +2,8 @@
 
 namespace Jalle19\StatusManager\Database;
 
+use Jalle19\StatusManager\Configuration\Instance as ConfiguredInstance;
 use Jalle19\StatusManager\Database\Base\InstanceQuery as BaseInstanceQuery;
-use Jalle19\tvheadend\Tvheadend;
 
 /**
  * @package   Jalle19\StatusManager\Database
@@ -14,13 +14,13 @@ class InstanceQuery extends BaseInstanceQuery
 {
 
 	/**
-	 * @param Tvheadend $instance
+	 * @param ConfiguredInstance $instance
 	 *
 	 * @return bool whether the instance exists in the database
 	 */
-	public function hasInstance(Tvheadend $instance)
+	public function hasInstance(ConfiguredInstance $instance)
 	{
-		return $this->findPk($instance->getHostname()) !== null;
+		return $this->findPk($instance->getName()) !== null;
 	}
 
 }
