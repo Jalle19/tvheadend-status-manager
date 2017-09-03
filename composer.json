@@ -29,7 +29,11 @@
     },
     "autoload": {
         "psr-4": {
-            "Jalle19\\StatusManager\\": "src/cli/",
+            "Jalle19\\StatusManager\\": "src/cli/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
             "Jalle19\\StatusManager\\Test\\": "tests/cli/"
         }
     }
