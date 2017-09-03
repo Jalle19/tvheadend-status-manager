@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "6eef88c58862381aaa3c5989bcf2ccbd",
-    "content-hash": "3265f6bebd5969fc8a0e63c648a346f1",
+    "hash": "bbc044fff51d13f53107a685ebd5dfdb",
+    "content-hash": "539237641c50d25e5b15180de46ca5cd",
     "packages": [
         {
             "name": "bramus/ansi-php",
