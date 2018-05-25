@@ -835,12 +835,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/propelorm/Propel2.git",
-                "reference": "4157132edc2149d06fc46173845ca29352dc86ff"
+                "reference": "6c4996fc130c7555d82d9dca04396c6f3eeef306"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/propelorm/Propel2/zipball/4157132edc2149d06fc46173845ca29352dc86ff",
-                "reference": "4157132edc2149d06fc46173845ca29352dc86ff",
+                "url": "https://api.github.com/repos/propelorm/Propel2/zipball/6c4996fc130c7555d82d9dca04396c6f3eeef306",
+                "reference": "6c4996fc130c7555d82d9dca04396c6f3eeef306",
                 "shasum": ""
             },
             "require": {
