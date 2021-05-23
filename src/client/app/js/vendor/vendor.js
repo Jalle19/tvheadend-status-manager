@@ -360,8 +360,8 @@
     return ReconnectingWebSocket;
 });
 ;/*!
- * Knockout JavaScript library v3.4.0
- * (c) Steven Sanderson - http://knockoutjs.com/
+ * Knockout JavaScript library v3.4.2
+ * (c) The Knockout.js team - http://knockoutjs.com/
  * License: MIT (http://www.opensource.org/licenses/mit-license.php)
  */
 
@@ -406,7 +406,7 @@ ko.exportSymbol = function(koPath, object) {
 ko.exportProperty = function(owner, publicName, object) {
     owner[publicName] = object;
 };
-ko.version = "3.4.0";
+ko.version = "3.4.2";
 
 ko.exportSymbol('version', ko.version);
 // For any options that may affect various areas of Knockout and aren't directly associated with data binding.
@@ -1550,11 +1550,20 @@ ko.extenders = {
         if (!target._deferUpdates) {
             target._deferUpdates = true;
             target.limit(function (callback) {
-                var handle;
+                var handle,
+                    ignoreUpdates = false;
                 return function () {
-                    ko.tasks.cancel(handle);
-                    handle = ko.tasks.schedule(callback);
-                    target['notifySubscribers'](undefined, 'dirty');
+                    if (!ignoreUpdates) {
+                        ko.tasks.cancel(handle);
+                        handle = ko.tasks.schedule(callback);
+
+                        try {
+                            ignoreUpdates = true;
+                            target['notifySubscribers'](undefined, 'dirty');
+                        } finally {
+                            ignoreUpdates = false;
+                        }
+                    }
                 };
             });
         }
@@ -1640,7 +1649,7 @@ function limitNotifySubscribers(value, event) {
 
 var ko_subscribable_fn = {
     init: function(instance) {
-        instance._subscriptions = {};
+        instance._subscriptions = { "change": [] };
         instance._versionNumber = 1;
     },
 
@@ -1672,9 +1681,10 @@ var ko_subscribable_fn = {
             this.updateVersion();
         }
         if (this.hasSubscriptionsForEvent(event)) {
+            var subs = event === defaultEvent && this._changeSubscriptions || this._subscriptions[event].slice(0);
             try {
                 ko.dependencyDetection.begin(); // Begin suppressing dependency detection (by setting the top frame to undefined)
-                for (var a = this._subscriptions[event].slice(0), i = 0, subscription; subscription = a[i]; ++i) {
+                for (var i = 0, subscription; subscription = subs[i]; ++i) {
                     // In case a subscription was disposed during the arrayForEach cycle, check
                     // for isDisposed on each subscription before invoking its callback
                     if (!subscription.isDisposed)
@@ -1700,7 +1710,7 @@ var ko_subscribable_fn = {
 
     limit: function(limitFunction) {
         var self = this, selfIsObservable = ko.isObservable(self),
-            ignoreBeforeChange, previousValue, pendingValue, beforeChange = 'beforeChange';
+            ignoreBeforeChange, notifyNextChange, previousValue, pendingValue, beforeChange = 'beforeChange';
 
         if (!self._origNotifySubscribers) {
             self._origNotifySubscribers = self["notifySubscribers"];
@@ -1713,15 +1723,19 @@ var ko_subscribable_fn = {
             // If an observable provided a reference to itself, access it to get the latest value.
             // This allows computed observables to delay calculating their value until needed.
             if (selfIsObservable && pendingValue === self) {
-                pendingValue = self();
+                pendingValue = self._evalIfChanged ? self._evalIfChanged() : self();
             }
-            ignoreBeforeChange = false;
-            if (self.isDifferent(previousValue, pendingValue)) {
+            var shouldNotify = notifyNextChange || self.isDifferent(previousValue, pendingValue);
+
+            notifyNextChange = ignoreBeforeChange = false;
+
+            if (shouldNotify) {
                 self._origNotifySubscribers(previousValue = pendingValue);
             }
         });
 
         self._limitChange = function(value) {
+            self._changeSubscriptions = self._subscriptions[defaultEvent].slice(0);
             self._notificationIsPending = ignoreBeforeChange = true;
             pendingValue = value;
             finish();
@@ -1730,6 +1744,11 @@ var ko_subscribable_fn = {
             if (!ignoreBeforeChange) {
                 previousValue = value;
                 self._origNotifySubscribers(value, beforeChange);
+            }
+        };
+        self._notifyNextChangeIfValueIsDifferent = function() {
+            if (self.isDifferent(previousValue, self.peek(true /*evaluate*/))) {
+                notifyNextChange = true;
             }
         };
     },
@@ -2068,6 +2087,7 @@ ko.extenders['trackArrayChanges'] = function(target, options) {
         cachedDiff = null,
         arrayChangeSubscription,
         pendingNotifications = 0,
+        underlyingNotifySubscribersFunction,
         underlyingBeforeSubscriptionAddFunction = target.beforeSubscriptionAdd,
         underlyingAfterSubscriptionRemoveFunction = target.afterSubscriptionRemove;
 
@@ -2084,6 +2104,10 @@ ko.extenders['trackArrayChanges'] = function(target, options) {
         if (underlyingAfterSubscriptionRemoveFunction)
             underlyingAfterSubscriptionRemoveFunction.call(target, event);
         if (event === arrayChangeEventName && !target.hasSubscriptionsForEvent(arrayChangeEventName)) {
+            if (underlyingNotifySubscribersFunction) {
+                target['notifySubscribers'] = underlyingNotifySubscribersFunction;
+                underlyingNotifySubscribersFunction = undefined;
+            }
             arrayChangeSubscription.dispose();
             trackingChanges = false;
         }
@@ -2098,7 +2122,7 @@ ko.extenders['trackArrayChanges'] = function(target, options) {
         trackingChanges = true;
 
         // Intercept "notifySubscribers" to track how many times it was called.
-        var underlyingNotifySubscribersFunction = target['notifySubscribers'];
+        underlyingNotifySubscribersFunction = target['notifySubscribers'];
         target['notifySubscribers'] = function(valueToNotify, event) {
             if (!event || event === defaultEvent) {
                 ++pendingNotifications;
@@ -2216,6 +2240,7 @@ ko.computed = ko.dependentObservable = function (evaluatorFunctionOrOptions, eva
     var state = {
         latestValue: undefined,
         isStale: true,
+        isDirty: true,
         isBeingEvaluated: false,
         suppressDisposalUntilDisposeWhenReturnsFalse: false,
         isDisposed: false,
@@ -2243,7 +2268,7 @@ ko.computed = ko.dependentObservable = function (evaluatorFunctionOrOptions, eva
         } else {
             // Reading the value
             ko.dependencyDetection.registerDependency(computedObservable);
-            if (state.isStale || (state.isSleeping && computedObservable.haveDependenciesChanged())) {
+            if (state.isDirty || (state.isSleeping && computedObservable.haveDependenciesChanged())) {
                 computedObservable.evaluateImmediate();
             }
             return state.latestValue;
@@ -2333,6 +2358,10 @@ function computedBeginDependencyDetectionCallback(subscribable, id) {
             // Brand new subscription - add it
             computedObservable.addDependencyTracking(id, subscribable, state.isSleeping ? { _target: subscribable } : computedObservable.subscribeToDependency(subscribable));
         }
+        // If the observable we've accessed has a pending notification, ensure we get notified of the actual final value (bypass equality checks)
+        if (subscribable._notificationIsPending) {
+            subscribable._notifyNextChangeIfValueIsDifferent();
+        }
     }
 }
 
@@ -2355,7 +2384,7 @@ var computedFn = {
         for (id in dependencyTracking) {
             if (dependencyTracking.hasOwnProperty(id)) {
                 dependency = dependencyTracking[id];
-                if (dependency._target.hasChanged(dependency._version)) {
+                if ((this._evalDelayed && dependency._target._notificationIsPending) || dependency._target.hasChanged(dependency._version)) {
                     return true;
                 }
             }
@@ -2364,16 +2393,19 @@ var computedFn = {
     markDirty: function () {
         // Process "dirty" events if we can handle delayed notifications
         if (this._evalDelayed && !this[computedState].isBeingEvaluated) {
-            this._evalDelayed();
+            this._evalDelayed(false /*isChange*/);
         }
     },
     isActive: function () {
-        return this[computedState].isStale || this[computedState].dependenciesCount > 0;
+        var state = this[computedState];
+        return state.isDirty || state.dependenciesCount > 0;
     },
     respondToChange: function () {
         // Ignore "change" events if we've already scheduled a delayed notification
         if (!this._notificationIsPending) {
             this.evaluatePossiblyAsync();
+        } else if (this[computedState].isDirty) {
+            this[computedState].isStale = true;
         }
     },
     subscribeToDependency: function (target) {
@@ -2400,7 +2432,7 @@ var computedFn = {
                 computedObservable.evaluateImmediate(true /*notifyChange*/);
             }, throttleEvaluationTimeout);
         } else if (computedObservable._evalDelayed) {
-            computedObservable._evalDelayed();
+            computedObservable._evalDelayed(true /*isChange*/);
         } else {
             computedObservable.evaluateImmediate(true /*notifyChange*/);
         }
@@ -2408,7 +2440,8 @@ var computedFn = {
     evaluateImmediate: function (notifyChange) {
         var computedObservable = this,
             state = computedObservable[computedState],
-            disposeWhen = state.disposeWhen;
+            disposeWhen = state.disposeWhen,
+            changed = false;
 
         if (state.isBeingEvaluated) {
             // If the evaluation of a ko.computed causes side effects, it's possible that it will trigger its own re-evaluation.
@@ -2436,7 +2469,7 @@ var computedFn = {
 
         state.isBeingEvaluated = true;
         try {
-            this.evaluateImmediate_CallReadWithDependencyDetection(notifyChange);
+            changed = this.evaluateImmediate_CallReadWithDependencyDetection(notifyChange);
         } finally {
             state.isBeingEvaluated = false;
         }
@@ -2444,6 +2477,8 @@ var computedFn = {
         if (!state.dependenciesCount) {
             computedObservable.dispose();
         }
+
+        return changed;
     },
     evaluateImmediate_CallReadWithDependencyDetection: function (notifyChange) {
         // This function is really just part of the evaluateImmediate logic. You would never call it from anywhere else.
@@ -2451,7 +2486,8 @@ var computedFn = {
         // which contributes to saving about 40% off the CPU overhead of computed evaluation (on V8 at least).
 
         var computedObservable = this,
-            state = computedObservable[computedState];
+            state = computedObservable[computedState],
+            changed = false;
 
         // Initially, we assume that none of the subscriptions are still being used (i.e., all are candidates for disposal).
         // Then, during evaluation, we cross off any that are in fact still being used.
@@ -2480,17 +2516,22 @@ var computedFn = {
             }
 
             state.latestValue = newValue;
+            if (DEBUG) computedObservable._latestValue = newValue;
 
             if (state.isSleeping) {
                 computedObservable.updateVersion();
             } else if (notifyChange) {
                 computedObservable["notifySubscribers"](state.latestValue);
             }
+
+            changed = true;
         }
 
         if (isInitial) {
             computedObservable["notifySubscribers"](state.latestValue, "awake");
         }
+
+        return changed;
     },
     evaluateImmediate_CallReadThenEndDependencyDetection: function (state, dependencyDetectionContext) {
         // This function is really part of the evaluateImmediate_CallReadWithDependencyDetection logic.
@@ -2509,13 +2550,14 @@ var computedFn = {
                 ko.utils.objectForEach(dependencyDetectionContext.disposalCandidates, computedDisposeDependencyCallback);
             }
 
-            state.isStale = false;
+            state.isStale = state.isDirty = false;
         }
     },
-    peek: function () {
-        // Peek won't re-evaluate, except while the computed is sleeping or to get the initial value when "deferEvaluation" is set.
+    peek: function (evaluate) {
+        // By default, peek won't re-evaluate, except while the computed is sleeping or to get the initial value when "deferEvaluation" is set.
+        // Pass in true to evaluate if needed.
         var state = this[computedState];
-        if ((state.isStale && !state.dependenciesCount) || (state.isSleeping && this.haveDependenciesChanged())) {
+        if ((state.isDirty && (evaluate || !state.dependenciesCount)) || (state.isSleeping && this.haveDependenciesChanged())) {
             this.evaluateImmediate();
         }
         return state.latestValue;
@@ -2523,15 +2565,27 @@ var computedFn = {
     limit: function (limitFunction) {
         // Override the limit function with one that delays evaluation as well
         ko.subscribable['fn'].limit.call(this, limitFunction);
-        this._evalDelayed = function () {
+        this._evalIfChanged = function () {
+            if (this[computedState].isStale) {
+                this.evaluateImmediate();
+            } else {
+                this[computedState].isDirty = false;
+            }
+            return this[computedState].latestValue;
+        };
+        this._evalDelayed = function (isChange) {
             this._limitBeforeChange(this[computedState].latestValue);
 
-            this[computedState].isStale = true; // Mark as dirty
+            // Mark as dirty
+            this[computedState].isDirty = true;
+            if (isChange) {
+                this[computedState].isStale = true;
+            }
 
-            // Pass the observable to the "limit" code, which will access it when
+            // Pass the observable to the "limit" code, which will evaluate it when
             // it's time to do the notification.
             this._limitChange(this);
-        }
+        };
     },
     dispose: function () {
         var state = this[computedState];
@@ -2548,6 +2602,7 @@ var computedFn = {
         state.dependenciesCount = 0;
         state.isDisposed = true;
         state.isStale = false;
+        state.isDirty = false;
         state.isSleeping = false;
         state.disposeWhenNodeIsRemoved = null;
     }
@@ -2563,8 +2618,9 @@ var pureComputedOverrides = {
             if (state.isStale || computedObservable.haveDependenciesChanged()) {
                 state.dependencyTracking = null;
                 state.dependenciesCount = 0;
-                state.isStale = true;
-                computedObservable.evaluateImmediate();
+                if (computedObservable.evaluateImmediate()) {
+                    computedObservable.updateVersion();
+                }
             } else {
                 // First put the dependencies in order
                 var dependeciesOrder = [];
@@ -3321,7 +3377,7 @@ ko.exportSymbol('bindingProvider', ko.bindingProvider);
 
     // The ko.bindingContext constructor is only called directly to create the root context. For child
     // contexts, use bindingContext.createChildContext or bindingContext.extend.
-    ko.bindingContext = function(dataItemOrAccessor, parentContext, dataItemAlias, extendCallback) {
+    ko.bindingContext = function(dataItemOrAccessor, parentContext, dataItemAlias, extendCallback, options) {
 
         // The binding context object includes static properties for the current, parent, and root view models.
         // If a view model is actually stored in an observable, the corresponding binding context object, and
@@ -3344,10 +3400,7 @@ ko.exportSymbol('bindingProvider', ko.bindingProvider);
                 ko.utils.extend(self, parentContext);
 
                 // Because the above copy overwrites our own properties, we need to reset them.
-                // During the first execution, "subscribable" isn't set, so don't bother doing the update then.
-                if (subscribable) {
-                    self._subscribable = subscribable;
-                }
+                self._subscribable = subscribable;
             } else {
                 self['$parents'] = [];
                 self['$root'] = dataItem;
@@ -3377,35 +3430,43 @@ ko.exportSymbol('bindingProvider', ko.bindingProvider);
         var self = this,
             isFunc = typeof(dataItemOrAccessor) == "function" && !ko.isObservable(dataItemOrAccessor),
             nodes,
+            subscribable;
+
+        if (options && options['exportDependencies']) {
+            // The "exportDependencies" option means that the calling code will track any dependencies and re-create
+            // the binding context when they change.
+            updateContext();
+        } else {
             subscribable = ko.dependentObservable(updateContext, null, { disposeWhen: disposeWhen, disposeWhenNodeIsRemoved: true });
 
-        // At this point, the binding context has been initialized, and the "subscribable" computed observable is
-        // subscribed to any observables that were accessed in the process. If there is nothing to track, the
-        // computed will be inactive, and we can safely throw it away. If it's active, the computed is stored in
-        // the context object.
-        if (subscribable.isActive()) {
-            self._subscribable = subscribable;
+            // At this point, the binding context has been initialized, and the "subscribable" computed observable is
+            // subscribed to any observables that were accessed in the process. If there is nothing to track, the
+            // computed will be inactive, and we can safely throw it away. If it's active, the computed is stored in
+            // the context object.
+            if (subscribable.isActive()) {
+                self._subscribable = subscribable;
 
-            // Always notify because even if the model ($data) hasn't changed, other context properties might have changed
-            subscribable['equalityComparer'] = null;
+                // Always notify because even if the model ($data) hasn't changed, other context properties might have changed
+                subscribable['equalityComparer'] = null;
 
-            // We need to be able to dispose of this computed observable when it's no longer needed. This would be
-            // easy if we had a single node to watch, but binding contexts can be used by many different nodes, and
-            // we cannot assume that those nodes have any relation to each other. So instead we track any node that
-            // the context is attached to, and dispose the computed when all of those nodes have been cleaned.
+                // We need to be able to dispose of this computed observable when it's no longer needed. This would be
+                // easy if we had a single node to watch, but binding contexts can be used by many different nodes, and
+                // we cannot assume that those nodes have any relation to each other. So instead we track any node that
+                // the context is attached to, and dispose the computed when all of those nodes have been cleaned.
 
-            // Add properties to *subscribable* instead of *self* because any properties added to *self* may be overwritten on updates
-            nodes = [];
-            subscribable._addNode = function(node) {
-                nodes.push(node);
-                ko.utils.domNodeDisposal.addDisposeCallback(node, function(node) {
-                    ko.utils.arrayRemoveItem(nodes, node);
-                    if (!nodes.length) {
-                        subscribable.dispose();
-                        self._subscribable = subscribable = undefined;
-                    }
-                });
-            };
+                // Add properties to *subscribable* instead of *self* because any properties added to *self* may be overwritten on updates
+                nodes = [];
+                subscribable._addNode = function(node) {
+                    nodes.push(node);
+                    ko.utils.domNodeDisposal.addDisposeCallback(node, function(node) {
+                        ko.utils.arrayRemoveItem(nodes, node);
+                        if (!nodes.length) {
+                            subscribable.dispose();
+                            self._subscribable = subscribable = undefined;
+                        }
+                    });
+                };
+            }
         }
     }
 
@@ -3414,7 +3475,7 @@ ko.exportSymbol('bindingProvider', ko.bindingProvider);
     // But this does not mean that the $data value of the child context will also get updated. If the child
     // view model also depends on the parent view model, you must provide a function that returns the correct
     // view model on each update.
-    ko.bindingContext.prototype['createChildContext'] = function (dataItemOrAccessor, dataItemAlias, extendCallback) {
+    ko.bindingContext.prototype['createChildContext'] = function (dataItemOrAccessor, dataItemAlias, extendCallback, options) {
         return new ko.bindingContext(dataItemOrAccessor, this, dataItemAlias, function(self, parentContext) {
             // Extend the context hierarchy by setting the appropriate pointers
             self['$parentContext'] = parentContext;
@@ -3423,7 +3484,7 @@ ko.exportSymbol('bindingProvider', ko.bindingProvider);
             self['$parents'].unshift(self['$parent']);
             if (extendCallback)
                 extendCallback(self);
-        });
+        }, options);
     };
 
     // Extend the binding context with new custom properties. This doesn't change the context hierarchy.
@@ -3438,6 +3499,10 @@ ko.exportSymbol('bindingProvider', ko.bindingProvider);
             self['$rawData'] = parentContext['$rawData'];
             ko.utils.extend(self, typeof(properties) == "function" ? properties() : properties);
         });
+    };
+
+    ko.bindingContext.prototype.createStaticChildContext = function (dataItemOrAccessor, dataItemAlias) {
+        return this['createChildContext'](dataItemOrAccessor, dataItemAlias, null, { "exportDependencies": true });
     };
 
     // Returns the valueAccesor function for a binding value
@@ -4684,7 +4749,8 @@ function makeWithIfBinding(bindingKey, isWith, isNot, makeContextCallback) {
             var didDisplayOnLastUpdate,
                 savedNodes;
             ko.computed(function() {
-                var dataValue = ko.utils.unwrapObservable(valueAccessor()),
+                var rawValue = valueAccessor(),
+                    dataValue = ko.utils.unwrapObservable(rawValue),
                     shouldDisplay = !isNot !== !dataValue, // equivalent to isNot ? !dataValue : !!dataValue
                     isFirstRender = !savedNodes,
                     needsRefresh = isFirstRender || isWith || (shouldDisplay !== didDisplayOnLastUpdate);
@@ -4699,7 +4765,7 @@ function makeWithIfBinding(bindingKey, isWith, isNot, makeContextCallback) {
                         if (!isFirstRender) {
                             ko.virtualElements.setDomNodeChildren(element, ko.utils.cloneNodes(savedNodes));
                         }
-                        ko.applyBindingsToDescendants(makeContextCallback ? makeContextCallback(bindingContext, dataValue) : bindingContext, element);
+                        ko.applyBindingsToDescendants(makeContextCallback ? makeContextCallback(bindingContext, rawValue) : bindingContext, element);
                     } else {
                         ko.virtualElements.emptyNode(element);
                     }
@@ -4719,7 +4785,7 @@ makeWithIfBinding('if');
 makeWithIfBinding('ifnot', false /* isWith */, true /* isNot */);
 makeWithIfBinding('with', true /* isWith */, false /* isNot */,
     function(bindingContext, dataValue) {
-        return bindingContext['createChildContext'](dataValue);
+        return bindingContext.createStaticChildContext(dataValue);
     }
 );
 var captionPlaceholder = {};
@@ -5680,7 +5746,7 @@ ko.exportSymbol('__tr_ambtns', ko.templateRewriting.applyMemoizedBindingsToNextS
                     // Ensure we've got a proper binding context to work with
                     var bindingContext = (dataOrBindingContext && (dataOrBindingContext instanceof ko.bindingContext))
                         ? dataOrBindingContext
-                        : new ko.bindingContext(ko.utils.unwrapObservable(dataOrBindingContext));
+                        : new ko.bindingContext(dataOrBindingContext, null, null, null, { "exportDependencies": true });
 
                     var templateName = resolveTemplateName(template, bindingContext['$data'], bindingContext),
                         renderedNodesArray = executeTemplate(targetNodeOrNodeArray, renderMode, templateName, bindingContext, options);
@@ -5781,7 +5847,6 @@ ko.exportSymbol('__tr_ambtns', ko.templateRewriting.applyMemoizedBindingsToNextS
         },
         'update': function (element, valueAccessor, allBindings, viewModel, bindingContext) {
             var value = valueAccessor(),
-                dataValue,
                 options = ko.utils.unwrapObservable(value),
                 shouldDisplay = true,
                 templateComputed = null,
@@ -5798,8 +5863,6 @@ ko.exportSymbol('__tr_ambtns', ko.templateRewriting.applyMemoizedBindingsToNextS
                     shouldDisplay = ko.utils.unwrapObservable(options['if']);
                 if (shouldDisplay && 'ifnot' in options)
                     shouldDisplay = !ko.utils.unwrapObservable(options['ifnot']);
-
-                dataValue = ko.utils.unwrapObservable(options['data']);
             }
 
             if ('foreach' in options) {
@@ -5811,7 +5874,7 @@ ko.exportSymbol('__tr_ambtns', ko.templateRewriting.applyMemoizedBindingsToNextS
             } else {
                 // Render once for this single data point (or use the viewModel if no data was provided)
                 var innerBindingContext = ('data' in options) ?
-                    bindingContext['createChildContext'](dataValue, options['as']) :  // Given an explitit 'data' value, we create a child binding context for it
+                    bindingContext.createStaticChildContext(options['data'], options['as']) :  // Given an explitit 'data' value, we create a child binding context for it
                     bindingContext;                                                        // Given no explicit 'data' value, we retain the same binding context
                 templateComputed = ko.renderTemplate(templateName || element, innerBindingContext, options, element);
             }
@@ -9836,7 +9899,7 @@ ko.exportSymbol('nativeTemplateEngine', ko.nativeTemplateEngine);
     return _moment;
 
 }));;/*!
- * jQuery JavaScript Library v2.2.1
+ * jQuery JavaScript Library v2.2.4
  * http://jquery.com/
  *
  * Includes Sizzle.js
@@ -9846,7 +9909,7 @@ ko.exportSymbol('nativeTemplateEngine', ko.nativeTemplateEngine);
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2016-02-22T19:11Z
+ * Date: 2016-05-20T17:23Z
  */
 
 (function( global, factory ) {
@@ -9902,7 +9965,7 @@ var support = {};
 
 
 var
-	version = "2.2.1",
+	version = "2.2.4",
 
 	// Define a local copy of jQuery
 	jQuery = function( selector, context ) {
@@ -10113,6 +10176,7 @@ jQuery.extend( {
 	},
 
 	isPlainObject: function( obj ) {
+		var key;
 
 		// Not plain objects:
 		// - Any object or value whose internal [[Class]] property is not "[object Object]"
@@ -10122,14 +10186,18 @@ jQuery.extend( {
 			return false;
 		}
 
+		// Not own constructor property must be Object
 		if ( obj.constructor &&
-				!hasOwn.call( obj.constructor.prototype, "isPrototypeOf" ) ) {
+				!hasOwn.call( obj, "constructor" ) &&
+				!hasOwn.call( obj.constructor.prototype || {}, "isPrototypeOf" ) ) {
 			return false;
 		}
 
-		// If the function hasn't returned already, we're confident that
-		// |obj| is a plain object, created by {} or constructed with new Object
-		return true;
+		// Own properties are enumerated firstly, so to speed up,
+		// if last one is own, then all properties are own
+		for ( key in obj ) {}
+
+		return key === undefined || hasOwn.call( obj, key );
 	},
 
 	isEmptyObject: function( obj ) {
@@ -14838,13 +14906,14 @@ jQuery.Event.prototype = {
 	isDefaultPrevented: returnFalse,
 	isPropagationStopped: returnFalse,
 	isImmediatePropagationStopped: returnFalse,
+	isSimulated: false,
 
 	preventDefault: function() {
 		var e = this.originalEvent;
 
 		this.isDefaultPrevented = returnTrue;
 
-		if ( e ) {
+		if ( e && !this.isSimulated ) {
 			e.preventDefault();
 		}
 	},
@@ -14853,7 +14922,7 @@ jQuery.Event.prototype = {
 
 		this.isPropagationStopped = returnTrue;
 
-		if ( e ) {
+		if ( e && !this.isSimulated ) {
 			e.stopPropagation();
 		}
 	},
@@ -14862,7 +14931,7 @@ jQuery.Event.prototype = {
 
 		this.isImmediatePropagationStopped = returnTrue;
 
-		if ( e ) {
+		if ( e && !this.isSimulated ) {
 			e.stopImmediatePropagation();
 		}
 
@@ -15792,19 +15861,6 @@ function getWidthOrHeight( elem, name, extra ) {
 		val = name === "width" ? elem.offsetWidth : elem.offsetHeight,
 		styles = getStyles( elem ),
 		isBorderBox = jQuery.css( elem, "boxSizing", false, styles ) === "border-box";
-
-	// Support: IE11 only
-	// In IE 11 fullscreen elements inside of an iframe have
-	// 100x too small dimensions (gh-1764).
-	if ( document.msFullscreenElement && window.top !== window ) {
-
-		// Support: IE11 only
-		// Running getBoundingClientRect on a disconnected node
-		// in IE throws an error.
-		if ( elem.getClientRects().length ) {
-			val = Math.round( elem.getBoundingClientRect()[ name ] * 100 );
-		}
-	}
 
 	// Some non-html elements return undefined for offsetWidth, so check for null/undefined
 	// svg - https://bugzilla.mozilla.org/show_bug.cgi?id=649285
@@ -17162,6 +17218,12 @@ jQuery.extend( {
 	}
 } );
 
+// Support: IE <=11 only
+// Accessing the selectedIndex property
+// forces the browser to respect setting selected
+// on the option
+// The getter ensures a default option is selected
+// when in an optgroup
 if ( !support.optSelected ) {
 	jQuery.propHooks.selected = {
 		get: function( elem ) {
@@ -17170,6 +17232,16 @@ if ( !support.optSelected ) {
 				parent.parentNode.selectedIndex;
 			}
 			return null;
+		},
+		set: function( elem ) {
+			var parent = elem.parentNode;
+			if ( parent ) {
+				parent.selectedIndex;
+
+				if ( parent.parentNode ) {
+					parent.parentNode.selectedIndex;
+				}
+			}
 		}
 	};
 }
@@ -17364,7 +17436,8 @@ jQuery.fn.extend( {
 
 
 
-var rreturn = /\r/g;
+var rreturn = /\r/g,
+	rspaces = /[\x20\t\r\n\f]+/g;
 
 jQuery.fn.extend( {
 	val: function( value ) {
@@ -17440,9 +17513,15 @@ jQuery.extend( {
 		option: {
 			get: function( elem ) {
 
-				// Support: IE<11
-				// option.value not trimmed (#14858)
-				return jQuery.trim( elem.value );
+				var val = jQuery.find.attr( elem, "value" );
+				return val != null ?
+					val :
+
+					// Support: IE10-11+
+					// option.text throws exceptions (#14686, #14858)
+					// Strip and collapse whitespace
+					// https://html.spec.whatwg.org/#strip-and-collapse-whitespace
+					jQuery.trim( jQuery.text( elem ) ).replace( rspaces, " " );
 			}
 		},
 		select: {
@@ -17495,7 +17574,7 @@ jQuery.extend( {
 				while ( i-- ) {
 					option = options[ i ];
 					if ( option.selected =
-							jQuery.inArray( jQuery.valHooks.option.get( option ), values ) > -1
+						jQuery.inArray( jQuery.valHooks.option.get( option ), values ) > -1
 					) {
 						optionSet = true;
 					}
@@ -17673,6 +17752,7 @@ jQuery.extend( jQuery.event, {
 	},
 
 	// Piggyback on a donor event to simulate a different one
+	// Used only for `focus(in | out)` events
 	simulate: function( type, elem, event ) {
 		var e = jQuery.extend(
 			new jQuery.Event(),
@@ -17680,27 +17760,10 @@ jQuery.extend( jQuery.event, {
 			{
 				type: type,
 				isSimulated: true
-
-				// Previously, `originalEvent: {}` was set here, so stopPropagation call
-				// would not be triggered on donor event, since in our own
-				// jQuery.event.stopPropagation function we had a check for existence of
-				// originalEvent.stopPropagation method, so, consequently it would be a noop.
-				//
-				// But now, this "simulate" function is used only for events
-				// for which stopPropagation() is noop, so there is no need for that anymore.
-				//
-				// For the 1.x branch though, guard for "click" and "submit"
-				// events is still used, but was moved to jQuery.event.stopPropagation function
-				// because `originalEvent` should point to the original event for the constancy
-				// with other events and for more focused logic
 			}
 		);
 
 		jQuery.event.trigger( e, null, elem );
-
-		if ( e.isDefaultPrevented() ) {
-			event.preventDefault();
-		}
 	}
 
 } );
@@ -19190,18 +19253,6 @@ jQuery.ajaxPrefilter( "json jsonp", function( s, originalSettings, jqXHR ) {
 
 
 
-// Support: Safari 8+
-// In Safari 8 documents created via document.implementation.createHTMLDocument
-// collapse sibling forms: the second one becomes a child of the first one.
-// Because of that, this security measure has to be disabled in Safari 8.
-// https://bugs.webkit.org/show_bug.cgi?id=137337
-support.createHTMLDocument = ( function() {
-	var body = document.implementation.createHTMLDocument( "" ).body;
-	body.innerHTML = "<form></form><form></form>";
-	return body.childNodes.length === 2;
-} )();
-
-
 // Argument "data" should be string of html
 // context (optional): If specified, the fragment will be created in this context,
 // defaults to document
@@ -19214,12 +19265,7 @@ jQuery.parseHTML = function( data, context, keepScripts ) {
 		keepScripts = context;
 		context = false;
 	}
-
-	// Stop scripts or inline event handlers from being executed immediately
-	// by using document.implementation
-	context = context || ( support.createHTMLDocument ?
-		document.implementation.createHTMLDocument( "" ) :
-		document );
+	context = context || document;
 
 	var parsed = rsingleTag.exec( data ),
 		scripts = !keepScripts && [];
@@ -19301,7 +19347,7 @@ jQuery.fn.load = function( url, params, callback ) {
 		// If it fails, this function gets "jqXHR", "status", "error"
 		} ).always( callback && function( jqXHR, status ) {
 			self.each( function() {
-				callback.apply( self, response || [ jqXHR.responseText, status, jqXHR ] );
+				callback.apply( this, response || [ jqXHR.responseText, status, jqXHR ] );
 			} );
 		} );
 	}
@@ -19682,7 +19728,7 @@ return jQuery;
   }
 }(this, function () {
 
-/* Chartist.js 0.9.7
+/* Chartist.js 0.9.8
  * Copyright © 2016 Gion Kunz
  * Free to use under either the WTFPL license or the MIT license.
  * https://raw.githubusercontent.com/gionkunz/chartist-js/master/LICENSE-WTFPL
@@ -19694,7 +19740,7 @@ return jQuery;
  * @module Chartist.Core
  */
 var Chartist = {
-  version: '0.9.7'
+  version: '0.9.8'
 };
 
 (function (window, document, Chartist) {
@@ -20417,6 +20463,10 @@ var Chartist = {
       }
     }
 
+    // step must not be less than EPSILON to create values that can be represented as floating number.
+    var EPSILON = 2.221E-16;
+    bounds.step = Math.max(bounds.step, EPSILON);
+
     // Narrow min and max based on new step
     newMin = bounds.min;
     newMax = bounds.max;
@@ -20430,11 +20480,14 @@ var Chartist = {
     bounds.max = newMax;
     bounds.range = bounds.max - bounds.min;
 
-    bounds.values = [];
+    var values = [];
     for (i = bounds.min; i <= bounds.max; i += bounds.step) {
-      bounds.values.push(Chartist.roundWithPrecision(i));
+      var value = Chartist.roundWithPrecision(i);
+      if (value !== values[values.length - 1]) {
+        values.push(i);
+      }
     }
-
+    bounds.values = values;
     return bounds;
   };
 
@@ -20572,7 +20625,7 @@ var Chartist = {
     positionalData[axis.units.pos] = position + labelOffset[axis.units.pos];
     positionalData[axis.counterUnits.pos] = labelOffset[axis.counterUnits.pos];
     positionalData[axis.units.len] = length;
-    positionalData[axis.counterUnits.len] = axisOffset - 10;
+    positionalData[axis.counterUnits.len] = Math.max(0, axisOffset - 10);
 
     if(useForeignObject) {
       // We need to set width and height explicitly to px as span will not expand with width and height being
@@ -20632,7 +20685,7 @@ var Chartist = {
       mediaQueryListeners = [],
       i;
 
-    function updateCurrentOptions(preventChangedEvent) {
+    function updateCurrentOptions(mediaEvent) {
       var previousOptions = currentOptions;
       currentOptions = Chartist.extend({}, baseOptions);
 
@@ -20645,7 +20698,7 @@ var Chartist = {
         }
       }
 
-      if(eventEmitter && !preventChangedEvent) {
+      if(eventEmitter && mediaEvent) {
         eventEmitter.emit('optionsChanged', {
           previousOptions: previousOptions,
           currentOptions: currentOptions
@@ -20669,8 +20722,8 @@ var Chartist = {
         mediaQueryListeners.push(mql);
       }
     }
-    // Execute initially so we get the correct options
-    updateCurrentOptions(true);
+    // Execute initially without an event argument so we get the correct options
+    updateCurrentOptions();
 
     return {
       removeMediaQueryListeners: removeMediaQueryListeners,
@@ -20680,6 +20733,73 @@ var Chartist = {
     };
   };
 
+
+  /**
+   * Splits a list of coordinates and associated values into segments. Each returned segment contains a pathCoordinates
+   * valueData property describing the segment.
+   *
+   * With the default options, segments consist of contiguous sets of points that do not have an undefined value. Any
+   * points with undefined values are discarded.
+   *
+   * **Options**
+   * The following options are used to determine how segments are formed
+   * ```javascript
+   * var options = {
+   *   // If fillHoles is true, undefined values are simply discarded without creating a new segment. Assuming other options are default, this returns single segment.
+   *   fillHoles: false,
+   *   // If increasingX is true, the coordinates in all segments have strictly increasing x-values.
+   *   increasingX: false
+   * };
+   * ```
+   *
+   * @memberof Chartist.Core
+   * @param {Array} pathCoordinates List of point coordinates to be split in the form [x1, y1, x2, y2 ... xn, yn]
+   * @param {Array} values List of associated point values in the form [v1, v2 .. vn]
+   * @param {Object} options Options set by user
+   * @return {Array} List of segments, each containing a pathCoordinates and valueData property.
+   */
+  Chartist.splitIntoSegments = function(pathCoordinates, valueData, options) {
+    var defaultOptions = {
+      increasingX: false,
+      fillHoles: false
+    };
+
+    options = Chartist.extend({}, defaultOptions, options);
+
+    var segments = [];
+    var hole = true;
+
+    for(var i = 0; i < pathCoordinates.length; i += 2) {
+      // If this value is a "hole" we set the hole flag
+      if(valueData[i / 2].value === undefined) {
+        if(!options.fillHoles) {
+          hole = true;
+        }
+      } else {
+        if(options.increasingX && i >= 2 && pathCoordinates[i] <= pathCoordinates[i-2]) {
+          // X is not increasing, so we need to make sure we start a new segment
+          hole = true;
+        }
+
+
+        // If it's a valid value we need to check if we're coming out of a hole and create a new empty segment
+        if(hole) {
+          segments.push({
+            pathCoordinates: [],
+            valueData: []
+          });
+          // As we have a valid value now, we are not in a "hole" anymore
+          hole = false;
+        }
+
+        // Add to the segment pathCoordinates and valueData
+        segments[segments.length - 1].pathCoordinates.push(pathCoordinates[i], pathCoordinates[i + 1]);
+        segments[segments.length - 1].valueData.push(valueData[i / 2]);
+      }
+    }
+
+    return segments;
+  };
 }(window, document, Chartist));
 ;/**
  * Chartist path interpolation functions.
@@ -20845,43 +20965,12 @@ var Chartist = {
     var t = Math.min(1, Math.max(0, options.tension)),
       c = 1 - t;
 
-    // This function will help us to split pathCoordinates and valueData into segments that also contain pathCoordinates
-    // and valueData. This way the existing functions can be reused and the segment paths can be joined afterwards.
-    // This functionality is necessary to treat "holes" in the line charts
-    function splitIntoSegments(pathCoordinates, valueData) {
-      var segments = [];
-      var hole = true;
-
-      for(var i = 0; i < pathCoordinates.length; i += 2) {
-        // If this value is a "hole" we set the hole flag
-        if(valueData[i / 2].value === undefined) {
-          if(!options.fillHoles) {
-            hole = true;
-          }
-        } else {
-          // If it's a valid value we need to check if we're coming out of a hole and create a new empty segment
-          if(hole) {
-            segments.push({
-              pathCoordinates: [],
-              valueData: []
-            });
-            // As we have a valid value now, we are not in a "hole" anymore
-            hole = false;
-          }
-
-          // Add to the segment pathCoordinates and valueData
-          segments[segments.length - 1].pathCoordinates.push(pathCoordinates[i], pathCoordinates[i + 1]);
-          segments[segments.length - 1].valueData.push(valueData[i / 2]);
-        }
-      }
-
-      return segments;
-    }
-
     return function cardinal(pathCoordinates, valueData) {
       // First we try to split the coordinates into segments
       // This is necessary to treat "holes" in line charts
-      var segments = splitIntoSegments(pathCoordinates, valueData);
+      var segments = Chartist.splitIntoSegments(pathCoordinates, valueData, {
+        fillHoles: options.fillHoles
+      });
 
       if(!segments.length) {
         // If there were no segments return 'Chartist.Interpolation.none'
@@ -20943,6 +21032,137 @@ var Chartist = {
             p[2].y,
             false,
             valueData[(i + 2) / 2]
+          );
+        }
+
+        return path;
+      }
+    };
+  };
+
+  /**
+   * Monotone Cubic spline interpolation produces a smooth curve which preserves monotonicity. Unlike cardinal splines, the curve will not extend beyond the range of y-values of the original data points.
+   *
+   * Monotone Cubic splines can only be created if there are more than two data points. If this is not the case this smoothing will fallback to `Chartist.Smoothing.none`.
+   *
+   * The x-values of subsequent points must be increasing to fit a Monotone Cubic spline. If this condition is not met for a pair of adjacent points, then there will be a break in the curve between those data points.
+   *
+   * All smoothing functions within Chartist are factory functions that accept an options parameter.
+   *
+   * @example
+   * var chart = new Chartist.Line('.ct-chart', {
+   *   labels: [1, 2, 3, 4, 5],
+   *   series: [[1, 2, 8, 1, 7]]
+   * }, {
+   *   lineSmooth: Chartist.Interpolation.monotoneCubic({
+   *     fillHoles: false
+   *   })
+   * });
+   *
+   * @memberof Chartist.Interpolation
+   * @param {Object} options The options of the monotoneCubic factory function.
+   * @return {Function}
+   */
+  Chartist.Interpolation.monotoneCubic = function(options) {
+    var defaultOptions = {
+      fillHoles: false
+    };
+
+    options = Chartist.extend({}, defaultOptions, options);
+
+    return function monotoneCubic(pathCoordinates, valueData) {
+      // First we try to split the coordinates into segments
+      // This is necessary to treat "holes" in line charts
+      var segments = Chartist.splitIntoSegments(pathCoordinates, valueData, {
+        fillHoles: options.fillHoles,
+        increasingX: true
+      });
+
+      if(!segments.length) {
+        // If there were no segments return 'Chartist.Interpolation.none'
+        return Chartist.Interpolation.none()([]);
+      } else if(segments.length > 1) {
+        // If the split resulted in more that one segment we need to interpolate each segment individually and join them
+        // afterwards together into a single path.
+          var paths = [];
+        // For each segment we will recurse the monotoneCubic fn function
+        segments.forEach(function(segment) {
+          paths.push(monotoneCubic(segment.pathCoordinates, segment.valueData));
+        });
+        // Join the segment path data into a single path and return
+        return Chartist.Svg.Path.join(paths);
+      } else {
+        // If there was only one segment we can proceed regularly by using pathCoordinates and valueData from the first
+        // segment
+        pathCoordinates = segments[0].pathCoordinates;
+        valueData = segments[0].valueData;
+
+        // If less than three points we need to fallback to no smoothing
+        if(pathCoordinates.length <= 4) {
+          return Chartist.Interpolation.none()(pathCoordinates, valueData);
+        }
+
+        var xs = [],
+          ys = [],
+          i,
+          n = pathCoordinates.length / 2,
+          ms = [],
+          ds = [], dys = [], dxs = [],
+          path;
+
+        // Populate x and y coordinates into separate arrays, for readability
+
+        for(i = 0; i < n; i++) {
+          xs[i] = pathCoordinates[i * 2];
+          ys[i] = pathCoordinates[i * 2 + 1];
+        }
+
+        // Calculate deltas and derivative
+
+        for(i = 0; i < n - 1; i++) {
+          dys[i] = ys[i + 1] - ys[i];
+          dxs[i] = xs[i + 1] - xs[i];
+          ds[i] = dys[i] / dxs[i];
+        }
+
+        // Determine desired slope (m) at each point using Fritsch-Carlson method
+        // See: http://math.stackexchange.com/questions/45218/implementation-of-monotone-cubic-interpolation
+
+        ms[0] = ds[0];
+        ms[n - 1] = ds[n - 2];
+
+        for(i = 1; i < n - 1; i++) {
+          if(ds[i] === 0 || ds[i - 1] === 0 || (ds[i - 1] > 0) !== (ds[i] > 0)) {
+            ms[i] = 0;
+          } else {
+            ms[i] = 3 * (dxs[i - 1] + dxs[i]) / (
+              (2 * dxs[i] + dxs[i - 1]) / ds[i - 1] +
+              (dxs[i] + 2 * dxs[i - 1]) / ds[i]);
+
+            if(!isFinite(ms[i])) {
+              ms[i] = 0;
+            }
+          }
+        }
+
+        // Now build a path from the slopes
+
+        path = new Chartist.Svg.Path().move(xs[0], ys[0], false, valueData[0]);
+
+        for(i = 0; i < n - 1; i++) {
+          path.curve(
+            // First control point
+            xs[i] + dxs[i] / 3,
+            ys[i] + ms[i] * dxs[i] / 3,
+            // Second control point
+            xs[i + 1] - dxs[i] / 3,
+            ys[i + 1] - ms[i + 1] * dxs[i] / 3,
+            // End point
+            xs[i + 1],
+            ys[i + 1],
+
+            false,
+            valueData[i + 1]
           );
         }
 
@@ -22821,7 +23041,7 @@ var Chartist = {
       };
 
       var smoothing = typeof seriesOptions.lineSmooth === 'function' ?
-        seriesOptions.lineSmooth : (seriesOptions.lineSmooth ? Chartist.Interpolation.cardinal() : Chartist.Interpolation.none());
+        seriesOptions.lineSmooth : (seriesOptions.lineSmooth ? Chartist.Interpolation.monotoneCubic() : Chartist.Interpolation.none());
       // Interpolating path where pathData will be used to annotate each path element so we can trace back the original
       // index, value and meta data
       var path = smoothing(pathCoordinates, pathData);
