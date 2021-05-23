@@ -2,8 +2,10 @@
 
 namespace Jalle19\StatusManager\Test\Message\Request;
 
+use Jalle19\StatusManager\Exception\MalformedRequestException;
 use Jalle19\StatusManager\Message\Request\PopularChannelsRequest;
 use Jalle19\StatusManager\TimeFrame;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class StatisticsRequestTest
@@ -11,17 +13,19 @@ use Jalle19\StatusManager\TimeFrame;
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class StatisticsRequestTest extends \PHPUnit_Framework_TestCase
+class StatisticsRequestTest extends TestCase
 {
 
 	/**
 	 * Tests that the constructor validation is working (instance name must be defined)
 	 *
-	 * @expectedException \Jalle19\StatusManager\Exception\MalformedRequestException
-	 * @expectedExceptionMessageRegExp *instanceName*
+	 *
+	 *
 	 */
 	public function testConstructor()
 	{
+		$this->expectExceptionMessageMatches("*instanceName*");
+		$this->expectException(MalformedRequestException::class);
 		$parameters            = new \stdClass();
 		$parameters->timeFrame = TimeFrame::TIME_FRAME_ALL_TIME;
 

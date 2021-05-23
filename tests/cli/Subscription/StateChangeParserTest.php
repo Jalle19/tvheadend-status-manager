@@ -5,6 +5,7 @@ namespace Jalle19\StatusManager\Test\Subscription;
 use Jalle19\StatusManager\Subscription\StateChange;
 use Jalle19\StatusManager\Subscription\StateChangeParser;
 use Jalle19\tvheadend\model\comet\LogMessageNotification;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class StateChangeParserTest
@@ -12,7 +13,7 @@ use Jalle19\tvheadend\model\comet\LogMessageNotification;
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class StateChangeParserTest extends \PHPUnit_Framework_TestCase
+class StateChangeParserTest extends TestCase
 {
 
 	/**

@@ -3,6 +3,7 @@
 namespace Jalle19\StatusManager\Test\Exception;
 
 use Jalle19\StatusManager\Exception\UnknownRequestException;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class UnknownRequestExceptionTest
@@ -10,7 +11,7 @@ use Jalle19\StatusManager\Exception\UnknownRequestException;
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class UnknownRequestExceptionTest extends \PHPUnit_Framework_TestCase
+class UnknownRequestExceptionTest extends TestCase
 {
 
 	/**

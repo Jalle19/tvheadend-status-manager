@@ -4,6 +4,7 @@ namespace Jalle19\StatusManager\Test\Configuration;
 
 use Jalle19\StatusManager\Configuration\Parser;
 use Jalle19\StatusManager\Configuration\Reader\ArrayReader;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class ParserTest
@@ -11,7 +12,7 @@ use Jalle19\StatusManager\Configuration\Reader\ArrayReader;
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class ParserTest extends \PHPUnit_Framework_TestCase
+class ParserTest extends TestCase
 {
 
 	use BasicConfigurationTrait;

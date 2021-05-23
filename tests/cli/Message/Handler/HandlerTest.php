@@ -2,11 +2,13 @@
 
 namespace Jalle19\StatusManager\Test\Message\Handler;
 
+use Jalle19\StatusManager\Exception\UnhandledMessageException;
 use Jalle19\StatusManager\Message\Handler\DelegatesMessagesTrait;
 use Jalle19\StatusManager\Message\Handler\HandlerInterface;
 use Jalle19\StatusManager\Message\Request\InstancesRequest;
 use Jalle19\StatusManager\Message\Request\UsersRequest;
 use Jalle19\StatusManager\Message\Response\UsersResponse;
+use PHPUnit\Framework\TestCase;
 use Ratchet\ConnectionInterface;
 
 /**
@@ -15,7 +17,7 @@ use Ratchet\ConnectionInterface;
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class HandlerTest extends \PHPUnit_Framework_TestCase
+class HandlerTest extends TestCase
 {
 
 	use DelegatesMessagesTrait;
@@ -34,7 +36,7 @@ class HandlerTest extends \PHPUnit_Framework_TestCase
 	/**
 	 * @inheritdoc
 	 */
-	protected function setUp()
+	protected function setUp(): void
 	{
 		$this->_handler = new DummyHandler();
 		$this->_sender  = new DummySender();
@@ -53,11 +55,9 @@ class HandlerTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	/**
-	 * @expectedException \Jalle19\StatusManager\Exception\UnhandledMessageException
-	 */
 	public function testFailedDelegation()
 	{
+		$this->expectException(UnhandledMessageException::class);
 		$this->tryDelegateMessage(new InstancesRequest(), $this->_sender);
 	}
 
