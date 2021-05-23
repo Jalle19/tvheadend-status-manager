@@ -11,6 +11,7 @@
     "require": {
         "php": ">=5.6.0",
         "ext-json": "*",
+        "ext-pdo": "*",
         "ext-sqlite3": "*",
         "jalle19/php-tvheadend": "^0.2",
         "symfony/monolog-bridge": "^3.0",
