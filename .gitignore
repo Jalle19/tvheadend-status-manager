@@ -6,6 +6,8 @@ build
 composer.phar
 .idea/workspace.xml
 .idea/dictionaries/*
+.phpunit.result.cache
+.phpunit.cache
 
 app/config.yml
 app/database.sqlite
