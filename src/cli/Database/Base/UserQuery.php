@@ -68,12 +68,12 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     \Jalle19\StatusManager\Database\InstanceQuery|\Jalle19\StatusManager\Database\ConnectionQuery|\Jalle19\StatusManager\Database\SubscriptionQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
- * @method     ChildUser findOne(ConnectionInterface $con = null) Return the first ChildUser matching the query
+ * @method     ChildUser|null findOne(ConnectionInterface $con = null) Return the first ChildUser matching the query
  * @method     ChildUser findOneOrCreate(ConnectionInterface $con = null) Return the first ChildUser matching the query, or a new ChildUser object populated from the query conditions when no match is found
  *
- * @method     ChildUser findOneById(int $id) Return the first ChildUser filtered by the id column
- * @method     ChildUser findOneByInstanceName(string $instance_name) Return the first ChildUser filtered by the instance_name column
- * @method     ChildUser findOneByName(string $name) Return the first ChildUser filtered by the name column *
+ * @method     ChildUser|null findOneById(int $id) Return the first ChildUser filtered by the id column
+ * @method     ChildUser|null findOneByInstanceName(string $instance_name) Return the first ChildUser filtered by the instance_name column
+ * @method     ChildUser|null findOneByName(string $name) Return the first ChildUser filtered by the name column *
 
  * @method     ChildUser requirePk($key, ConnectionInterface $con = null) Return the ChildUser by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildUser requireOne(ConnectionInterface $con = null) Return the first ChildUser matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -148,21 +148,27 @@ abstract class UserQuery extends ModelCriteria
         if ($key === null) {
             return null;
         }
-        if ((null !== ($obj = UserTableMap::getInstanceFromPool(null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key))) && !$this->formatter) {
-            // the object is already in the instance pool
-            return $obj;
-        }
+
         if ($con === null) {
             $con = Propel::getServiceContainer()->getReadConnection(UserTableMap::DATABASE_NAME);
         }
+
         $this->basePreSelect($con);
-        if ($this->formatter || $this->modelAlias || $this->with || $this->select
-         || $this->selectColumns || $this->asColumns || $this->selectModifiers
-         || $this->map || $this->having || $this->joins) {
+
+        if (
+            $this->formatter || $this->modelAlias || $this->with || $this->select
+            || $this->selectColumns || $this->asColumns || $this->selectModifiers
+            || $this->map || $this->having || $this->joins
+        ) {
             return $this->findPkComplex($key, $con);
-        } else {
-            return $this->findPkSimple($key, $con);
         }
+
+        if ((null !== ($obj = UserTableMap::getInstanceFromPool(null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key)))) {
+            // the object is already in the instance pool
+            return $obj;
+        }
+
+        return $this->findPkSimple($key, $con);
     }
 
     /**
@@ -315,11 +321,10 @@ abstract class UserQuery extends ModelCriteria
      * Example usage:
      * <code>
      * $query->filterByInstanceName('fooValue');   // WHERE instance_name = 'fooValue'
-     * $query->filterByInstanceName('%fooValue%'); // WHERE instance_name LIKE '%fooValue%'
+     * $query->filterByInstanceName('%fooValue%', Criteria::LIKE); // WHERE instance_name LIKE '%fooValue%'
      * </code>
      *
      * @param     string $instanceName The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserQuery The current query, for fluid interface
@@ -329,9 +334,6 @@ abstract class UserQuery extends ModelCriteria
         if (null === $comparison) {
             if (is_array($instanceName)) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $instanceName)) {
-                $instanceName = str_replace('*', '%', $instanceName);
-                $comparison = Criteria::LIKE;
             }
         }
 
@@ -344,11 +346,10 @@ abstract class UserQuery extends ModelCriteria
      * Example usage:
      * <code>
      * $query->filterByName('fooValue');   // WHERE name = 'fooValue'
-     * $query->filterByName('%fooValue%'); // WHERE name LIKE '%fooValue%'
+     * $query->filterByName('%fooValue%', Criteria::LIKE); // WHERE name LIKE '%fooValue%'
      * </code>
      *
      * @param     string $name The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildUserQuery The current query, for fluid interface
@@ -358,9 +359,6 @@ abstract class UserQuery extends ModelCriteria
         if (null === $comparison) {
             if (is_array($name)) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $name)) {
-                $name = str_replace('*', '%', $name);
-                $comparison = Criteria::LIKE;
             }
         }
 

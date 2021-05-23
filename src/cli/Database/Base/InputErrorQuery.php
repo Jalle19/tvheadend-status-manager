@@ -58,17 +58,17 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     \Jalle19\StatusManager\Database\InputQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
- * @method     ChildInputError findOne(ConnectionInterface $con = null) Return the first ChildInputError matching the query
+ * @method     ChildInputError|null findOne(ConnectionInterface $con = null) Return the first ChildInputError matching the query
  * @method     ChildInputError findOneOrCreate(ConnectionInterface $con = null) Return the first ChildInputError matching the query, or a new ChildInputError object populated from the query conditions when no match is found
  *
- * @method     ChildInputError findOneById(int $id) Return the first ChildInputError filtered by the id column
- * @method     ChildInputError findOneByInputUuid(string $input_uuid) Return the first ChildInputError filtered by the input_uuid column
- * @method     ChildInputError findOneByBerAverage(double $ber_average) Return the first ChildInputError filtered by the ber_average column
- * @method     ChildInputError findOneByUncAverage(double $unc_average) Return the first ChildInputError filtered by the unc_average column
- * @method     ChildInputError findOneByCumulativeTe(int $cumulative_te) Return the first ChildInputError filtered by the cumulative_te column
- * @method     ChildInputError findOneByCumulativeCc(int $cumulative_cc) Return the first ChildInputError filtered by the cumulative_cc column
- * @method     ChildInputError findOneByCreated(string $created) Return the first ChildInputError filtered by the created column
- * @method     ChildInputError findOneByModified(string $modified) Return the first ChildInputError filtered by the modified column *
+ * @method     ChildInputError|null findOneById(int $id) Return the first ChildInputError filtered by the id column
+ * @method     ChildInputError|null findOneByInputUuid(string $input_uuid) Return the first ChildInputError filtered by the input_uuid column
+ * @method     ChildInputError|null findOneByBerAverage(double $ber_average) Return the first ChildInputError filtered by the ber_average column
+ * @method     ChildInputError|null findOneByUncAverage(double $unc_average) Return the first ChildInputError filtered by the unc_average column
+ * @method     ChildInputError|null findOneByCumulativeTe(int $cumulative_te) Return the first ChildInputError filtered by the cumulative_te column
+ * @method     ChildInputError|null findOneByCumulativeCc(int $cumulative_cc) Return the first ChildInputError filtered by the cumulative_cc column
+ * @method     ChildInputError|null findOneByCreated(string $created) Return the first ChildInputError filtered by the created column
+ * @method     ChildInputError|null findOneByModified(string $modified) Return the first ChildInputError filtered by the modified column *
 
  * @method     ChildInputError requirePk($key, ConnectionInterface $con = null) Return the ChildInputError by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildInputError requireOne(ConnectionInterface $con = null) Return the first ChildInputError matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -153,21 +153,27 @@ abstract class InputErrorQuery extends ModelCriteria
         if ($key === null) {
             return null;
         }
-        if ((null !== ($obj = InputErrorTableMap::getInstanceFromPool(null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key))) && !$this->formatter) {
-            // the object is already in the instance pool
-            return $obj;
-        }
+
         if ($con === null) {
             $con = Propel::getServiceContainer()->getReadConnection(InputErrorTableMap::DATABASE_NAME);
         }
+
         $this->basePreSelect($con);
-        if ($this->formatter || $this->modelAlias || $this->with || $this->select
-         || $this->selectColumns || $this->asColumns || $this->selectModifiers
-         || $this->map || $this->having || $this->joins) {
+
+        if (
+            $this->formatter || $this->modelAlias || $this->with || $this->select
+            || $this->selectColumns || $this->asColumns || $this->selectModifiers
+            || $this->map || $this->having || $this->joins
+        ) {
             return $this->findPkComplex($key, $con);
-        } else {
-            return $this->findPkSimple($key, $con);
         }
+
+        if ((null !== ($obj = InputErrorTableMap::getInstanceFromPool(null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key)))) {
+            // the object is already in the instance pool
+            return $obj;
+        }
+
+        return $this->findPkSimple($key, $con);
     }
 
     /**
@@ -320,11 +326,10 @@ abstract class InputErrorQuery extends ModelCriteria
      * Example usage:
      * <code>
      * $query->filterByInputUuid('fooValue');   // WHERE input_uuid = 'fooValue'
-     * $query->filterByInputUuid('%fooValue%'); // WHERE input_uuid LIKE '%fooValue%'
+     * $query->filterByInputUuid('%fooValue%', Criteria::LIKE); // WHERE input_uuid LIKE '%fooValue%'
      * </code>
      *
      * @param     string $inputUuid The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildInputErrorQuery The current query, for fluid interface
@@ -334,9 +339,6 @@ abstract class InputErrorQuery extends ModelCriteria
         if (null === $comparison) {
             if (is_array($inputUuid)) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $inputUuid)) {
-                $inputUuid = str_replace('*', '%', $inputUuid);
-                $comparison = Criteria::LIKE;
             }
         }
 

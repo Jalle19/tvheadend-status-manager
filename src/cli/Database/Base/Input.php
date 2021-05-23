@@ -35,8 +35,8 @@ use Propel\Runtime\Util\PropelDateTime;
  *
  *
  *
-* @package    propel.generator.Jalle19.StatusManager.Database.Base
-*/
+ * @package    propel.generator.Jalle19.StatusManager.Database.Base
+ */
 abstract class Input implements ActiveRecordInterface
 {
     /**
@@ -88,7 +88,7 @@ abstract class Input implements ActiveRecordInterface
     /**
      * The value for the started field.
      *
-     * @var        \DateTime
+     * @var        DateTime
      */
     protected $started;
 
@@ -321,7 +321,7 @@ abstract class Input implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return $this|Input The current object, for fluid interface
+     * @return $this The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -335,11 +335,11 @@ abstract class Input implements ActiveRecordInterface
      *
      * @param  string  $msg
      * @param  int     $priority One of the Propel::LOG_* logging levels
-     * @return boolean
+     * @return void
      */
     protected function log($msg, $priority = Propel::LOG_INFO)
     {
-        return Propel::log(get_class($this) . ': ' . $msg, $priority);
+        Propel::log(get_class($this) . ': ' . $msg, $priority);
     }
 
     /**
@@ -406,19 +406,19 @@ abstract class Input implements ActiveRecordInterface
      * Get the [optionally formatted] temporal [started] column value.
      *
      *
-     * @param      string $format The date/time format string (either date()-style or strftime()-style).
-     *                            If format is NULL, then the raw DateTime object will be returned.
+     * @param string|null $format The date/time format string (either date()-style or strftime()-style).
+     *   If format is NULL, then the raw DateTime object will be returned.
      *
      * @return string|DateTime Formatted date/time value as string or DateTime object (if format is NULL), NULL if column is NULL
      *
      * @throws PropelException - if unable to parse/validate the date/time value.
      */
-    public function getStarted($format = NULL)
+    public function getStarted($format = null)
     {
         if ($format === null) {
             return $this->started;
         } else {
-            return $this->started instanceof \DateTime ? $this->started->format($format) : null;
+            return $this->started instanceof \DateTimeInterface ? $this->started->format($format) : null;
         }
     }
 
@@ -465,7 +465,7 @@ abstract class Input implements ActiveRecordInterface
     /**
      * Set the value of [uuid] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\Jalle19\StatusManager\Database\Input The current object (for fluent API support)
      */
     public function setUuid($v)
@@ -485,7 +485,7 @@ abstract class Input implements ActiveRecordInterface
     /**
      * Set the value of [instance_name] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\Jalle19\StatusManager\Database\Input The current object (for fluent API support)
      */
     public function setInstanceName($v)
@@ -509,7 +509,7 @@ abstract class Input implements ActiveRecordInterface
     /**
      * Sets the value of [started] column to a normalized version of the date/time value specified.
      *
-     * @param  mixed $v string, integer (timestamp), or \DateTime value.
+     * @param  string|integer|\DateTimeInterface $v string, integer (timestamp), or \DateTimeInterface value.
      *               Empty strings are treated as NULL.
      * @return $this|\Jalle19\StatusManager\Database\Input The current object (for fluent API support)
      */
@@ -517,7 +517,7 @@ abstract class Input implements ActiveRecordInterface
     {
         $dt = PropelDateTime::newInstance($v, null, 'DateTime');
         if ($this->started !== null || $dt !== null) {
-            if ($this->started === null || $dt === null || $dt->format("Y-m-d H:i:s") !== $this->started->format("Y-m-d H:i:s")) {
+            if ($this->started === null || $dt === null || $dt->format("Y-m-d H:i:s.u") !== $this->started->format("Y-m-d H:i:s.u")) {
                 $this->started = $dt === null ? null : clone $dt;
                 $this->modifiedColumns[InputTableMap::COL_STARTED] = true;
             }
@@ -529,7 +529,7 @@ abstract class Input implements ActiveRecordInterface
     /**
      * Set the value of [input] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\Jalle19\StatusManager\Database\Input The current object (for fluent API support)
      */
     public function setInput($v)
@@ -549,7 +549,7 @@ abstract class Input implements ActiveRecordInterface
     /**
      * Set the value of [network] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\Jalle19\StatusManager\Database\Input The current object (for fluent API support)
      */
     public function setNetwork($v)
@@ -569,7 +569,7 @@ abstract class Input implements ActiveRecordInterface
     /**
      * Set the value of [mux] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\Jalle19\StatusManager\Database\Input The current object (for fluent API support)
      */
     public function setMux($v)
@@ -589,7 +589,7 @@ abstract class Input implements ActiveRecordInterface
     /**
      * Set the value of [weight] column.
      *
-     * @param int $v new value
+     * @param int $v New value
      * @return $this|\Jalle19\StatusManager\Database\Input The current object (for fluent API support)
      */
     public function setWeight($v)
@@ -792,13 +792,17 @@ abstract class Input implements ActiveRecordInterface
             throw new PropelException("You cannot save an object that has been deleted.");
         }
 
+        if ($this->alreadyInSave) {
+            return 0;
+        }
+
         if ($con === null) {
             $con = Propel::getServiceContainer()->getWriteConnection(InputTableMap::DATABASE_NAME);
         }
 
         return $con->transaction(function () use ($con) {
-            $isInsert = $this->isNew();
             $ret = $this->preSave($con);
+            $isInsert = $this->isNew();
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
             } else {
@@ -957,7 +961,7 @@ abstract class Input implements ActiveRecordInterface
                         $stmt->bindValue($identifier, $this->instance_name, PDO::PARAM_STR);
                         break;
                     case 'started':
-                        $stmt->bindValue($identifier, $this->started ? $this->started->format("Y-m-d H:i:s") : null, PDO::PARAM_STR);
+                        $stmt->bindValue($identifier, $this->started ? $this->started->format("Y-m-d H:i:s.u") : null, PDO::PARAM_STR);
                         break;
                     case 'input':
                         $stmt->bindValue($identifier, $this->input, PDO::PARAM_STR);
@@ -1085,8 +1089,8 @@ abstract class Input implements ActiveRecordInterface
             $keys[5] => $this->getMux(),
             $keys[6] => $this->getWeight(),
         );
-        if ($result[$keys[2]] instanceof \DateTime) {
-            $result[$keys[2]] = $result[$keys[2]]->format('c');
+        if ($result[$keys[2]] instanceof \DateTimeInterface) {
+            $result[$keys[2]] = $result[$keys[2]]->format('Y-m-d H:i:s.u');
         }
 
         $virtualColumns = $this->virtualColumns;
@@ -1506,11 +1510,13 @@ abstract class Input implements ActiveRecordInterface
      */
     public function initRelation($relationName)
     {
-        if ('InputError' == $relationName) {
-            return $this->initInputErrors();
+        if ('InputError' === $relationName) {
+            $this->initInputErrors();
+            return;
         }
-        if ('Subscription' == $relationName) {
-            return $this->initSubscriptions();
+        if ('Subscription' === $relationName) {
+            $this->initSubscriptions();
+            return;
         }
     }
 
@@ -1577,10 +1583,19 @@ abstract class Input implements ActiveRecordInterface
     public function getInputErrors(Criteria $criteria = null, ConnectionInterface $con = null)
     {
         $partial = $this->collInputErrorsPartial && !$this->isNew();
-        if (null === $this->collInputErrors || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collInputErrors) {
+        if (null === $this->collInputErrors || null !== $criteria || $partial) {
+            if ($this->isNew()) {
                 // return empty collection
-                $this->initInputErrors();
+                if (null === $this->collInputErrors) {
+                    $this->initInputErrors();
+                } else {
+                    $collectionClassName = InputErrorTableMap::getTableMap()->getCollectionClassName();
+
+                    $collInputErrors = new $collectionClassName;
+                    $collInputErrors->setModel('\Jalle19\StatusManager\Database\InputError');
+
+                    return $collInputErrors;
+                }
             } else {
                 $collInputErrors = ChildInputErrorQuery::create(null, $criteria)
                     ->filterByInput($this)
@@ -1802,10 +1817,19 @@ abstract class Input implements ActiveRecordInterface
     public function getSubscriptions(Criteria $criteria = null, ConnectionInterface $con = null)
     {
         $partial = $this->collSubscriptionsPartial && !$this->isNew();
-        if (null === $this->collSubscriptions || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collSubscriptions) {
+        if (null === $this->collSubscriptions || null !== $criteria || $partial) {
+            if ($this->isNew()) {
                 // return empty collection
-                $this->initSubscriptions();
+                if (null === $this->collSubscriptions) {
+                    $this->initSubscriptions();
+                } else {
+                    $collectionClassName = SubscriptionTableMap::getTableMap()->getCollectionClassName();
+
+                    $collSubscriptions = new $collectionClassName;
+                    $collSubscriptions->setModel('\Jalle19\StatusManager\Database\Subscription');
+
+                    return $collSubscriptions;
+                }
             } else {
                 $collSubscriptions = ChildSubscriptionQuery::create(null, $criteria)
                     ->filterByInput($this)
@@ -2108,7 +2132,7 @@ abstract class Input implements ActiveRecordInterface
      */
     public function preSave(ConnectionInterface $con = null)
     {
-        return true;
+                return true;
     }
 
     /**
@@ -2117,8 +2141,7 @@ abstract class Input implements ActiveRecordInterface
      */
     public function postSave(ConnectionInterface $con = null)
     {
-
-    }
+            }
 
     /**
      * Code to be run before inserting to database
@@ -2127,7 +2150,7 @@ abstract class Input implements ActiveRecordInterface
      */
     public function preInsert(ConnectionInterface $con = null)
     {
-        return true;
+                return true;
     }
 
     /**
@@ -2136,8 +2159,7 @@ abstract class Input implements ActiveRecordInterface
      */
     public function postInsert(ConnectionInterface $con = null)
     {
-
-    }
+            }
 
     /**
      * Code to be run before updating the object in database
@@ -2146,7 +2168,7 @@ abstract class Input implements ActiveRecordInterface
      */
     public function preUpdate(ConnectionInterface $con = null)
     {
-        return true;
+                return true;
     }
 
     /**
@@ -2155,8 +2177,7 @@ abstract class Input implements ActiveRecordInterface
      */
     public function postUpdate(ConnectionInterface $con = null)
     {
-
-    }
+            }
 
     /**
      * Code to be run before deleting the object in database
@@ -2165,7 +2186,7 @@ abstract class Input implements ActiveRecordInterface
      */
     public function preDelete(ConnectionInterface $con = null)
     {
-        return true;
+                return true;
     }
 
     /**
@@ -2174,8 +2195,7 @@ abstract class Input implements ActiveRecordInterface
      */
     public function postDelete(ConnectionInterface $con = null)
     {
-
-    }
+            }
 
 
     /**

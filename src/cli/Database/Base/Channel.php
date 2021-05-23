@@ -30,8 +30,8 @@ use Propel\Runtime\Parser\AbstractParser;
  *
  *
  *
-* @package    propel.generator.Jalle19.StatusManager.Database.Base
-*/
+ * @package    propel.generator.Jalle19.StatusManager.Database.Base
+ */
 abstract class Channel implements ActiveRecordInterface
 {
     /**
@@ -276,7 +276,7 @@ abstract class Channel implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return $this|Channel The current object, for fluid interface
+     * @return $this The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -290,11 +290,11 @@ abstract class Channel implements ActiveRecordInterface
      *
      * @param  string  $msg
      * @param  int     $priority One of the Propel::LOG_* logging levels
-     * @return boolean
+     * @return void
      */
     protected function log($msg, $priority = Propel::LOG_INFO)
     {
-        return Propel::log(get_class($this) . ': ' . $msg, $priority);
+        Propel::log(get_class($this) . ': ' . $msg, $priority);
     }
 
     /**
@@ -370,7 +370,7 @@ abstract class Channel implements ActiveRecordInterface
     /**
      * Set the value of [id] column.
      *
-     * @param int $v new value
+     * @param int $v New value
      * @return $this|\Jalle19\StatusManager\Database\Channel The current object (for fluent API support)
      */
     public function setId($v)
@@ -390,7 +390,7 @@ abstract class Channel implements ActiveRecordInterface
     /**
      * Set the value of [instance_name] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\Jalle19\StatusManager\Database\Channel The current object (for fluent API support)
      */
     public function setInstanceName($v)
@@ -414,7 +414,7 @@ abstract class Channel implements ActiveRecordInterface
     /**
      * Set the value of [name] column.
      *
-     * @param string $v new value
+     * @param string $v New value
      * @return $this|\Jalle19\StatusManager\Database\Channel The current object (for fluent API support)
      */
     public function setName($v)
@@ -603,13 +603,17 @@ abstract class Channel implements ActiveRecordInterface
             throw new PropelException("You cannot save an object that has been deleted.");
         }
 
+        if ($this->alreadyInSave) {
+            return 0;
+        }
+
         if ($con === null) {
             $con = Propel::getServiceContainer()->getWriteConnection(ChannelTableMap::DATABASE_NAME);
         }
 
         return $con->transaction(function () use ($con) {
-            $isInsert = $this->isNew();
             $ret = $this->preSave($con);
+            $isInsert = $this->isNew();
             if ($isInsert) {
                 $ret = $ret && $this->preInsert($con);
             } else {
@@ -1205,8 +1209,9 @@ abstract class Channel implements ActiveRecordInterface
      */
     public function initRelation($relationName)
     {
-        if ('Subscription' == $relationName) {
-            return $this->initSubscriptions();
+        if ('Subscription' === $relationName) {
+            $this->initSubscriptions();
+            return;
         }
     }
 
@@ -1273,10 +1278,19 @@ abstract class Channel implements ActiveRecordInterface
     public function getSubscriptions(Criteria $criteria = null, ConnectionInterface $con = null)
     {
         $partial = $this->collSubscriptionsPartial && !$this->isNew();
-        if (null === $this->collSubscriptions || null !== $criteria  || $partial) {
-            if ($this->isNew() && null === $this->collSubscriptions) {
+        if (null === $this->collSubscriptions || null !== $criteria || $partial) {
+            if ($this->isNew()) {
                 // return empty collection
-                $this->initSubscriptions();
+                if (null === $this->collSubscriptions) {
+                    $this->initSubscriptions();
+                } else {
+                    $collectionClassName = SubscriptionTableMap::getTableMap()->getCollectionClassName();
+
+                    $collSubscriptions = new $collectionClassName;
+                    $collSubscriptions->setModel('\Jalle19\StatusManager\Database\Subscription');
+
+                    return $collSubscriptions;
+                }
             } else {
                 $collSubscriptions = ChildSubscriptionQuery::create(null, $criteria)
                     ->filterByChannel($this)
@@ -1569,7 +1583,7 @@ abstract class Channel implements ActiveRecordInterface
      */
     public function preSave(ConnectionInterface $con = null)
     {
-        return true;
+                return true;
     }
 
     /**
@@ -1578,8 +1592,7 @@ abstract class Channel implements ActiveRecordInterface
      */
     public function postSave(ConnectionInterface $con = null)
     {
-
-    }
+            }
 
     /**
      * Code to be run before inserting to database
@@ -1588,7 +1601,7 @@ abstract class Channel implements ActiveRecordInterface
      */
     public function preInsert(ConnectionInterface $con = null)
     {
-        return true;
+                return true;
     }
 
     /**
@@ -1597,8 +1610,7 @@ abstract class Channel implements ActiveRecordInterface
      */
     public function postInsert(ConnectionInterface $con = null)
     {
-
-    }
+            }
 
     /**
      * Code to be run before updating the object in database
@@ -1607,7 +1619,7 @@ abstract class Channel implements ActiveRecordInterface
      */
     public function preUpdate(ConnectionInterface $con = null)
     {
-        return true;
+                return true;
     }
 
     /**
@@ -1616,8 +1628,7 @@ abstract class Channel implements ActiveRecordInterface
      */
     public function postUpdate(ConnectionInterface $con = null)
     {
-
-    }
+            }
 
     /**
      * Code to be run before deleting the object in database
@@ -1626,7 +1637,7 @@ abstract class Channel implements ActiveRecordInterface
      */
     public function preDelete(ConnectionInterface $con = null)
     {
-        return true;
+                return true;
     }
 
     /**
@@ -1635,8 +1646,7 @@ abstract class Channel implements ActiveRecordInterface
      */
     public function postDelete(ConnectionInterface $con = null)
     {
-
-    }
+            }
 
 
     /**

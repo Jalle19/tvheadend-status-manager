@@ -92,19 +92,19 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     \Jalle19\StatusManager\Database\InstanceQuery|\Jalle19\StatusManager\Database\InputQuery|\Jalle19\StatusManager\Database\UserQuery|\Jalle19\StatusManager\Database\ChannelQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
- * @method     ChildSubscription findOne(ConnectionInterface $con = null) Return the first ChildSubscription matching the query
+ * @method     ChildSubscription|null findOne(ConnectionInterface $con = null) Return the first ChildSubscription matching the query
  * @method     ChildSubscription findOneOrCreate(ConnectionInterface $con = null) Return the first ChildSubscription matching the query, or a new ChildSubscription object populated from the query conditions when no match is found
  *
- * @method     ChildSubscription findOneById(int $id) Return the first ChildSubscription filtered by the id column
- * @method     ChildSubscription findOneByInstanceName(string $instance_name) Return the first ChildSubscription filtered by the instance_name column
- * @method     ChildSubscription findOneByInputUuid(string $input_uuid) Return the first ChildSubscription filtered by the input_uuid column
- * @method     ChildSubscription findOneByUserId(int $user_id) Return the first ChildSubscription filtered by the user_id column
- * @method     ChildSubscription findOneByChannelId(int $channel_id) Return the first ChildSubscription filtered by the channel_id column
- * @method     ChildSubscription findOneBySubscriptionId(int $subscription_id) Return the first ChildSubscription filtered by the subscription_id column
- * @method     ChildSubscription findOneByStarted(string $started) Return the first ChildSubscription filtered by the started column
- * @method     ChildSubscription findOneByStopped(string $stopped) Return the first ChildSubscription filtered by the stopped column
- * @method     ChildSubscription findOneByTitle(string $title) Return the first ChildSubscription filtered by the title column
- * @method     ChildSubscription findOneByService(string $service) Return the first ChildSubscription filtered by the service column *
+ * @method     ChildSubscription|null findOneById(int $id) Return the first ChildSubscription filtered by the id column
+ * @method     ChildSubscription|null findOneByInstanceName(string $instance_name) Return the first ChildSubscription filtered by the instance_name column
+ * @method     ChildSubscription|null findOneByInputUuid(string $input_uuid) Return the first ChildSubscription filtered by the input_uuid column
+ * @method     ChildSubscription|null findOneByUserId(int $user_id) Return the first ChildSubscription filtered by the user_id column
+ * @method     ChildSubscription|null findOneByChannelId(int $channel_id) Return the first ChildSubscription filtered by the channel_id column
+ * @method     ChildSubscription|null findOneBySubscriptionId(int $subscription_id) Return the first ChildSubscription filtered by the subscription_id column
+ * @method     ChildSubscription|null findOneByStarted(string $started) Return the first ChildSubscription filtered by the started column
+ * @method     ChildSubscription|null findOneByStopped(string $stopped) Return the first ChildSubscription filtered by the stopped column
+ * @method     ChildSubscription|null findOneByTitle(string $title) Return the first ChildSubscription filtered by the title column
+ * @method     ChildSubscription|null findOneByService(string $service) Return the first ChildSubscription filtered by the service column *
 
  * @method     ChildSubscription requirePk($key, ConnectionInterface $con = null) Return the ChildSubscription by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildSubscription requireOne(ConnectionInterface $con = null) Return the first ChildSubscription matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -193,21 +193,27 @@ abstract class SubscriptionQuery extends ModelCriteria
         if ($key === null) {
             return null;
         }
-        if ((null !== ($obj = SubscriptionTableMap::getInstanceFromPool(null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key))) && !$this->formatter) {
-            // the object is already in the instance pool
-            return $obj;
-        }
+
         if ($con === null) {
             $con = Propel::getServiceContainer()->getReadConnection(SubscriptionTableMap::DATABASE_NAME);
         }
+
         $this->basePreSelect($con);
-        if ($this->formatter || $this->modelAlias || $this->with || $this->select
-         || $this->selectColumns || $this->asColumns || $this->selectModifiers
-         || $this->map || $this->having || $this->joins) {
+
+        if (
+            $this->formatter || $this->modelAlias || $this->with || $this->select
+            || $this->selectColumns || $this->asColumns || $this->selectModifiers
+            || $this->map || $this->having || $this->joins
+        ) {
             return $this->findPkComplex($key, $con);
-        } else {
-            return $this->findPkSimple($key, $con);
         }
+
+        if ((null !== ($obj = SubscriptionTableMap::getInstanceFromPool(null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key)))) {
+            // the object is already in the instance pool
+            return $obj;
+        }
+
+        return $this->findPkSimple($key, $con);
     }
 
     /**
@@ -360,11 +366,10 @@ abstract class SubscriptionQuery extends ModelCriteria
      * Example usage:
      * <code>
      * $query->filterByInstanceName('fooValue');   // WHERE instance_name = 'fooValue'
-     * $query->filterByInstanceName('%fooValue%'); // WHERE instance_name LIKE '%fooValue%'
+     * $query->filterByInstanceName('%fooValue%', Criteria::LIKE); // WHERE instance_name LIKE '%fooValue%'
      * </code>
      *
      * @param     string $instanceName The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildSubscriptionQuery The current query, for fluid interface
@@ -374,9 +379,6 @@ abstract class SubscriptionQuery extends ModelCriteria
         if (null === $comparison) {
             if (is_array($instanceName)) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $instanceName)) {
-                $instanceName = str_replace('*', '%', $instanceName);
-                $comparison = Criteria::LIKE;
             }
         }
 
@@ -389,11 +391,10 @@ abstract class SubscriptionQuery extends ModelCriteria
      * Example usage:
      * <code>
      * $query->filterByInputUuid('fooValue');   // WHERE input_uuid = 'fooValue'
-     * $query->filterByInputUuid('%fooValue%'); // WHERE input_uuid LIKE '%fooValue%'
+     * $query->filterByInputUuid('%fooValue%', Criteria::LIKE); // WHERE input_uuid LIKE '%fooValue%'
      * </code>
      *
      * @param     string $inputUuid The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildSubscriptionQuery The current query, for fluid interface
@@ -403,9 +404,6 @@ abstract class SubscriptionQuery extends ModelCriteria
         if (null === $comparison) {
             if (is_array($inputUuid)) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $inputUuid)) {
-                $inputUuid = str_replace('*', '%', $inputUuid);
-                $comparison = Criteria::LIKE;
             }
         }
 
@@ -631,11 +629,10 @@ abstract class SubscriptionQuery extends ModelCriteria
      * Example usage:
      * <code>
      * $query->filterByTitle('fooValue');   // WHERE title = 'fooValue'
-     * $query->filterByTitle('%fooValue%'); // WHERE title LIKE '%fooValue%'
+     * $query->filterByTitle('%fooValue%', Criteria::LIKE); // WHERE title LIKE '%fooValue%'
      * </code>
      *
      * @param     string $title The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildSubscriptionQuery The current query, for fluid interface
@@ -645,9 +642,6 @@ abstract class SubscriptionQuery extends ModelCriteria
         if (null === $comparison) {
             if (is_array($title)) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $title)) {
-                $title = str_replace('*', '%', $title);
-                $comparison = Criteria::LIKE;
             }
         }
 
@@ -660,11 +654,10 @@ abstract class SubscriptionQuery extends ModelCriteria
      * Example usage:
      * <code>
      * $query->filterByService('fooValue');   // WHERE service = 'fooValue'
-     * $query->filterByService('%fooValue%'); // WHERE service LIKE '%fooValue%'
+     * $query->filterByService('%fooValue%', Criteria::LIKE); // WHERE service LIKE '%fooValue%'
      * </code>
      *
      * @param     string $service The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildSubscriptionQuery The current query, for fluid interface
@@ -674,9 +667,6 @@ abstract class SubscriptionQuery extends ModelCriteria
         if (null === $comparison) {
             if (is_array($service)) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $service)) {
-                $service = str_replace('*', '%', $service);
-                $comparison = Criteria::LIKE;
             }
         }
 

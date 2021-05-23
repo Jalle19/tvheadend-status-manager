@@ -24,7 +24,6 @@ use Propel\Runtime\Map\TableMapTrait;
  * For example, the createSelectSql() method checks the type of a given column used in an
  * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
  * (i.e. if it's a text column type).
- *
  */
 class UserTableMap extends TableMap
 {
@@ -118,6 +117,39 @@ class UserTableMap extends TableMap
         self::TYPE_FIELDNAME     => array('id' => 0, 'instance_name' => 1, 'name' => 2, ),
         self::TYPE_NUM           => array(0, 1, 2, )
     );
+
+    /**
+     * Holds a list of column names and their normalized version.
+     *
+     * @var string[]
+     */
+    protected $normalizedColumnNameMap = [
+
+        'Id' => 'ID',
+        'User.Id' => 'ID',
+        'id' => 'ID',
+        'user.id' => 'ID',
+        'UserTableMap::COL_ID' => 'ID',
+        'COL_ID' => 'ID',
+        'id' => 'ID',
+        'user.id' => 'ID',
+        'InstanceName' => 'INSTANCE_NAME',
+        'User.InstanceName' => 'INSTANCE_NAME',
+        'instanceName' => 'INSTANCE_NAME',
+        'user.instanceName' => 'INSTANCE_NAME',
+        'UserTableMap::COL_INSTANCE_NAME' => 'INSTANCE_NAME',
+        'COL_INSTANCE_NAME' => 'INSTANCE_NAME',
+        'instance_name' => 'INSTANCE_NAME',
+        'user.instance_name' => 'INSTANCE_NAME',
+        'Name' => 'NAME',
+        'User.Name' => 'NAME',
+        'name' => 'NAME',
+        'user.name' => 'NAME',
+        'UserTableMap::COL_NAME' => 'NAME',
+        'COL_NAME' => 'NAME',
+        'name' => 'NAME',
+        'user.name' => 'NAME',
+    ];
 
     /**
      * Initialize the table attributes and columns
@@ -317,6 +349,30 @@ class UserTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.id');
             $criteria->addSelectColumn($alias . '.instance_name');
             $criteria->addSelectColumn($alias . '.name');
+        }
+    }
+
+    /**
+     * Remove all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be removed as they are only loaded on demand.
+     *
+     * @param Criteria $criteria object containing the columns to remove.
+     * @param string   $alias    optional table alias
+     * @throws PropelException Any exceptions caught during processing will be
+     *                         rethrown wrapped into a PropelException.
+     */
+    public static function removeSelectColumns(Criteria $criteria, $alias = null)
+    {
+        if (null === $alias) {
+            $criteria->removeSelectColumn(UserTableMap::COL_ID);
+            $criteria->removeSelectColumn(UserTableMap::COL_INSTANCE_NAME);
+            $criteria->removeSelectColumn(UserTableMap::COL_NAME);
+        } else {
+            $criteria->removeSelectColumn($alias . '.id');
+            $criteria->removeSelectColumn($alias . '.instance_name');
+            $criteria->removeSelectColumn($alias . '.name');
         }
     }
 

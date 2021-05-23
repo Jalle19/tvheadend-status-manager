@@ -24,7 +24,6 @@ use Propel\Runtime\Map\TableMapTrait;
  * For example, the createSelectSql() method checks the type of a given column used in an
  * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
  * (i.e. if it's a text column type).
- *
  */
 class ConnectionTableMap extends TableMap
 {
@@ -133,6 +132,63 @@ class ConnectionTableMap extends TableMap
         self::TYPE_FIELDNAME     => array('id' => 0, 'instance_name' => 1, 'user_id' => 2, 'peer' => 3, 'started' => 4, 'type' => 5, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, )
     );
+
+    /**
+     * Holds a list of column names and their normalized version.
+     *
+     * @var string[]
+     */
+    protected $normalizedColumnNameMap = [
+
+        'Id' => 'ID',
+        'Connection.Id' => 'ID',
+        'id' => 'ID',
+        'connection.id' => 'ID',
+        'ConnectionTableMap::COL_ID' => 'ID',
+        'COL_ID' => 'ID',
+        'id' => 'ID',
+        'connection.id' => 'ID',
+        'InstanceName' => 'INSTANCE_NAME',
+        'Connection.InstanceName' => 'INSTANCE_NAME',
+        'instanceName' => 'INSTANCE_NAME',
+        'connection.instanceName' => 'INSTANCE_NAME',
+        'ConnectionTableMap::COL_INSTANCE_NAME' => 'INSTANCE_NAME',
+        'COL_INSTANCE_NAME' => 'INSTANCE_NAME',
+        'instance_name' => 'INSTANCE_NAME',
+        'connection.instance_name' => 'INSTANCE_NAME',
+        'UserId' => 'USER_ID',
+        'Connection.UserId' => 'USER_ID',
+        'userId' => 'USER_ID',
+        'connection.userId' => 'USER_ID',
+        'ConnectionTableMap::COL_USER_ID' => 'USER_ID',
+        'COL_USER_ID' => 'USER_ID',
+        'user_id' => 'USER_ID',
+        'connection.user_id' => 'USER_ID',
+        'Peer' => 'PEER',
+        'Connection.Peer' => 'PEER',
+        'peer' => 'PEER',
+        'connection.peer' => 'PEER',
+        'ConnectionTableMap::COL_PEER' => 'PEER',
+        'COL_PEER' => 'PEER',
+        'peer' => 'PEER',
+        'connection.peer' => 'PEER',
+        'Started' => 'STARTED',
+        'Connection.Started' => 'STARTED',
+        'started' => 'STARTED',
+        'connection.started' => 'STARTED',
+        'ConnectionTableMap::COL_STARTED' => 'STARTED',
+        'COL_STARTED' => 'STARTED',
+        'started' => 'STARTED',
+        'connection.started' => 'STARTED',
+        'Type' => 'TYPE',
+        'Connection.Type' => 'TYPE',
+        'type' => 'TYPE',
+        'connection.type' => 'TYPE',
+        'ConnectionTableMap::COL_TYPE' => 'TYPE',
+        'COL_TYPE' => 'TYPE',
+        'type' => 'TYPE',
+        'connection.type' => 'TYPE',
+    ];
 
     /**
      * Initialize the table attributes and columns
@@ -334,6 +390,36 @@ class ConnectionTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.peer');
             $criteria->addSelectColumn($alias . '.started');
             $criteria->addSelectColumn($alias . '.type');
+        }
+    }
+
+    /**
+     * Remove all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be removed as they are only loaded on demand.
+     *
+     * @param Criteria $criteria object containing the columns to remove.
+     * @param string   $alias    optional table alias
+     * @throws PropelException Any exceptions caught during processing will be
+     *                         rethrown wrapped into a PropelException.
+     */
+    public static function removeSelectColumns(Criteria $criteria, $alias = null)
+    {
+        if (null === $alias) {
+            $criteria->removeSelectColumn(ConnectionTableMap::COL_ID);
+            $criteria->removeSelectColumn(ConnectionTableMap::COL_INSTANCE_NAME);
+            $criteria->removeSelectColumn(ConnectionTableMap::COL_USER_ID);
+            $criteria->removeSelectColumn(ConnectionTableMap::COL_PEER);
+            $criteria->removeSelectColumn(ConnectionTableMap::COL_STARTED);
+            $criteria->removeSelectColumn(ConnectionTableMap::COL_TYPE);
+        } else {
+            $criteria->removeSelectColumn($alias . '.id');
+            $criteria->removeSelectColumn($alias . '.instance_name');
+            $criteria->removeSelectColumn($alias . '.user_id');
+            $criteria->removeSelectColumn($alias . '.peer');
+            $criteria->removeSelectColumn($alias . '.started');
+            $criteria->removeSelectColumn($alias . '.type');
         }
     }
 

@@ -24,7 +24,6 @@ use Propel\Runtime\Map\TableMapTrait;
  * For example, the createSelectSql() method checks the type of a given column used in an
  * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
  * (i.e. if it's a text column type).
- *
  */
 class InputErrorTableMap extends TableMap
 {
@@ -143,6 +142,79 @@ class InputErrorTableMap extends TableMap
         self::TYPE_FIELDNAME     => array('id' => 0, 'input_uuid' => 1, 'ber_average' => 2, 'unc_average' => 3, 'cumulative_te' => 4, 'cumulative_cc' => 5, 'created' => 6, 'modified' => 7, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, )
     );
+
+    /**
+     * Holds a list of column names and their normalized version.
+     *
+     * @var string[]
+     */
+    protected $normalizedColumnNameMap = [
+
+        'Id' => 'ID',
+        'InputError.Id' => 'ID',
+        'id' => 'ID',
+        'inputError.id' => 'ID',
+        'InputErrorTableMap::COL_ID' => 'ID',
+        'COL_ID' => 'ID',
+        'id' => 'ID',
+        'input_error.id' => 'ID',
+        'InputUuid' => 'INPUT_UUID',
+        'InputError.InputUuid' => 'INPUT_UUID',
+        'inputUuid' => 'INPUT_UUID',
+        'inputError.inputUuid' => 'INPUT_UUID',
+        'InputErrorTableMap::COL_INPUT_UUID' => 'INPUT_UUID',
+        'COL_INPUT_UUID' => 'INPUT_UUID',
+        'input_uuid' => 'INPUT_UUID',
+        'input_error.input_uuid' => 'INPUT_UUID',
+        'BerAverage' => 'BER_AVERAGE',
+        'InputError.BerAverage' => 'BER_AVERAGE',
+        'berAverage' => 'BER_AVERAGE',
+        'inputError.berAverage' => 'BER_AVERAGE',
+        'InputErrorTableMap::COL_BER_AVERAGE' => 'BER_AVERAGE',
+        'COL_BER_AVERAGE' => 'BER_AVERAGE',
+        'ber_average' => 'BER_AVERAGE',
+        'input_error.ber_average' => 'BER_AVERAGE',
+        'UncAverage' => 'UNC_AVERAGE',
+        'InputError.UncAverage' => 'UNC_AVERAGE',
+        'uncAverage' => 'UNC_AVERAGE',
+        'inputError.uncAverage' => 'UNC_AVERAGE',
+        'InputErrorTableMap::COL_UNC_AVERAGE' => 'UNC_AVERAGE',
+        'COL_UNC_AVERAGE' => 'UNC_AVERAGE',
+        'unc_average' => 'UNC_AVERAGE',
+        'input_error.unc_average' => 'UNC_AVERAGE',
+        'CumulativeTe' => 'CUMULATIVE_TE',
+        'InputError.CumulativeTe' => 'CUMULATIVE_TE',
+        'cumulativeTe' => 'CUMULATIVE_TE',
+        'inputError.cumulativeTe' => 'CUMULATIVE_TE',
+        'InputErrorTableMap::COL_CUMULATIVE_TE' => 'CUMULATIVE_TE',
+        'COL_CUMULATIVE_TE' => 'CUMULATIVE_TE',
+        'cumulative_te' => 'CUMULATIVE_TE',
+        'input_error.cumulative_te' => 'CUMULATIVE_TE',
+        'CumulativeCc' => 'CUMULATIVE_CC',
+        'InputError.CumulativeCc' => 'CUMULATIVE_CC',
+        'cumulativeCc' => 'CUMULATIVE_CC',
+        'inputError.cumulativeCc' => 'CUMULATIVE_CC',
+        'InputErrorTableMap::COL_CUMULATIVE_CC' => 'CUMULATIVE_CC',
+        'COL_CUMULATIVE_CC' => 'CUMULATIVE_CC',
+        'cumulative_cc' => 'CUMULATIVE_CC',
+        'input_error.cumulative_cc' => 'CUMULATIVE_CC',
+        'Created' => 'CREATED',
+        'InputError.Created' => 'CREATED',
+        'created' => 'CREATED',
+        'inputError.created' => 'CREATED',
+        'InputErrorTableMap::COL_CREATED' => 'CREATED',
+        'COL_CREATED' => 'CREATED',
+        'created' => 'CREATED',
+        'input_error.created' => 'CREATED',
+        'Modified' => 'MODIFIED',
+        'InputError.Modified' => 'MODIFIED',
+        'modified' => 'MODIFIED',
+        'inputError.modified' => 'MODIFIED',
+        'InputErrorTableMap::COL_MODIFIED' => 'MODIFIED',
+        'COL_MODIFIED' => 'MODIFIED',
+        'modified' => 'MODIFIED',
+        'input_error.modified' => 'MODIFIED',
+    ];
 
     /**
      * Initialize the table attributes and columns
@@ -356,6 +428,40 @@ class InputErrorTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.cumulative_cc');
             $criteria->addSelectColumn($alias . '.created');
             $criteria->addSelectColumn($alias . '.modified');
+        }
+    }
+
+    /**
+     * Remove all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be removed as they are only loaded on demand.
+     *
+     * @param Criteria $criteria object containing the columns to remove.
+     * @param string   $alias    optional table alias
+     * @throws PropelException Any exceptions caught during processing will be
+     *                         rethrown wrapped into a PropelException.
+     */
+    public static function removeSelectColumns(Criteria $criteria, $alias = null)
+    {
+        if (null === $alias) {
+            $criteria->removeSelectColumn(InputErrorTableMap::COL_ID);
+            $criteria->removeSelectColumn(InputErrorTableMap::COL_INPUT_UUID);
+            $criteria->removeSelectColumn(InputErrorTableMap::COL_BER_AVERAGE);
+            $criteria->removeSelectColumn(InputErrorTableMap::COL_UNC_AVERAGE);
+            $criteria->removeSelectColumn(InputErrorTableMap::COL_CUMULATIVE_TE);
+            $criteria->removeSelectColumn(InputErrorTableMap::COL_CUMULATIVE_CC);
+            $criteria->removeSelectColumn(InputErrorTableMap::COL_CREATED);
+            $criteria->removeSelectColumn(InputErrorTableMap::COL_MODIFIED);
+        } else {
+            $criteria->removeSelectColumn($alias . '.id');
+            $criteria->removeSelectColumn($alias . '.input_uuid');
+            $criteria->removeSelectColumn($alias . '.ber_average');
+            $criteria->removeSelectColumn($alias . '.unc_average');
+            $criteria->removeSelectColumn($alias . '.cumulative_te');
+            $criteria->removeSelectColumn($alias . '.cumulative_cc');
+            $criteria->removeSelectColumn($alias . '.created');
+            $criteria->removeSelectColumn($alias . '.modified');
         }
     }
 
