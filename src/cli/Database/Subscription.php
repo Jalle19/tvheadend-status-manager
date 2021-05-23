@@ -22,7 +22,7 @@ class Subscription extends BaseSubscription
 	{
 		$parts = self::getServiceParts($SubscriptionStatus);
 
-		return $parts[1];
+		return $parts[2];
 	}
 
 
@@ -35,7 +35,7 @@ class Subscription extends BaseSubscription
 	{
 		$parts = self::getServiceParts($SubscriptionStatus);
 
-		return $parts[0];
+		return $parts[1];
 	}
 
 
@@ -52,13 +52,7 @@ class Subscription extends BaseSubscription
 		$channel = $subscriptionStatus->channel;
 		$service = preg_replace('/\/' . preg_quote($channel, '/') . '$/', '', $service);
 
-		// Split on the first slash
-		$slash = strpos($service, '/');
-
-		return [
-			substr($service, 0, $slash),
-			substr($service, $slash + 1), // ignore the slash
-		];
+		return explode('/', $service);
 	}
 
 }
