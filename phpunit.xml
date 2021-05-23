@@ -22,5 +22,9 @@
         <include>
             <directory suffix=".php">src</directory>
         </include>
+        <report>
+            <clover outputFile="build/logs/clover.xml"/>
+            <html outputDirectory="build/logs/html-coverage" lowUpperBound="50" highLowerBound="90"/>
+        </report>
     </coverage>
 </phpunit>
