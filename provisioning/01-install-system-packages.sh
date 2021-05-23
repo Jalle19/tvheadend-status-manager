@@ -15,4 +15,4 @@
 
 	npm install -g grunt-cli
 
-} > /dev/null 2>&1
+}

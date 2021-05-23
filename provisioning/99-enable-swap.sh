@@ -6,4 +6,4 @@
     mkswap /tmp/swap
     chmod 600 /tmp/swap
     swapon /tmp/swap
-} > /dev/null 2>&1
+}
