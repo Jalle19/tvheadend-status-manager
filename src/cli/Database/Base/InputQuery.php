@@ -76,16 +76,16 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     \Jalle19\StatusManager\Database\InstanceQuery|\Jalle19\StatusManager\Database\InputErrorQuery|\Jalle19\StatusManager\Database\SubscriptionQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
- * @method     ChildInput findOne(ConnectionInterface $con = null) Return the first ChildInput matching the query
+ * @method     ChildInput|null findOne(ConnectionInterface $con = null) Return the first ChildInput matching the query
  * @method     ChildInput findOneOrCreate(ConnectionInterface $con = null) Return the first ChildInput matching the query, or a new ChildInput object populated from the query conditions when no match is found
  *
- * @method     ChildInput findOneByUuid(string $uuid) Return the first ChildInput filtered by the uuid column
- * @method     ChildInput findOneByInstanceName(string $instance_name) Return the first ChildInput filtered by the instance_name column
- * @method     ChildInput findOneByStarted(string $started) Return the first ChildInput filtered by the started column
- * @method     ChildInput findOneByInput(string $input) Return the first ChildInput filtered by the input column
- * @method     ChildInput findOneByNetwork(string $network) Return the first ChildInput filtered by the network column
- * @method     ChildInput findOneByMux(string $mux) Return the first ChildInput filtered by the mux column
- * @method     ChildInput findOneByWeight(int $weight) Return the first ChildInput filtered by the weight column *
+ * @method     ChildInput|null findOneByUuid(string $uuid) Return the first ChildInput filtered by the uuid column
+ * @method     ChildInput|null findOneByInstanceName(string $instance_name) Return the first ChildInput filtered by the instance_name column
+ * @method     ChildInput|null findOneByStarted(string $started) Return the first ChildInput filtered by the started column
+ * @method     ChildInput|null findOneByInput(string $input) Return the first ChildInput filtered by the input column
+ * @method     ChildInput|null findOneByNetwork(string $network) Return the first ChildInput filtered by the network column
+ * @method     ChildInput|null findOneByMux(string $mux) Return the first ChildInput filtered by the mux column
+ * @method     ChildInput|null findOneByWeight(int $weight) Return the first ChildInput filtered by the weight column *
 
  * @method     ChildInput requirePk($key, ConnectionInterface $con = null) Return the ChildInput by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildInput requireOne(ConnectionInterface $con = null) Return the first ChildInput matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -168,21 +168,27 @@ abstract class InputQuery extends ModelCriteria
         if ($key === null) {
             return null;
         }
-        if ((null !== ($obj = InputTableMap::getInstanceFromPool(null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key))) && !$this->formatter) {
-            // the object is already in the instance pool
-            return $obj;
-        }
+
         if ($con === null) {
             $con = Propel::getServiceContainer()->getReadConnection(InputTableMap::DATABASE_NAME);
         }
+
         $this->basePreSelect($con);
-        if ($this->formatter || $this->modelAlias || $this->with || $this->select
-         || $this->selectColumns || $this->asColumns || $this->selectModifiers
-         || $this->map || $this->having || $this->joins) {
+
+        if (
+            $this->formatter || $this->modelAlias || $this->with || $this->select
+            || $this->selectColumns || $this->asColumns || $this->selectModifiers
+            || $this->map || $this->having || $this->joins
+        ) {
             return $this->findPkComplex($key, $con);
-        } else {
-            return $this->findPkSimple($key, $con);
         }
+
+        if ((null !== ($obj = InputTableMap::getInstanceFromPool(null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key)))) {
+            // the object is already in the instance pool
+            return $obj;
+        }
+
+        return $this->findPkSimple($key, $con);
     }
 
     /**
@@ -294,11 +300,10 @@ abstract class InputQuery extends ModelCriteria
      * Example usage:
      * <code>
      * $query->filterByUuid('fooValue');   // WHERE uuid = 'fooValue'
-     * $query->filterByUuid('%fooValue%'); // WHERE uuid LIKE '%fooValue%'
+     * $query->filterByUuid('%fooValue%', Criteria::LIKE); // WHERE uuid LIKE '%fooValue%'
      * </code>
      *
      * @param     string $uuid The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildInputQuery The current query, for fluid interface
@@ -308,9 +313,6 @@ abstract class InputQuery extends ModelCriteria
         if (null === $comparison) {
             if (is_array($uuid)) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $uuid)) {
-                $uuid = str_replace('*', '%', $uuid);
-                $comparison = Criteria::LIKE;
             }
         }
 
@@ -323,11 +325,10 @@ abstract class InputQuery extends ModelCriteria
      * Example usage:
      * <code>
      * $query->filterByInstanceName('fooValue');   // WHERE instance_name = 'fooValue'
-     * $query->filterByInstanceName('%fooValue%'); // WHERE instance_name LIKE '%fooValue%'
+     * $query->filterByInstanceName('%fooValue%', Criteria::LIKE); // WHERE instance_name LIKE '%fooValue%'
      * </code>
      *
      * @param     string $instanceName The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildInputQuery The current query, for fluid interface
@@ -337,9 +338,6 @@ abstract class InputQuery extends ModelCriteria
         if (null === $comparison) {
             if (is_array($instanceName)) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $instanceName)) {
-                $instanceName = str_replace('*', '%', $instanceName);
-                $comparison = Criteria::LIKE;
             }
         }
 
@@ -395,11 +393,10 @@ abstract class InputQuery extends ModelCriteria
      * Example usage:
      * <code>
      * $query->filterByInput('fooValue');   // WHERE input = 'fooValue'
-     * $query->filterByInput('%fooValue%'); // WHERE input LIKE '%fooValue%'
+     * $query->filterByInput('%fooValue%', Criteria::LIKE); // WHERE input LIKE '%fooValue%'
      * </code>
      *
      * @param     string $input The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildInputQuery The current query, for fluid interface
@@ -409,9 +406,6 @@ abstract class InputQuery extends ModelCriteria
         if (null === $comparison) {
             if (is_array($input)) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $input)) {
-                $input = str_replace('*', '%', $input);
-                $comparison = Criteria::LIKE;
             }
         }
 
@@ -424,11 +418,10 @@ abstract class InputQuery extends ModelCriteria
      * Example usage:
      * <code>
      * $query->filterByNetwork('fooValue');   // WHERE network = 'fooValue'
-     * $query->filterByNetwork('%fooValue%'); // WHERE network LIKE '%fooValue%'
+     * $query->filterByNetwork('%fooValue%', Criteria::LIKE); // WHERE network LIKE '%fooValue%'
      * </code>
      *
      * @param     string $network The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildInputQuery The current query, for fluid interface
@@ -438,9 +431,6 @@ abstract class InputQuery extends ModelCriteria
         if (null === $comparison) {
             if (is_array($network)) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $network)) {
-                $network = str_replace('*', '%', $network);
-                $comparison = Criteria::LIKE;
             }
         }
 
@@ -453,11 +443,10 @@ abstract class InputQuery extends ModelCriteria
      * Example usage:
      * <code>
      * $query->filterByMux('fooValue');   // WHERE mux = 'fooValue'
-     * $query->filterByMux('%fooValue%'); // WHERE mux LIKE '%fooValue%'
+     * $query->filterByMux('%fooValue%', Criteria::LIKE); // WHERE mux LIKE '%fooValue%'
      * </code>
      *
      * @param     string $mux The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildInputQuery The current query, for fluid interface
@@ -467,9 +456,6 @@ abstract class InputQuery extends ModelCriteria
         if (null === $comparison) {
             if (is_array($mux)) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $mux)) {
-                $mux = str_replace('*', '%', $mux);
-                $comparison = Criteria::LIKE;
             }
         }
 

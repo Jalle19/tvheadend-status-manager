@@ -9,6 +9,7 @@ use Jalle19\StatusManager\Configuration\Reader\ArrayReader;
 use Jalle19\StatusManager\Test\Configuration\BasicConfigurationTrait;
 use Monolog\Handler\NullHandler;
 use Monolog\Logger;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
@@ -18,7 +19,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-abstract class AbstractManagerTest extends \PHPUnit_Framework_TestCase
+abstract class AbstractManagerTest extends TestCase
 {
 
 	use BasicConfigurationTrait;

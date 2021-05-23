@@ -3,6 +3,7 @@
 namespace Jalle19\StatusManager\Test;
 
 use Jalle19\StatusManager\TimeFrame;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class TimeFrameTest
@@ -10,14 +11,12 @@ use Jalle19\StatusManager\TimeFrame;
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class TimeFrameTest extends \PHPUnit_Framework_TestCase
+class TimeFrameTest extends TestCase
 {
 
-	/**
-	 * @expectedException \InvalidArgumentException
-	 */
 	public function testConstructor()
 	{
+		$this->expectException(\InvalidArgumentException::class);
 		new TimeFrame('invalid');
 	}
 

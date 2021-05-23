@@ -3,6 +3,8 @@
 namespace Jalle19\StatusManager\Test\Configuration\Reader;
 
 use Jalle19\StatusManager\Configuration\Reader\YamlReader;
+use Jalle19\StatusManager\Exception\InvalidConfigurationException;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -11,7 +13,7 @@ use Symfony\Component\Yaml\Yaml;
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class YamlReaderTest extends \PHPUnit_Framework_TestCase
+class YamlReaderTest extends TestCase
 {
 
 	public function testReader()
@@ -29,23 +31,19 @@ class YamlReaderTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	/**
-	 * @expectedException \Jalle19\StatusManager\Exception\InvalidConfigurationException
-	 * @expectedExceptionMessageRegExp *The configuration file does not*
-	 */
 	public function testMissingFile()
 	{
+		$this->expectExceptionMessageMatches("*The configuration file does not*");
+		$this->expectException(InvalidConfigurationException::class);
 		$reader = new YamlReader('/tmp/does/not/exist');
 		$reader->readConfiguration();
 	}
 
 
-	/**
-	 * @expectedException \Jalle19\StatusManager\Exception\InvalidConfigurationException
-	 * @expectedExceptionMessageRegExp *Failed to parse*
-	 */
 	public function testUnparsableConfiguration()
 	{
+		$this->expectExceptionMessageMatches("*Failed to parse*");
+		$this->expectException(InvalidConfigurationException::class);
 		$tmpFile = $this->getTemporaryFilePath();
 		file_put_contents($tmpFile, "\t\tfail");
 

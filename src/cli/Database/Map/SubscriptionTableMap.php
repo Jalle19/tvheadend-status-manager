@@ -24,7 +24,6 @@ use Propel\Runtime\Map\TableMapTrait;
  * For example, the createSelectSql() method checks the type of a given column used in an
  * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
  * (i.e. if it's a text column type).
- *
  */
 class SubscriptionTableMap extends TableMap
 {
@@ -153,6 +152,95 @@ class SubscriptionTableMap extends TableMap
         self::TYPE_FIELDNAME     => array('id' => 0, 'instance_name' => 1, 'input_uuid' => 2, 'user_id' => 3, 'channel_id' => 4, 'subscription_id' => 5, 'started' => 6, 'stopped' => 7, 'title' => 8, 'service' => 9, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, )
     );
+
+    /**
+     * Holds a list of column names and their normalized version.
+     *
+     * @var string[]
+     */
+    protected $normalizedColumnNameMap = [
+
+        'Id' => 'ID',
+        'Subscription.Id' => 'ID',
+        'id' => 'ID',
+        'subscription.id' => 'ID',
+        'SubscriptionTableMap::COL_ID' => 'ID',
+        'COL_ID' => 'ID',
+        'id' => 'ID',
+        'subscription.id' => 'ID',
+        'InstanceName' => 'INSTANCE_NAME',
+        'Subscription.InstanceName' => 'INSTANCE_NAME',
+        'instanceName' => 'INSTANCE_NAME',
+        'subscription.instanceName' => 'INSTANCE_NAME',
+        'SubscriptionTableMap::COL_INSTANCE_NAME' => 'INSTANCE_NAME',
+        'COL_INSTANCE_NAME' => 'INSTANCE_NAME',
+        'instance_name' => 'INSTANCE_NAME',
+        'subscription.instance_name' => 'INSTANCE_NAME',
+        'InputUuid' => 'INPUT_UUID',
+        'Subscription.InputUuid' => 'INPUT_UUID',
+        'inputUuid' => 'INPUT_UUID',
+        'subscription.inputUuid' => 'INPUT_UUID',
+        'SubscriptionTableMap::COL_INPUT_UUID' => 'INPUT_UUID',
+        'COL_INPUT_UUID' => 'INPUT_UUID',
+        'input_uuid' => 'INPUT_UUID',
+        'subscription.input_uuid' => 'INPUT_UUID',
+        'UserId' => 'USER_ID',
+        'Subscription.UserId' => 'USER_ID',
+        'userId' => 'USER_ID',
+        'subscription.userId' => 'USER_ID',
+        'SubscriptionTableMap::COL_USER_ID' => 'USER_ID',
+        'COL_USER_ID' => 'USER_ID',
+        'user_id' => 'USER_ID',
+        'subscription.user_id' => 'USER_ID',
+        'ChannelId' => 'CHANNEL_ID',
+        'Subscription.ChannelId' => 'CHANNEL_ID',
+        'channelId' => 'CHANNEL_ID',
+        'subscription.channelId' => 'CHANNEL_ID',
+        'SubscriptionTableMap::COL_CHANNEL_ID' => 'CHANNEL_ID',
+        'COL_CHANNEL_ID' => 'CHANNEL_ID',
+        'channel_id' => 'CHANNEL_ID',
+        'subscription.channel_id' => 'CHANNEL_ID',
+        'SubscriptionId' => 'SUBSCRIPTION_ID',
+        'Subscription.SubscriptionId' => 'SUBSCRIPTION_ID',
+        'subscriptionId' => 'SUBSCRIPTION_ID',
+        'subscription.subscriptionId' => 'SUBSCRIPTION_ID',
+        'SubscriptionTableMap::COL_SUBSCRIPTION_ID' => 'SUBSCRIPTION_ID',
+        'COL_SUBSCRIPTION_ID' => 'SUBSCRIPTION_ID',
+        'subscription_id' => 'SUBSCRIPTION_ID',
+        'subscription.subscription_id' => 'SUBSCRIPTION_ID',
+        'Started' => 'STARTED',
+        'Subscription.Started' => 'STARTED',
+        'started' => 'STARTED',
+        'subscription.started' => 'STARTED',
+        'SubscriptionTableMap::COL_STARTED' => 'STARTED',
+        'COL_STARTED' => 'STARTED',
+        'started' => 'STARTED',
+        'subscription.started' => 'STARTED',
+        'Stopped' => 'STOPPED',
+        'Subscription.Stopped' => 'STOPPED',
+        'stopped' => 'STOPPED',
+        'subscription.stopped' => 'STOPPED',
+        'SubscriptionTableMap::COL_STOPPED' => 'STOPPED',
+        'COL_STOPPED' => 'STOPPED',
+        'stopped' => 'STOPPED',
+        'subscription.stopped' => 'STOPPED',
+        'Title' => 'TITLE',
+        'Subscription.Title' => 'TITLE',
+        'title' => 'TITLE',
+        'subscription.title' => 'TITLE',
+        'SubscriptionTableMap::COL_TITLE' => 'TITLE',
+        'COL_TITLE' => 'TITLE',
+        'title' => 'TITLE',
+        'subscription.title' => 'TITLE',
+        'Service' => 'SERVICE',
+        'Subscription.Service' => 'SERVICE',
+        'service' => 'SERVICE',
+        'subscription.service' => 'SERVICE',
+        'SubscriptionTableMap::COL_SERVICE' => 'SERVICE',
+        'COL_SERVICE' => 'SERVICE',
+        'service' => 'SERVICE',
+        'subscription.service' => 'SERVICE',
+    ];
 
     /**
      * Initialize the table attributes and columns
@@ -380,6 +468,44 @@ class SubscriptionTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.stopped');
             $criteria->addSelectColumn($alias . '.title');
             $criteria->addSelectColumn($alias . '.service');
+        }
+    }
+
+    /**
+     * Remove all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be removed as they are only loaded on demand.
+     *
+     * @param Criteria $criteria object containing the columns to remove.
+     * @param string   $alias    optional table alias
+     * @throws PropelException Any exceptions caught during processing will be
+     *                         rethrown wrapped into a PropelException.
+     */
+    public static function removeSelectColumns(Criteria $criteria, $alias = null)
+    {
+        if (null === $alias) {
+            $criteria->removeSelectColumn(SubscriptionTableMap::COL_ID);
+            $criteria->removeSelectColumn(SubscriptionTableMap::COL_INSTANCE_NAME);
+            $criteria->removeSelectColumn(SubscriptionTableMap::COL_INPUT_UUID);
+            $criteria->removeSelectColumn(SubscriptionTableMap::COL_USER_ID);
+            $criteria->removeSelectColumn(SubscriptionTableMap::COL_CHANNEL_ID);
+            $criteria->removeSelectColumn(SubscriptionTableMap::COL_SUBSCRIPTION_ID);
+            $criteria->removeSelectColumn(SubscriptionTableMap::COL_STARTED);
+            $criteria->removeSelectColumn(SubscriptionTableMap::COL_STOPPED);
+            $criteria->removeSelectColumn(SubscriptionTableMap::COL_TITLE);
+            $criteria->removeSelectColumn(SubscriptionTableMap::COL_SERVICE);
+        } else {
+            $criteria->removeSelectColumn($alias . '.id');
+            $criteria->removeSelectColumn($alias . '.instance_name');
+            $criteria->removeSelectColumn($alias . '.input_uuid');
+            $criteria->removeSelectColumn($alias . '.user_id');
+            $criteria->removeSelectColumn($alias . '.channel_id');
+            $criteria->removeSelectColumn($alias . '.subscription_id');
+            $criteria->removeSelectColumn($alias . '.started');
+            $criteria->removeSelectColumn($alias . '.stopped');
+            $criteria->removeSelectColumn($alias . '.title');
+            $criteria->removeSelectColumn($alias . '.service');
         }
     }
 

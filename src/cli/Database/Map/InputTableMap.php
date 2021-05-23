@@ -24,7 +24,6 @@ use Propel\Runtime\Map\TableMapTrait;
  * For example, the createSelectSql() method checks the type of a given column used in an
  * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
  * (i.e. if it's a text column type).
- *
  */
 class InputTableMap extends TableMap
 {
@@ -138,6 +137,71 @@ class InputTableMap extends TableMap
         self::TYPE_FIELDNAME     => array('uuid' => 0, 'instance_name' => 1, 'started' => 2, 'input' => 3, 'network' => 4, 'mux' => 5, 'weight' => 6, ),
         self::TYPE_NUM           => array(0, 1, 2, 3, 4, 5, 6, )
     );
+
+    /**
+     * Holds a list of column names and their normalized version.
+     *
+     * @var string[]
+     */
+    protected $normalizedColumnNameMap = [
+
+        'Uuid' => 'UUID',
+        'Input.Uuid' => 'UUID',
+        'uuid' => 'UUID',
+        'input.uuid' => 'UUID',
+        'InputTableMap::COL_UUID' => 'UUID',
+        'COL_UUID' => 'UUID',
+        'uuid' => 'UUID',
+        'input.uuid' => 'UUID',
+        'InstanceName' => 'INSTANCE_NAME',
+        'Input.InstanceName' => 'INSTANCE_NAME',
+        'instanceName' => 'INSTANCE_NAME',
+        'input.instanceName' => 'INSTANCE_NAME',
+        'InputTableMap::COL_INSTANCE_NAME' => 'INSTANCE_NAME',
+        'COL_INSTANCE_NAME' => 'INSTANCE_NAME',
+        'instance_name' => 'INSTANCE_NAME',
+        'input.instance_name' => 'INSTANCE_NAME',
+        'Started' => 'STARTED',
+        'Input.Started' => 'STARTED',
+        'started' => 'STARTED',
+        'input.started' => 'STARTED',
+        'InputTableMap::COL_STARTED' => 'STARTED',
+        'COL_STARTED' => 'STARTED',
+        'started' => 'STARTED',
+        'input.started' => 'STARTED',
+        'Input' => 'INPUT',
+        'Input.Input' => 'INPUT',
+        'input' => 'INPUT',
+        'input.input' => 'INPUT',
+        'InputTableMap::COL_INPUT' => 'INPUT',
+        'COL_INPUT' => 'INPUT',
+        'input' => 'INPUT',
+        'input.input' => 'INPUT',
+        'Network' => 'NETWORK',
+        'Input.Network' => 'NETWORK',
+        'network' => 'NETWORK',
+        'input.network' => 'NETWORK',
+        'InputTableMap::COL_NETWORK' => 'NETWORK',
+        'COL_NETWORK' => 'NETWORK',
+        'network' => 'NETWORK',
+        'input.network' => 'NETWORK',
+        'Mux' => 'MUX',
+        'Input.Mux' => 'MUX',
+        'mux' => 'MUX',
+        'input.mux' => 'MUX',
+        'InputTableMap::COL_MUX' => 'MUX',
+        'COL_MUX' => 'MUX',
+        'mux' => 'MUX',
+        'input.mux' => 'MUX',
+        'Weight' => 'WEIGHT',
+        'Input.Weight' => 'WEIGHT',
+        'weight' => 'WEIGHT',
+        'input.weight' => 'WEIGHT',
+        'InputTableMap::COL_WEIGHT' => 'WEIGHT',
+        'COL_WEIGHT' => 'WEIGHT',
+        'weight' => 'WEIGHT',
+        'input.weight' => 'WEIGHT',
+    ];
 
     /**
      * Initialize the table attributes and columns
@@ -349,6 +413,38 @@ class InputTableMap extends TableMap
             $criteria->addSelectColumn($alias . '.network');
             $criteria->addSelectColumn($alias . '.mux');
             $criteria->addSelectColumn($alias . '.weight');
+        }
+    }
+
+    /**
+     * Remove all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be removed as they are only loaded on demand.
+     *
+     * @param Criteria $criteria object containing the columns to remove.
+     * @param string   $alias    optional table alias
+     * @throws PropelException Any exceptions caught during processing will be
+     *                         rethrown wrapped into a PropelException.
+     */
+    public static function removeSelectColumns(Criteria $criteria, $alias = null)
+    {
+        if (null === $alias) {
+            $criteria->removeSelectColumn(InputTableMap::COL_UUID);
+            $criteria->removeSelectColumn(InputTableMap::COL_INSTANCE_NAME);
+            $criteria->removeSelectColumn(InputTableMap::COL_STARTED);
+            $criteria->removeSelectColumn(InputTableMap::COL_INPUT);
+            $criteria->removeSelectColumn(InputTableMap::COL_NETWORK);
+            $criteria->removeSelectColumn(InputTableMap::COL_MUX);
+            $criteria->removeSelectColumn(InputTableMap::COL_WEIGHT);
+        } else {
+            $criteria->removeSelectColumn($alias . '.uuid');
+            $criteria->removeSelectColumn($alias . '.instance_name');
+            $criteria->removeSelectColumn($alias . '.started');
+            $criteria->removeSelectColumn($alias . '.input');
+            $criteria->removeSelectColumn($alias . '.network');
+            $criteria->removeSelectColumn($alias . '.mux');
+            $criteria->removeSelectColumn($alias . '.weight');
         }
     }
 

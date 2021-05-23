@@ -3,6 +3,8 @@
 namespace Jalle19\StatusManager\Test\Configuration;
 
 use Jalle19\StatusManager\Configuration\Validator;
+use Jalle19\StatusManager\Exception\InvalidConfigurationException;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class ValidatorTest
@@ -10,18 +12,15 @@ use Jalle19\StatusManager\Configuration\Validator;
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class ValidatorTest extends \PHPUnit_Framework_TestCase
+class ValidatorTest extends TestCase
 {
 
 	use BasicConfigurationTrait;
 
-
-	/**
-	 * @expectedException \Jalle19\StatusManager\Exception\InvalidConfigurationException
-	 * @expectedExceptionMessageRegExp *Mandatory*
-	 */
 	public function testMandatoryValues()
 	{
+		$this->expectExceptionMessageMatches("*Mandatory*");
+		$this->expectException(InvalidConfigurationException::class);
 		$configuration = [
 
 		];
@@ -31,12 +30,10 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	/**
-	 * @expectedException \Jalle19\StatusManager\Exception\InvalidConfigurationException
-	 * @expectedExceptionMessageRegExp *The database path*
-	 */
 	public function testDatabasePath()
 	{
+		$this->expectExceptionMessageMatches("*The database path*");
+		$this->expectException(InvalidConfigurationException::class);
 		$configuration                  = $this->getBaseConfiguration();
 		$configuration['database_path'] = '/tmp/does/not/exist';
 
@@ -45,12 +42,10 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	/**
-	 * @expectedException \Jalle19\StatusManager\Exception\InvalidConfigurationException
-	 * @expectedExceptionMessageRegExp *The log path*
-	 */
 	public function testLogPath()
 	{
+		$this->expectExceptionMessageMatches("*The log path*");
+		$this->expectException(InvalidConfigurationException::class);
 		$configuration             = $this->getBaseConfiguration();
 		$configuration['log_path'] = '/some/other/path';
 
@@ -64,11 +59,13 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	 *
 	 * @param mixed $updateInterval
 	 *
-	 * @expectedException \Jalle19\StatusManager\Exception\InvalidConfigurationException
-	 * @expectedExceptionMessageRegExp *Update interval cannot*
+	 *
+	 *
 	 */
 	public function testUpdateInterval($updateInterval)
 	{
+		$this->expectExceptionMessageMatches("*Update interval cannot*");
+		$this->expectException(InvalidConfigurationException::class);
 		$configuration                    = $this->getBaseConfiguration();
 		$configuration['update_interval'] = $updateInterval;
 
@@ -77,12 +74,10 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	}
 
 
-	/**
-	 * @expectedException \Jalle19\StatusManager\Exception\InvalidConfigurationException
-	 * @expectedExceptionMessage listen_port and http_listen_port cannot be equal
-	 */
 	public function testListenPorts()
 	{
+		$this->expectExceptionMessage("listen_port and http_listen_port cannot be equal");
+		$this->expectException(InvalidConfigurationException::class);
 		$configuration                     = $this->getBaseConfiguration();
 		$configuration['http_listen_port'] = $configuration['listen_port'];
 
@@ -96,11 +91,13 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase
 	 *
 	 * @param int $listenPort
 	 *
-	 * @expectedException \Jalle19\StatusManager\Exception\InvalidConfigurationException
-	 * @expectedExceptionMessageRegExp *Listen port must be between*
+	 *
+	 *
 	 */
 	public function testListenPort($listenPort)
 	{
+		$this->expectExceptionMessageMatches("*Listen port must be between*");
+		$this->expectException(InvalidConfigurationException::class);
 		$configuration                = $this->getBaseConfiguration();
 		$configuration['listen_port'] = $listenPort;
 

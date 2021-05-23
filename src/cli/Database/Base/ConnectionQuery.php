@@ -64,15 +64,15 @@ use Propel\Runtime\Exception\PropelException;
  *
  * @method     \Jalle19\StatusManager\Database\InstanceQuery|\Jalle19\StatusManager\Database\UserQuery endUse() Finalizes a secondary criteria and merges it with its primary Criteria
  *
- * @method     ChildConnection findOne(ConnectionInterface $con = null) Return the first ChildConnection matching the query
+ * @method     ChildConnection|null findOne(ConnectionInterface $con = null) Return the first ChildConnection matching the query
  * @method     ChildConnection findOneOrCreate(ConnectionInterface $con = null) Return the first ChildConnection matching the query, or a new ChildConnection object populated from the query conditions when no match is found
  *
- * @method     ChildConnection findOneById(int $id) Return the first ChildConnection filtered by the id column
- * @method     ChildConnection findOneByInstanceName(string $instance_name) Return the first ChildConnection filtered by the instance_name column
- * @method     ChildConnection findOneByUserId(int $user_id) Return the first ChildConnection filtered by the user_id column
- * @method     ChildConnection findOneByPeer(string $peer) Return the first ChildConnection filtered by the peer column
- * @method     ChildConnection findOneByStarted(string $started) Return the first ChildConnection filtered by the started column
- * @method     ChildConnection findOneByType(string $type) Return the first ChildConnection filtered by the type column *
+ * @method     ChildConnection|null findOneById(int $id) Return the first ChildConnection filtered by the id column
+ * @method     ChildConnection|null findOneByInstanceName(string $instance_name) Return the first ChildConnection filtered by the instance_name column
+ * @method     ChildConnection|null findOneByUserId(int $user_id) Return the first ChildConnection filtered by the user_id column
+ * @method     ChildConnection|null findOneByPeer(string $peer) Return the first ChildConnection filtered by the peer column
+ * @method     ChildConnection|null findOneByStarted(string $started) Return the first ChildConnection filtered by the started column
+ * @method     ChildConnection|null findOneByType(string $type) Return the first ChildConnection filtered by the type column *
 
  * @method     ChildConnection requirePk($key, ConnectionInterface $con = null) Return the ChildConnection by primary key and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
  * @method     ChildConnection requireOne(ConnectionInterface $con = null) Return the first ChildConnection matching the query and throws \Propel\Runtime\Exception\EntityNotFoundException when not found
@@ -153,21 +153,27 @@ abstract class ConnectionQuery extends ModelCriteria
         if ($key === null) {
             return null;
         }
-        if ((null !== ($obj = ConnectionTableMap::getInstanceFromPool(null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key))) && !$this->formatter) {
-            // the object is already in the instance pool
-            return $obj;
-        }
+
         if ($con === null) {
             $con = Propel::getServiceContainer()->getReadConnection(ConnectionTableMap::DATABASE_NAME);
         }
+
         $this->basePreSelect($con);
-        if ($this->formatter || $this->modelAlias || $this->with || $this->select
-         || $this->selectColumns || $this->asColumns || $this->selectModifiers
-         || $this->map || $this->having || $this->joins) {
+
+        if (
+            $this->formatter || $this->modelAlias || $this->with || $this->select
+            || $this->selectColumns || $this->asColumns || $this->selectModifiers
+            || $this->map || $this->having || $this->joins
+        ) {
             return $this->findPkComplex($key, $con);
-        } else {
-            return $this->findPkSimple($key, $con);
         }
+
+        if ((null !== ($obj = ConnectionTableMap::getInstanceFromPool(null === $key || is_scalar($key) || is_callable([$key, '__toString']) ? (string) $key : $key)))) {
+            // the object is already in the instance pool
+            return $obj;
+        }
+
+        return $this->findPkSimple($key, $con);
     }
 
     /**
@@ -320,11 +326,10 @@ abstract class ConnectionQuery extends ModelCriteria
      * Example usage:
      * <code>
      * $query->filterByInstanceName('fooValue');   // WHERE instance_name = 'fooValue'
-     * $query->filterByInstanceName('%fooValue%'); // WHERE instance_name LIKE '%fooValue%'
+     * $query->filterByInstanceName('%fooValue%', Criteria::LIKE); // WHERE instance_name LIKE '%fooValue%'
      * </code>
      *
      * @param     string $instanceName The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildConnectionQuery The current query, for fluid interface
@@ -334,9 +339,6 @@ abstract class ConnectionQuery extends ModelCriteria
         if (null === $comparison) {
             if (is_array($instanceName)) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $instanceName)) {
-                $instanceName = str_replace('*', '%', $instanceName);
-                $comparison = Criteria::LIKE;
             }
         }
 
@@ -392,11 +394,10 @@ abstract class ConnectionQuery extends ModelCriteria
      * Example usage:
      * <code>
      * $query->filterByPeer('fooValue');   // WHERE peer = 'fooValue'
-     * $query->filterByPeer('%fooValue%'); // WHERE peer LIKE '%fooValue%'
+     * $query->filterByPeer('%fooValue%', Criteria::LIKE); // WHERE peer LIKE '%fooValue%'
      * </code>
      *
      * @param     string $peer The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildConnectionQuery The current query, for fluid interface
@@ -406,9 +407,6 @@ abstract class ConnectionQuery extends ModelCriteria
         if (null === $comparison) {
             if (is_array($peer)) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $peer)) {
-                $peer = str_replace('*', '%', $peer);
-                $comparison = Criteria::LIKE;
             }
         }
 
@@ -464,11 +462,10 @@ abstract class ConnectionQuery extends ModelCriteria
      * Example usage:
      * <code>
      * $query->filterByType('fooValue');   // WHERE type = 'fooValue'
-     * $query->filterByType('%fooValue%'); // WHERE type LIKE '%fooValue%'
+     * $query->filterByType('%fooValue%', Criteria::LIKE); // WHERE type LIKE '%fooValue%'
      * </code>
      *
      * @param     string $type The value to use as filter.
-     *              Accepts wildcards (* and % trigger a LIKE)
      * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
      *
      * @return $this|ChildConnectionQuery The current query, for fluid interface
@@ -478,9 +475,6 @@ abstract class ConnectionQuery extends ModelCriteria
         if (null === $comparison) {
             if (is_array($type)) {
                 $comparison = Criteria::IN;
-            } elseif (preg_match('/[\%\*]/', $type)) {
-                $type = str_replace('*', '%', $type);
-                $comparison = Criteria::LIKE;
             }
         }
 

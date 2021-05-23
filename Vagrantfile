@@ -2,14 +2,14 @@
 # vi: set ft=ruby :
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "ubuntu/focal64"
 
   # networking
   config.vm.network "private_network", ip: "192.168.47.47"
 
   # memory
   config.vm.provider "virtualbox" do |vb|
-    vb.memory = "512"
+    vb.memory = "2048"
   end
 
   # provisioning

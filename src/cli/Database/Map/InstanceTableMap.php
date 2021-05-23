@@ -24,7 +24,6 @@ use Propel\Runtime\Map\TableMapTrait;
  * For example, the createSelectSql() method checks the type of a given column used in an
  * ORDER BY clause to know whether it needs to apply SQL to make the ORDER BY case-insensitive
  * (i.e. if it's a text column type).
- *
  */
 class InstanceTableMap extends TableMap
 {
@@ -108,6 +107,23 @@ class InstanceTableMap extends TableMap
         self::TYPE_FIELDNAME     => array('name' => 0, ),
         self::TYPE_NUM           => array(0, )
     );
+
+    /**
+     * Holds a list of column names and their normalized version.
+     *
+     * @var string[]
+     */
+    protected $normalizedColumnNameMap = [
+
+        'Name' => 'NAME',
+        'Instance.Name' => 'NAME',
+        'name' => 'NAME',
+        'instance.name' => 'NAME',
+        'InstanceTableMap::COL_NAME' => 'NAME',
+        'COL_NAME' => 'NAME',
+        'name' => 'NAME',
+        'instance.name' => 'NAME',
+    ];
 
     /**
      * Initialize the table attributes and columns
@@ -315,6 +331,26 @@ class InstanceTableMap extends TableMap
             $criteria->addSelectColumn(InstanceTableMap::COL_NAME);
         } else {
             $criteria->addSelectColumn($alias . '.name');
+        }
+    }
+
+    /**
+     * Remove all the columns needed to create a new object.
+     *
+     * Note: any columns that were marked with lazyLoad="true" in the
+     * XML schema will not be removed as they are only loaded on demand.
+     *
+     * @param Criteria $criteria object containing the columns to remove.
+     * @param string   $alias    optional table alias
+     * @throws PropelException Any exceptions caught during processing will be
+     *                         rethrown wrapped into a PropelException.
+     */
+    public static function removeSelectColumns(Criteria $criteria, $alias = null)
+    {
+        if (null === $alias) {
+            $criteria->removeSelectColumn(InstanceTableMap::COL_NAME);
+        } else {
+            $criteria->removeSelectColumn($alias . '.name');
         }
     }
 

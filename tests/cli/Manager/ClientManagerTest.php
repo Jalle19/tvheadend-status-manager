@@ -37,7 +37,7 @@ class ClientManagerTest extends AbstractManagerTest
 	/**
 	 * @inheritdoc
 	 */
-	protected function setUp()
+	protected function setUp(): void
 	{
 		$this->_manager = new DummyClientManager($this->configuration, $this->logger, $this->eventDispatcher);
 

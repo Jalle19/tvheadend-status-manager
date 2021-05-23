@@ -142,6 +142,11 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$instanceName = $event->getInstance();
 		$inputStatus  = $event->getInputStatus();
 
+		// Only deal with inputs that are attached to a stream
+		if ($inputStatus->stream === null) {
+			return;
+		}
+
 		// Update the input and started fields for existing inputs
 		if (InputQuery::create()->hasInput($inputStatus->uuid))
 		{

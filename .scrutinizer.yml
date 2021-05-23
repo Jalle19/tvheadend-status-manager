@@ -22,6 +22,3 @@ coding_style:
                 opening: new-line
                 catch_on_new_line: true
                 finally_on_new_line: true
-                
-tools:
-    external_code_coverage: true  

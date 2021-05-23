@@ -4,6 +4,7 @@ namespace Jalle19\StatusManager\Test\Database;
 
 use Jalle19\StatusManager\Database\SubscriptionQuery;
 use Jalle19\StatusManager\TimeFrame;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class SubscriptionQueryTest
@@ -11,7 +12,7 @@ use Jalle19\StatusManager\TimeFrame;
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class SubscriptionQueryTest extends \PHPUnit_Framework_TestCase
+class SubscriptionQueryTest extends TestCase
 {
 
 	/**

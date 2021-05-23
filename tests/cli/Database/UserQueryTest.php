@@ -3,6 +3,7 @@
 namespace Jalle19\StatusManager\Test\Database;
 
 use Jalle19\StatusManager\Database\UserQuery;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class UserQueryTest
@@ -10,7 +11,7 @@ use Jalle19\StatusManager\Database\UserQuery;
  * @copyright Copyright &copy; Sam Stenvall 2016-
  * @license   https://www.gnu.org/licenses/gpl.html The GNU General Public License v2.0
  */
-class UserQueryTest extends \PHPUnit_Framework_TestCase
+class UserQueryTest extends TestCase
 {
 
 	/**
