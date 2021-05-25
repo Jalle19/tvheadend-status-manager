@@ -3,6 +3,8 @@
 namespace Jalle19\StatusManager\Database;
 
 use Jalle19\StatusManager\Database\Base\Subscription as BaseSubscription;
+use Jalle19\tvheadend\model\multiplex\Multiplex;
+use Jalle19\tvheadend\model\network\Network;
 use Jalle19\tvheadend\model\SubscriptionStatus;
 
 /**
@@ -14,45 +16,47 @@ class Subscription extends BaseSubscription
 {
 
 	/**
-	 * @param SubscriptionStatus $SubscriptionStatus
+	 * @param SubscriptionStatus $subscriptionStatus
+	 * @param Multiplex[]        $availableMuxes
 	 *
 	 * @return string
 	 */
-	public static function parseMux(SubscriptionStatus $SubscriptionStatus)
+	public static function parseMux(SubscriptionStatus $subscriptionStatus, array $availableMuxes)
 	{
-		$parts = self::getServiceParts($SubscriptionStatus);
+		$service = $subscriptionStatus->service;
 
-		return $parts[2];
-	}
+		// Check if the service string contains /$mux/
+		foreach ($availableMuxes as $mux)
+		{
+			if (strpos($service, '/' . $mux->name . '/') !== false)
+			{
+				return $mux->name;
+			}
+		}
 
-
-	/**
-	 * @param SubscriptionStatus $SubscriptionStatus
-	 *
-	 * @return string
-	 */
-	public static function parseNetwork(SubscriptionStatus $SubscriptionStatus)
-	{
-		$parts = self::getServiceParts($SubscriptionStatus);
-
-		return $parts[1];
+		return null;
 	}
 
 
 	/**
 	 * @param SubscriptionStatus $subscriptionStatus
+	 * @param Network[]          $availableNetworks
 	 *
-	 * @return array
+	 * @return string
 	 */
-	private static function getServiceParts(SubscriptionStatus $subscriptionStatus)
+	public static function parseNetwork(SubscriptionStatus $subscriptionStatus, array $availableNetworks)
 	{
 		$service = $subscriptionStatus->service;
 
-		// Remove the channel name and the beginning slash from the service string
-		$channel = $subscriptionStatus->channel;
-		$service = preg_replace('/\/' . preg_quote($channel, '/') . '$/', '', $service);
+		// Check if the service string contains /$network/
+		foreach ($availableNetworks as $network)
+		{
+			if (strpos($service, '/' . $network->networkname . '/') !== false)
+			{
+				return $network->networkname;
+			}
+		}
 
-		return explode('/', $service);
+		return null;
 	}
-
 }

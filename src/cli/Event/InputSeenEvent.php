@@ -2,6 +2,7 @@
 
 namespace Jalle19\StatusManager\Event;
 
+use Jalle19\StatusManager\Instance\InstanceStatus;
 use Jalle19\tvheadend\model\InputStatus;
 
 /**
@@ -19,16 +20,26 @@ class InputSeenEvent extends AbstractInstanceEvent
 	 */
 	private $_input;
 
+	/**
+	 * @var InstanceStatus
+	 */
+	private InstanceStatus $_instanceStatus;
+
 
 	/**
-	 * @param string      $instanceName
-	 * @param InputStatus $inputStatus
+	 * @param string         $instanceName
+	 * @param InstanceStatus $instanceStatus
+	 * @param InputStatus    $inputStatus
 	 */
-	public function __construct($instanceName, InputStatus $inputStatus)
-	{
+	public function __construct(
+		$instanceName,
+		InstanceStatus $instanceStatus,
+		InputStatus $inputStatus
+	) {
 		parent::__construct($instanceName);
 
-		$this->_input = $inputStatus;
+		$this->_instanceStatus = $instanceStatus;
+		$this->_input          = $inputStatus;
 	}
 
 
@@ -40,4 +51,12 @@ class InputSeenEvent extends AbstractInstanceEvent
 		return $this->_input;
 	}
 
+
+	/**
+	 * @return InstanceStatus
+	 */
+	public function getInstanceStatus(): InstanceStatus
+	{
+		return $this->_instanceStatus;
+	}
 }

@@ -108,13 +108,14 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 
 		// Persist inputs
 		foreach ($instanceStatus->getInputs() as $input)
-			$this->eventDispatcher->dispatch(Events::INPUT_SEEN, new InputSeenEvent($instanceName, $input));
+			$this->eventDispatcher->dispatch(Events::INPUT_SEEN,
+				new InputSeenEvent($instanceName, $instanceStatus, $input));
 
 		// Persist running subscriptions
 		foreach ($instanceStatus->getSubscriptions() as $subscription)
 		{
 			$this->eventDispatcher->dispatch(Events::SUBSCRIPTION_SEEN,
-				new SubscriptionSeenEvent($instanceName, $subscription));
+				new SubscriptionSeenEvent($instanceName, $instanceStatus, $subscription));
 		}
 
 		// Handle subscription state changes
