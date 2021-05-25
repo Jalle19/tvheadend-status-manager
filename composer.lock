@@ -619,19 +619,20 @@
         },
         {
             "name": "jalle19/php-tvheadend",
-            "version": "0.2.0",
+            "version": "0.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Jalle19/php-tvheadend.git",
-                "reference": "307eb982c970f6fbf166a0306c0e45c6db3ff805"
+                "reference": "c118841f2149eac632326ecd9fab2072e5c34dba"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/307eb982c970f6fbf166a0306c0e45c6db3ff805",
-                "reference": "307eb982c970f6fbf166a0306c0e45c6db3ff805",
+                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/c118841f2149eac632326ecd9fab2072e5c34dba",
+                "reference": "c118841f2149eac632326ecd9fab2072e5c34dba",
                 "shasum": ""
             },
             "require": {
+                "ext-json": "*",
                 "laminas/laminas-http": "^2.14",
                 "monolog/monolog": "^1.12",
                 "nategood/commando": "0.2.*"
@@ -655,9 +656,9 @@
             "description": "Library for communicating with tvheadend",
             "support": {
                 "issues": "https://github.com/Jalle19/php-tvheadend/issues",
-                "source": "https://github.com/Jalle19/php-tvheadend/tree/0.2.0"
+                "source": "https://github.com/Jalle19/php-tvheadend/tree/0.2.1"
             },
-            "time": "2021-05-22T18:23:07+00:00"
+            "time": "2021-05-25T11:37:21+00:00"
         },
         {
             "name": "jalle19/react-http-static",
