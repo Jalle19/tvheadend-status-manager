@@ -24,6 +24,7 @@ use Jalle19\StatusManager\Event\SubscriptionSeenEvent;
 use Jalle19\StatusManager\Event\SubscriptionStateChangeEvent;
 use Jalle19\StatusManager\Subscription\StateChange;
 use Jalle19\tvheadend\model\SubscriptionStatus;
+use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -69,7 +70,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 	/**
 	 * @param InstanceSeenEvent $event
 	 *
-	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws PropelException
 	 */
 	public function onInstanceSeen(InstanceSeenEvent $event)
 	{
@@ -143,7 +144,8 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$inputStatus  = $event->getInputStatus();
 
 		// Only deal with inputs that are attached to a stream
-		if ($inputStatus->stream === null) {
+		if ($inputStatus->stream === null)
+		{
 			return;
 		}
 
@@ -175,7 +177,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 	/**
 	 * @param SubscriptionSeenEvent $event
 	 *
-	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws PropelException
 	 */
 	public function onSubscriptionSeen(SubscriptionSeenEvent $event)
 	{
@@ -294,7 +296,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$inputError->setInput($input);
 		$inputError->setFromInputErrorCumulative($cumulativeErrors);
 		$inputError->save();
-		
+
 		$this->logger->debug('Persisted input errors (instance: {instanceName}, input: {friendlyName})', [
 			'instanceName' => $input->getInstanceName(),
 			'friendlyName' => $input->getFriendlyName(),
@@ -306,7 +308,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 	 * @param string $instanceName
 	 * @param string $userName
 	 *
-	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws PropelException
 	 */
 	private function onUserSeen($instanceName, $userName)
 	{
@@ -328,7 +330,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 	 * @param string $instanceName
 	 * @param string $channelName
 	 *
-	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws PropelException
 	 */
 	private function onChannelSeen($instanceName, $channelName)
 	{
