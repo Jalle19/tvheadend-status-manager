@@ -185,8 +185,14 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$status       = $event->getSubscription();
 
 		// Ignore certain subscriptions
-		if (in_array($status->getType(), [SubscriptionStatus::TYPE_EPGGRAB, SubscriptionStatus::TYPE_SERVICE_OR_MUX]))
+		if (in_array($status->getType(), [
+			SubscriptionStatus::TYPE_EPGGRAB,
+			SubscriptionStatus::TYPE_SERVICE_OR_MUX,
+			SubscriptionStatus::TYPE_SATIP,
+		]))
+		{
 			return;
+		}
 
 		// Determine the username to store for the subscription
 		$username = $status->username;
@@ -210,7 +216,8 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 			return;
 
 		// Try to determine which input is used by the subscription
-		$input = InputQuery::create()->filterBySubscriptionStatus($instanceName, $status)->findOne();
+		$input = InputQuery::create()->filterBySubscriptionStatus($instanceName, $event->getInstanceStatus(), $status)
+		                   ->findOne();
 
 		if ($input === null)
 		{
@@ -259,7 +266,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		if ($subscription === null)
 		{
 			$this->logger
-				->error('Got subscription stop without a matching start (instance: {instanceName}, subscription: {subscriptionId})',
+				->debug('Got subscription stop without a matching start (instance: {instanceName}, subscription: {subscriptionId})',
 					[
 						'instanceName'   => $instanceName,
 						'subscriptionId' => $stateChange->getSubscriptionId(),
