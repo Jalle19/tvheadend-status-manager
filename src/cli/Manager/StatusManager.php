@@ -59,7 +59,7 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 		foreach ($instances as $instance)
 		{
 			$this->logger->notice('  {name} ({address}:{port})', [
-				'name'=>$instance->getName(),
+				'name'    => $instance->getName(),
 				'address' => $instance->getInstance()->getHostname(),
 				'port'    => $instance->getInstance()->getPort(),
 			]);
@@ -152,6 +152,8 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 				{
 					$collection->add(new InstanceStatus(
 						$instanceName,
+						$tvheadend->getNetworks(),
+						$tvheadend->getMultiplexes(),
 						$tvheadend->getInputStatus(),
 						$tvheadend->getSubscriptionStatus(),
 						$tvheadend->getConnectionStatus(),
