@@ -21,7 +21,7 @@ instances
 
 ## Requirements
 
-* PHP >= 5.6 with XML and SQLite3 support
+* PHP >= 7.4 with XML and SQLite3 support
 
 ## Installation
 
