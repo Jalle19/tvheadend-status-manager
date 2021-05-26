@@ -24,6 +24,7 @@ use Jalle19\StatusManager\Event\SubscriptionSeenEvent;
 use Jalle19\StatusManager\Event\SubscriptionStateChangeEvent;
 use Jalle19\StatusManager\Subscription\StateChange;
 use Jalle19\tvheadend\model\SubscriptionStatus;
+use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -69,7 +70,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 	/**
 	 * @param InstanceSeenEvent $event
 	 *
-	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws PropelException
 	 */
 	public function onInstanceSeen(InstanceSeenEvent $event)
 	{
@@ -143,13 +144,15 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$inputStatus  = $event->getInputStatus();
 
 		// Only deal with inputs that are attached to a stream
-		if ($inputStatus->stream === null) {
+		if ($inputStatus->stream === null)
+		{
 			return;
 		}
 
 		// Update the input and started fields for existing inputs
 		if (InputQuery::create()->hasInput($inputStatus->uuid))
 		{
+			/** @var Input $input */
 			$input = InputQuery::create()->findPk($inputStatus->uuid);
 			$input->setStarted(new \DateTime())->setWeight($inputStatus->weight);
 
@@ -175,7 +178,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 	/**
 	 * @param SubscriptionSeenEvent $event
 	 *
-	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws PropelException
 	 */
 	public function onSubscriptionSeen(SubscriptionSeenEvent $event)
 	{
@@ -183,8 +186,14 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$status       = $event->getSubscription();
 
 		// Ignore certain subscriptions
-		if (in_array($status->getType(), [SubscriptionStatus::TYPE_EPGGRAB, SubscriptionStatus::TYPE_SERVICE_OR_MUX]))
+		if (in_array($status->getType(), [
+			SubscriptionStatus::TYPE_EPGGRAB,
+			SubscriptionStatus::TYPE_SERVICE_OR_MUX,
+			SubscriptionStatus::TYPE_SATIP,
+		]))
+		{
 			return;
+		}
 
 		// Determine the username to store for the subscription
 		$username = $status->username;
@@ -197,18 +206,21 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		}
 
 		// Get the instance, user and channel
+		/** @var Database\Instance $instance */
 		$instance = InstanceQuery::create()->findPk($instanceName);
 		$user     = UserQuery::create()->filterByInstance($instance)->filterByName($username)->findOne();
 
 		// Ensure the channel exists
 		$this->onChannelSeen($instanceName, $status->channel);
+		/** @var Channel $channel */
 		$channel = ChannelQuery::create()->filterByInstance($instance)->filterByName($status->channel)->findOne();
 
 		if (SubscriptionQuery::create()->hasSubscription($instance, $user, $channel, $status))
 			return;
 
 		// Try to determine which input is used by the subscription
-		$input = InputQuery::create()->filterBySubscriptionStatus($instanceName, $status)->findOne();
+		$input = InputQuery::create()->filterBySubscriptionStatus($instanceName, $event->getInstanceStatus(), $status)
+		                   ->findOne();
 
 		if ($input === null)
 		{
@@ -257,7 +269,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		if ($subscription === null)
 		{
 			$this->logger
-				->error('Got subscription stop without a matching start (instance: {instanceName}, subscription: {subscriptionId})',
+				->debug('Got subscription stop without a matching start (instance: {instanceName}, subscription: {subscriptionId})',
 					[
 						'instanceName'   => $instanceName,
 						'subscriptionId' => $stateChange->getSubscriptionId(),
@@ -294,7 +306,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		$inputError->setInput($input);
 		$inputError->setFromInputErrorCumulative($cumulativeErrors);
 		$inputError->save();
-		
+
 		$this->logger->debug('Persisted input errors (instance: {instanceName}, input: {friendlyName})', [
 			'instanceName' => $input->getInstanceName(),
 			'friendlyName' => $input->getFriendlyName(),
@@ -306,7 +318,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 	 * @param string $instanceName
 	 * @param string $userName
 	 *
-	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws PropelException
 	 */
 	private function onUserSeen($instanceName, $userName)
 	{
@@ -328,7 +340,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 	 * @param string $instanceName
 	 * @param string $channelName
 	 *
-	 * @throws \Propel\Runtime\Exception\PropelException
+	 * @throws PropelException
 	 */
 	private function onChannelSeen($instanceName, $channelName)
 	{

@@ -2,6 +2,7 @@
 
 namespace Jalle19\StatusManager\Event;
 
+use Jalle19\StatusManager\Instance\InstanceStatus;
 use Jalle19\tvheadend\model\SubscriptionStatus;
 
 /**
@@ -19,16 +20,26 @@ class SubscriptionSeenEvent extends AbstractInstanceEvent
 	 */
 	private $_subscription;
 
+	/**
+	 * @var InstanceStatus
+	 */
+	private InstanceStatus $_instanceStatus;
+
 
 	/**
 	 * @param string             $instanceName
+	 * @param InstanceStatus     $instanceStatus
 	 * @param SubscriptionStatus $subscription
 	 */
-	public function __construct($instanceName, SubscriptionStatus $subscription)
-	{
+	public function __construct(
+		$instanceName,
+		InstanceStatus $instanceStatus,
+		SubscriptionStatus $subscription
+	) {
 		parent::__construct($instanceName);
 
-		$this->_subscription = $subscription;
+		$this->_instanceStatus = $instanceStatus;
+		$this->_subscription   = $subscription;
 	}
 
 
@@ -40,4 +51,12 @@ class SubscriptionSeenEvent extends AbstractInstanceEvent
 		return $this->_subscription;
 	}
 
+
+	/**
+	 * @return InstanceStatus
+	 */
+	public function getInstanceStatus(): InstanceStatus
+	{
+		return $this->_instanceStatus;
+	}
 }

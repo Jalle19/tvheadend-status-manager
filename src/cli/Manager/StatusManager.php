@@ -59,7 +59,7 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 		foreach ($instances as $instance)
 		{
 			$this->logger->notice('  {name} ({address}:{port})', [
-				'name'=>$instance->getName(),
+				'name'    => $instance->getName(),
 				'address' => $instance->getInstance()->getHostname(),
 				'port'    => $instance->getInstance()->getPort(),
 			]);
@@ -108,13 +108,14 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 
 		// Persist inputs
 		foreach ($instanceStatus->getInputs() as $input)
-			$this->eventDispatcher->dispatch(Events::INPUT_SEEN, new InputSeenEvent($instanceName, $input));
+			$this->eventDispatcher->dispatch(Events::INPUT_SEEN,
+				new InputSeenEvent($instanceName, $instanceStatus, $input));
 
 		// Persist running subscriptions
 		foreach ($instanceStatus->getSubscriptions() as $subscription)
 		{
 			$this->eventDispatcher->dispatch(Events::SUBSCRIPTION_SEEN,
-				new SubscriptionSeenEvent($instanceName, $subscription));
+				new SubscriptionSeenEvent($instanceName, $instanceStatus, $subscription));
 		}
 
 		// Handle subscription state changes
@@ -152,6 +153,8 @@ class StatusManager extends AbstractManager implements EventSubscriberInterface
 				{
 					$collection->add(new InstanceStatus(
 						$instanceName,
+						$tvheadend->getNetworks(),
+						$tvheadend->getMultiplexes(),
 						$tvheadend->getInputStatus(),
 						$tvheadend->getSubscriptionStatus(),
 						$tvheadend->getConnectionStatus(),

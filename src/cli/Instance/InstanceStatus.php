@@ -5,6 +5,8 @@ namespace Jalle19\StatusManager\Instance;
 use Jalle19\StatusManager\Subscription\StateChange;
 use Jalle19\tvheadend\model\ConnectionStatus;
 use Jalle19\tvheadend\model\InputStatus;
+use Jalle19\tvheadend\model\multiplex\Multiplex;
+use Jalle19\tvheadend\model\network\Network;
 use Jalle19\tvheadend\model\SubscriptionStatus;
 
 /**
@@ -20,6 +22,16 @@ class InstanceStatus implements \JsonSerializable
 	 * @var string the name of the instance
 	 */
 	private $_instanceName;
+
+	/**
+	 * @var Network[]
+	 */
+	private $_availableNetworks;
+
+	/**
+	 * @var Multiplex[]
+	 */
+	private $_availableMuxes;
 
 	/**
 	 * @var InputStatus[]
@@ -46,6 +58,8 @@ class InstanceStatus implements \JsonSerializable
 	 * BroadcastMessage constructor.
 	 *
 	 * @param string               $instanceName
+	 * @param Network[]            $availableNetworks
+	 * @param Multiplex[]          $availableMuxes
 	 * @param InputStatus[]        $inputs
 	 * @param SubscriptionStatus[] $subscriptions
 	 * @param ConnectionStatus[]   $connections
@@ -54,6 +68,8 @@ class InstanceStatus implements \JsonSerializable
 	 */
 	public function __construct(
 		$instanceName,
+		array $availableNetworks,
+		array $availableMuxes,
 		array $inputs,
 		array $subscriptions,
 		array $connections,
@@ -64,6 +80,8 @@ class InstanceStatus implements \JsonSerializable
 		$this->_subscriptions            = $subscriptions;
 		$this->_connections              = $connections;
 		$this->_subscriptionStateChanges = $subscriptionStateChanges;
+		$this->_availableNetworks        = $availableNetworks;
+		$this->_availableMuxes           = $availableMuxes;
 	}
 
 
@@ -77,6 +95,24 @@ class InstanceStatus implements \JsonSerializable
 
 
 	/**
+	 * @return Network[]
+	 */
+	public function getAvailableNetworks(): array
+	{
+		return $this->_availableNetworks;
+	}
+
+
+	/**
+	 * @return Multiplex[]
+	 */
+	public function getAvailableMuxes(): array
+	{
+		return $this->_availableMuxes;
+	}
+
+
+	/**
 	 * @return ConnectionStatus[]
 	 */
 	public function getConnections()
@@ -86,7 +122,7 @@ class InstanceStatus implements \JsonSerializable
 
 
 	/**
-	 * @return \Jalle19\tvheadend\model\InputStatus[]
+	 * @return InputStatus[]
 	 */
 	public function getInputs()
 	{
@@ -142,6 +178,8 @@ class InstanceStatus implements \JsonSerializable
 	{
 		return [
 			'instanceName'             => $this->_instanceName,
+			'availableNetworks'        => $this->_availableNetworks,
+			'availableMuxes'           => $this->_availableMuxes,
 			'inputs'                   => $this->_inputs,
 			'subscriptions'            => $this->_subscriptions,
 			'connections'              => $this->_connections,
