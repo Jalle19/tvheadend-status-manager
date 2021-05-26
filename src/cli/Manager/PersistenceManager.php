@@ -152,6 +152,7 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		// Update the input and started fields for existing inputs
 		if (InputQuery::create()->hasInput($inputStatus->uuid))
 		{
+			/** @var Input $input */
 			$input = InputQuery::create()->findPk($inputStatus->uuid);
 			$input->setStarted(new \DateTime())->setWeight($inputStatus->weight);
 
@@ -205,11 +206,13 @@ class PersistenceManager extends AbstractManager implements EventSubscriberInter
 		}
 
 		// Get the instance, user and channel
+		/** @var Database\Instance $instance */
 		$instance = InstanceQuery::create()->findPk($instanceName);
 		$user     = UserQuery::create()->filterByInstance($instance)->filterByName($username)->findOne();
 
 		// Ensure the channel exists
 		$this->onChannelSeen($instanceName, $status->channel);
+		/** @var Channel $channel */
 		$channel = ChannelQuery::create()->filterByInstance($instance)->filterByName($status->channel)->findOne();
 
 		if (SubscriptionQuery::create()->hasSubscription($instance, $user, $channel, $status))
