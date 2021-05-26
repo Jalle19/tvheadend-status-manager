@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aba3da118c49dbe3b656f224a03bf37c",
+    "content-hash": "66b679957145575f72f17fee8cabe125",
     "packages": [
         {
             "name": "bramus/ansi-php",
@@ -619,19 +619,20 @@
         },
         {
             "name": "jalle19/php-tvheadend",
-            "version": "0.2.1",
+            "version": "0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Jalle19/php-tvheadend.git",
-                "reference": "c118841f2149eac632326ecd9fab2072e5c34dba"
+                "reference": "42ebfa507512af36508c969ca845f7f1586d4c0d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/c118841f2149eac632326ecd9fab2072e5c34dba",
-                "reference": "c118841f2149eac632326ecd9fab2072e5c34dba",
+                "url": "https://api.github.com/repos/Jalle19/php-tvheadend/zipball/42ebfa507512af36508c969ca845f7f1586d4c0d",
+                "reference": "42ebfa507512af36508c969ca845f7f1586d4c0d",
                 "shasum": ""
             },
             "require": {
+                "ext-curl": "*",
                 "ext-json": "*",
                 "laminas/laminas-http": "^2.14",
                 "monolog/monolog": "^1.12",
@@ -656,9 +657,9 @@
             "description": "Library for communicating with tvheadend",
             "support": {
                 "issues": "https://github.com/Jalle19/php-tvheadend/issues",
-                "source": "https://github.com/Jalle19/php-tvheadend/tree/0.2.1"
+                "source": "https://github.com/Jalle19/php-tvheadend/tree/0.3.0"
             },
-            "time": "2021-05-25T11:37:21+00:00"
+            "time": "2021-05-25T12:41:50+00:00"
         },
         {
             "name": "jalle19/react-http-static",

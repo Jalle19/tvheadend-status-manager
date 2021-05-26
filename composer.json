@@ -13,7 +13,7 @@
         "ext-json": "*",
         "ext-pdo": "*",
         "ext-sqlite3": "*",
-        "jalle19/php-tvheadend": "^0.2",
+        "jalle19/php-tvheadend": "^0.3",
         "symfony/monolog-bridge": "^3.0",
         "symfony/event-dispatcher": "^3.0",
         "cboden/ratchet": "^0.3.3",
