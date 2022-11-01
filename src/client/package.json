@@ -16,7 +16,7 @@
     "url": "https://github.com/Jalle19/tvheadend-status-manager/issues"
   },
   "devDependencies": {
-    "grunt-contrib-less": "~1.2.0",
+    "grunt-contrib-less": "~1.4.1",
     "grunt-contrib-concat": "~1.0.0",
     "grunt-contrib-watch": "~1.1.0",
     "grunt": "~1.5.3"
